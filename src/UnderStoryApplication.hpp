@@ -19,15 +19,22 @@
 
 #pragma once
 
-#include <cmrc/cmrc.hpp>  // resources
-
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
-#include "version.h"
+#include <stb_image.h>
+
+#include <understory.h>
+
+#include <string>
+
+#include <cmrc/cmrc.hpp>  // resources
+
+CMRC_DECLARE(appResources);
 
 class UnderStoryApplication {
  public:
-    void run() {
+    void
+    run() {
         initWindow();
         initVulkan();
         mainLoop();
@@ -35,7 +42,7 @@ class UnderStoryApplication {
     }
 
  private:
-    GLFWwindow * _window = nullptr;
+    GLFWwindow *_window = nullptr;
 
     void initWindow() {
         glfwInit();
@@ -44,11 +51,18 @@ class UnderStoryApplication {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
         _window = glfwCreateWindow(800, 600, APP_NAME, nullptr, nullptr);
+
+
+        auto iconF = cmrc::appResources::get_filesystem().open("logo.png");
+        std::string icon{ iconF.begin(), iconF.end()};
+        int x, y, channels_in_file;
+        auto r = stbi_load_from_memory((const unsigned char *)icon.c_str(), icon.length(), &x, &y, &channels_in_file, 24);
+
+        GLFWimage wIcon;
+        glfwSetWindowIcon(_window, 0, &wIcon);
     }
 
-    void initVulkan() {
-
-    }
+    void initVulkan() {}
 
     void mainLoop() {
         while (!glfwWindowShouldClose(_window)) {

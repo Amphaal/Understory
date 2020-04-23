@@ -17,18 +17,19 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
+#include <cstdlib>
 #include <iostream>
 #include <stdexcept>
-#include <cstdlib>
 
 #include "UnderStoryApplication.hpp"
 
-int main() {
+auto main() -> int {
     UnderStoryApplication app;
 
     try {
         app.run();
-    } catch (const std::exception& e) {
+    }
+    catch (const std::exception &e) {
         std::cerr << e.what() << std::endl;
         return EXIT_FAILURE;
     }

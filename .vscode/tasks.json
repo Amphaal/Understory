@@ -13,14 +13,14 @@
                 "kind": "test"
             },
             "type": "shell",
-            "command": "cmake -GNinja -B_genDebug -H. -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/msys2.cmake"
+            "command": "cmake -GNinja -B_gen -H. -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/msys2.cmake"
         },
         {
             "label": "3. Build",
             "type": "shell",
             "command": "ninja",
             "options": {
-                "cwd": "${workspaceRoot}/_genDebug"
+                "cwd": "${workspaceRoot}/_gen"
             },
             "problemMatcher": []
         }

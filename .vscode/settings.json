@@ -11,7 +11,5 @@
         "MSVSCODE": "1"
     },
     "terminal.integrated.scrollback": 10000,
-    "C_Cpp.autoAddFileAssociations": false,
-    "clang-format.executable": "C:/msys64/mingw64/bin/clang-format.exe",
-    "editor.formatOnSave": true
+    "C_Cpp.autoAddFileAssociations": false
 }

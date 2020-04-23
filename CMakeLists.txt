@@ -9,6 +9,7 @@ endif()
 # default configuration
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE CACHE INTERNAL "")
 
 # pre-startup
 cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
@@ -19,7 +20,7 @@ project(UnderStory
     VERSION 0.0.1
     DESCRIPTION "An intuitive Pen & Paper experience"
     HOMEPAGE_URL "https://github.com/Amphaal/Understory"
-    LANGUAGES CXX
+    LANGUAGES C CXX
 )
 
 ################################
@@ -43,8 +44,8 @@ endif()
 
 # configure header with basic app informations
 configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/_version.h 
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/version.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/_understory.h 
+    ${CMAKE_CURRENT_SOURCE_DIR}/include/understory.h
 )
 
 ######################################
@@ -53,27 +54,20 @@ configure_file(
 
 # define app executable
 add_executable(appExec ${APP_BUNDLE_TYPE})
-target_include_directories(appExec PRIVATE "include")
+target_include_directories(appExec PRIVATE
+    "include"
+    "libs"
+)
 set_target_properties(appExec PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")  # define executable name
 target_compile_definitions(appExec PRIVATE $<$<CONFIG:Debug>:_DEBUG>)  # define _DEBUG markup if in DEBUG config
-
-# clang-tidy
-find_program(
-    CLANG_TIDY_EXE
-    NAMES "clang-tidy"
-    DOC "Path to clang-tidy executable"
-)
-if(CLANG_TIDY_EXE)
-    set_target_properties(appExec PROPERTIES
-        CXX_CLANG_TIDY "${CLANG_TIDY_EXE}"
-    )
-endif()
 
 #############
 ## Sources ##
 #############
 
-target_sources(appExec PRIVATE "src/main.cpp")
+target_sources(appExec PRIVATE 
+    "src/main.cpp"
+)
 
 ###############
 ## Resources ##
@@ -82,14 +76,26 @@ target_sources(appExec PRIVATE "src/main.cpp")
 include(CMakeRC)
 
 # find resources
-file(GLOB_RECURSE APP_RESOURCES_FILES "src/**")
-cmrc_add_resource_library(appResources ${APP_RESOURCES_FILES})
+file(GLOB_RECURSE APP_RESOURCES_FILES "resources/**")
+cmrc_add_resource_library(appResources
+    WHENCE resources
+    ${APP_RESOURCES_FILES}
+)
 
 target_link_libraries(appExec PRIVATE appResources)
 
-##
-## Deps : GLFW
-##
+################
+## Deps : stb ##
+################
+
+add_library(stb STATIC "libs/stb_image.h")
+target_compile_definitions(stb PUBLIC STB_IMAGE_STATIC)
+set_target_properties(stb PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(appExec PRIVATE stb)
+
+#################
+## Deps : GLFW ##
+#################
 
 find_package(glfw3 REQUIRED)
 target_link_libraries(appExec PRIVATE glfw3)

@@ -12,7 +12,7 @@
             "request": "launch",
             "cwd": "${workspaceFolder}",
             "MIMode": "gdb",
-            "program": "${workspaceFolder}/_genDebug/bin/UnderStory.exe",
+            "program": "${workspaceFolder}/_gen/bin/UnderStory.exe",
             "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe"
         }
     ]
