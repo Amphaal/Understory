@@ -1,0 +1,19 @@
+{
+    // Utilisez IntelliSense pour en savoir plus sur les attributs possibles.
+    // Pointez pour afficher la description des attributs existants.
+    // Pour plus d'informations, visitez : https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "targetArchitecture": "x64",
+            "type": "cppdbg",
+            "preLaunchTask": "3. Build",
+            "name" : "Launch",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "program": "${workspaceFolder}/_genDebug/bin/UnderStory.exe",
+            "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe"
+        }
+    ]
+}

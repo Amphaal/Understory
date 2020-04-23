@@ -1,0 +1,7 @@
+msys/git
+mingw64/mingw-w64-x86_64-cmake
+mingw64/mingw-w64-x86_64-ninja
+mingw64/mingw-w64-x86_64-clang
+mingw64/mingw-w64-x86_64-lld
+mingw64/mingw-w64-x86_64-pkg-config
+mingw64/mingw-w64-x86_64-glfw

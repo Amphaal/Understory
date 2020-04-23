@@ -1,0 +1,17 @@
+{
+    "terminal.integrated.shell.windows": "C:/msys64/usr/bin/bash.exe",
+    "terminal.integrated.shellArgs.windows": [
+        "--login",
+        "-i"
+    ],
+    "terminal.integrated.env.windows": {
+        "MSYSTEM": "MINGW64",
+        "MSYS2_PATH_TYPE": "inherit",
+        "CHERE_INVOKING": "1",
+        "MSVSCODE": "1"
+    },
+    "terminal.integrated.scrollback": 10000,
+    "C_Cpp.autoAddFileAssociations": false,
+    "clang-format.executable": "C:/msys64/mingw64/bin/clang-format.exe",
+    "editor.formatOnSave": true
+}
