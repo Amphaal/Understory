@@ -71,7 +71,7 @@ class UnderStoryApplication {
 
     void _mainLoop() {
         while (!glfwWindowShouldClose(_window)) {
-            glfwPollEvents();
+            glfwWaitEvents();
         }
     }
 
