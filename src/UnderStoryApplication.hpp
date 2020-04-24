@@ -25,7 +25,7 @@
 
 #include <understory.h>
 
-#include <string>
+#include <vector>
 
 #include <cmrc/cmrc.hpp>  // resources
 
@@ -49,14 +49,15 @@ class UnderStoryApplication {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
         _window = glfwCreateWindow(800, 600, APP_NAME, nullptr, nullptr);
+        _initIcon();
     }
 
     void _initIcon() {
         // load from resources
         auto iconF = cmrc::appResources::get_filesystem().open("logo.png");
-        std::string icon{ iconF.begin(), iconF.end()};
+        std::vector<unsigned char> icon{iconF.begin(), iconF.end()};
         int x, y, n;
-        auto logoAsBMP = stbi_load_from_memory((const unsigned char *)icon.c_str(), icon.length(), &x, &y, &n, 4);
+        auto logoAsBMP = stbi_load_from_memory(icon.data(), icon.size(), &x, &y, &n, 4);
 
         // fill struct
         GLFWimage wIcon;
