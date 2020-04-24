@@ -33,44 +33,48 @@ CMRC_DECLARE(appResources);
 
 class UnderStoryApplication {
  public:
-    void
-    run() {
-        initWindow();
-        initVulkan();
-        mainLoop();
-        cleanup();
+    void run() {
+        _initWindow();
+        _mainLoop();
+        _cleanup();
     }
 
  private:
     GLFWwindow *_window = nullptr;
 
-    void initWindow() {
+    void _initWindow() {
         glfwInit();
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
         _window = glfwCreateWindow(800, 600, APP_NAME, nullptr, nullptr);
-
-
-        auto iconF = cmrc::appResources::get_filesystem().open("logo.png");
-        std::string icon{ iconF.begin(), iconF.end()};
-        int x, y, channels_in_file;
-        auto r = stbi_load_from_memory((const unsigned char *)icon.c_str(), icon.length(), &x, &y, &channels_in_file, 24);
-
-        GLFWimage wIcon;
-        glfwSetWindowIcon(_window, 0, &wIcon);
     }
 
-    void initVulkan() {}
+    void _initIcon() {
+        // load from resources
+        auto iconF = cmrc::appResources::get_filesystem().open("logo.png");
+        std::string icon{ iconF.begin(), iconF.end()};
+        int x, y, n;
+        auto logoAsBMP = stbi_load_from_memory((const unsigned char *)icon.c_str(), icon.length(), &x, &y, &n, 4);
 
-    void mainLoop() {
+        // fill struct
+        GLFWimage wIcon;
+        wIcon.pixels = logoAsBMP;
+        wIcon.height = y;
+        wIcon.width = x;
+
+        // define
+        glfwSetWindowIcon(_window, 1, &wIcon);
+    }
+
+    void _mainLoop() {
         while (!glfwWindowShouldClose(_window)) {
             glfwPollEvents();
         }
     }
 
-    void cleanup() {
+    void _cleanup() {
         glfwDestroyWindow(_window);
         glfwTerminate();
     }

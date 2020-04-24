@@ -89,7 +89,7 @@ target_link_libraries(appExec PRIVATE appResources)
 ################
 
 add_library(stb STATIC "libs/stb_image.h")
-target_compile_definitions(stb PUBLIC STB_IMAGE_STATIC)
+target_compile_definitions(stb PUBLIC STB_IMAGE_IMPLEMENTATION)
 set_target_properties(stb PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(appExec PRIVATE stb)
 

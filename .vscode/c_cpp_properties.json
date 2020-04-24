@@ -14,7 +14,8 @@
             "includePath": [
                 "${workspaceFolder}",
                 "${workspaceFolder}/_gen/_cmrc/include",
-                "${workspaceFolder}/include"
+                "${workspaceFolder}/include",
+                "C:/msys64/mingw64/include"
             ],
             "defines": [
                 "_DEBUG",
