@@ -8,6 +8,17 @@
             "targetArchitecture": "x64",
             "type": "cppdbg",
             "preLaunchTask": "3. Build",
+            "name" : "Local Tests",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "MIMode": "gdb",
+            "program": "${workspaceFolder}/_gen/bin/localTests.exe",
+            "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe"
+        },
+        {
+            "targetArchitecture": "x64",
+            "type": "cppdbg",
+            "preLaunchTask": "3. Build",
             "name" : "Launch",
             "request": "launch",
             "cwd": "${workspaceFolder}",

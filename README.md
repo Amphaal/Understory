@@ -31,8 +31,8 @@ Prepare your build environement:
     -   Create env. variable MINGW64_ROOT (ex : C:/msys64/mingw64)
     -   Run : `pacman -Syu` (From msys2_shell.cmd)
     -   Run : `pacman -Su` (From msys2_shell.cmd)
-    -   Run : `pacman -S --needed - < ./prerequisites/msys2/pkglist_build.txt` (From msys2_shell.cmd)
-    -   Run : `pacman -S --needed - < ./prerequisites/msys2/pkglist_dev.txt` (From msys2_shell.cmd)
+    -   Run : `pacman -S --needed - < ./deps/msys2/pkglist_build.txt` (From msys2_shell.cmd)
+    -   Run : `pacman -S --needed - < ./deps/msys2/pkglist_dev.txt` (From msys2_shell.cmd)
 
 Recommanded:
 

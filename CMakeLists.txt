@@ -56,7 +56,8 @@ SET(CMAKE_INCLUDE_CURRENT_DIR ON) #to integrate header
 ######################################
 
 # define app executable
-add_executable(appExec ${APP_BUNDLE_TYPE})
+add_executable(appExec ${APP_BUNDLE_TYPE} src/main.cpp)
+add_executable(UnderStory::executable ALIAS appExec)
 set_target_properties(appExec PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")  # define executable name
 target_compile_definitions(appExec PRIVATE $<$<CONFIG:Debug>:_DEBUG>)  # define _DEBUG markup if in DEBUG config
 
@@ -64,10 +65,15 @@ target_compile_definitions(appExec PRIVATE $<$<CONFIG:Debug>:_DEBUG>)  # define 
 ## Sources ##
 #############
 
-target_sources(appExec PRIVATE 
-    src/main.cpp
+add_library(appCore STATIC)
+add_library(UnderStory::core ALIAS appCore)
+
+target_sources(appCore PRIVATE 
     src/app/Application.hpp
 )
+set_target_properties(appCore PROPERTIES LINKER_LANGUAGE CXX)
+
+target_link_libraries(appExec PRIVATE appCore)
 
 ###############
 ## Resources ##
@@ -136,3 +142,12 @@ target_link_libraries(appExec PRIVATE
     Magnum::GL
     Magnum::Magnum
 )
+
+###########
+## Tests ##
+###########
+
+#dont build tests if included as submodule
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
+    add_subdirectory(tests)
+endif()

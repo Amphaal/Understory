@@ -20,7 +20,8 @@
                 "C:/msys64/mingw64/include/spdlog",
                 "C:/msys64/mingw64/include/SDL2",
                 "${workspaceFolder}/_gen",
-                "${workspaceFolder}/_gen/_deps/stb-src"
+                "${workspaceFolder}/_gen/_deps/stb-src",
+                "${workspaceFolder}/_gen/_deps/catch2-src/single_include"
             ],
             "defines": [
                 "_DEBUG",
