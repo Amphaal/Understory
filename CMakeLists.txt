@@ -70,6 +70,7 @@ add_library(UnderStory::core ALIAS appCore)
 
 target_sources(appCore PRIVATE 
     src/app/Application.hpp
+    src/network/uPnPHandler.hpp
 )
 set_target_properties(appCore PROPERTIES LINKER_LANGUAGE CXX)
 
@@ -88,17 +89,20 @@ cmrc_add_resource_library(appResources
     ${APP_RESOURCES_FILES}
 )
 
-target_link_libraries(appExec PRIVATE appResources)
+target_link_libraries(appCore PUBLIC appResources)
 
 ###################
 ## Deps : spdlog ##
 ###################
 
-#find miniupnpc
+#find spdlog
 find_package(spdlog REQUIRED)
 
+#hardcore definition to handle external reference
+add_definitions(-DSPDLOG_FMT_EXTERNAL)
+
 #link
-target_link_libraries(appExec PRIVATE spdlog::spdlog)
+target_link_libraries(appCore PUBLIC spdlog::spdlog)
 
 ######################
 ## Deps : miniupnpc ##
@@ -108,7 +112,7 @@ target_link_libraries(appExec PRIVATE spdlog::spdlog)
 find_package(miniupnpc REQUIRED)
 
 #link
-target_link_libraries(appExec PRIVATE miniupnpc)
+target_link_libraries(appCore PRIVATE miniupnpc)
 
 ################
 ## Deps : stb ##
@@ -127,7 +131,7 @@ target_compile_definitions(stb INTERFACE STB_IMAGE_IMPLEMENTATION)
 set_target_properties(stb PROPERTIES LINKER_LANGUAGE CXX)
 
 #link
-target_link_libraries(appExec PRIVATE stb)
+target_link_libraries(appCore PUBLIC stb)
 
 ###################
 ## Deps : Magnum ##
@@ -136,7 +140,7 @@ target_link_libraries(appExec PRIVATE stb)
 find_package(Magnum REQUIRED GL Sdl2Application)
 find_package(Corrade REQUIRED Main)
 
-target_link_libraries(appExec PRIVATE
+target_link_libraries(appCore PUBLIC
     Corrade::Main
     Magnum::Application
     Magnum::GL

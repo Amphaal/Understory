@@ -20,6 +20,9 @@
 #pragma once
 
 #include <miniupnpc.h>
+#include <upnpcommands.h>
+#include <portlistingparse.h>
+#include <upnperrors.h>
 
 #ifdef _WIN32
     #include <time.h>
@@ -33,9 +36,66 @@
 #include <spdlog.h>
 
 #include <string>
+#include <future>
 
 class uPnPHandler {
  public:
+    using RetCode = int;
+
+    uPnPHandler(uint16_t portToOpen, std::string requestDescription) :
+        _requestedPortToOpen(std::to_string(portToOpen)),
+        _requestDescription(requestDescription) {}
+
+    std::string requestedPort() const {
+        return _requestedPortToOpen;
+    }
+
+    bool hasSucceded() const {
+        return this->_success;
+    }
+
+    std::string externalIp() const {
+        return this->_externalIp;
+    }
+
+    // try to request uPnP port redirection to domestic router
+    std::future<void> run() {
+        return std::async(
+            std::launch::async,
+            &uPnPHandler::_queryRedirection,
+            this->_queryRedirection
+        );
+    }
+
+    ~uPnPHandler() {
+        // if any redirect succeded
+        if(_success) {
+            // remove any redirect
+            this->_RemoveRedirect(
+                this->_requestedPortToOpen.c_str(),
+                this->_protocol.c_str(),
+                NULL
+            );
+
+            /*free*/
+            FreeUPNPUrls(&urls);
+            freeUPNPDevlist(devlist);
+            devlist = 0;
+        }
+
+        /*End websock*/
+        #ifdef _WIN32
+            WSACleanup();
+        #endif
+    }
+
+ private:
+    static inline std::string _protocol = "TCP";
+    std::string _requestedPortToOpen;
+    std::string _requestDescription;
+    std::string _externalIp;
+    bool _success = false;
+
     struct UPNPUrls urls;
     struct IGDdatas data;
     struct UPNPDev * devlist = 0;
@@ -45,63 +105,39 @@ class uPnPHandler {
     char * multicastif = 0;
     char * minissdpdpath = 0;
     int localport = UPNP_LOCAL_PORT_ANY;
-    int retcode = 0;
     int error = 0;
     int ipv6 = 0;
     unsigned char ttl = 2; /* defaulting to 2 */
 
-    uPnPHandler(const uint16_t &portToOpen, const std::string &requestDescription) :
-        _requestedPortToOpen(portToOpen),
-        _requestDescription(requestDescription) {}
-
-    // try to request uPnP port redirection to domestic router
-    void run() {
+    void _queryRedirection() {
         try {
-            // init uPnP...
-            this->_initUPnP();
-            if (retcode != 0) {
-                emit uPnPError(retcode);
-                return;
-            }
+            // init uPnP
+            auto initResult = this->_initUPnP();
+            if (initResult) return;
 
-            auto resultTCP = this->SetRedirectAndTest(this->lanaddr, this->targetPort, this->targetPort, "TCP", "0", 0);
-
-            if (resultTCP != 0) {
-                emit uPnPError(-999);
-                return;
-            } else {
-                emit uPnPSuccess("TCP", this->targetPort);
-            }
+            // try to redirect
+            auto redirectResult = this->_SetRedirectAndTest(
+                this->lanaddr,
+                this->_requestedPortToOpen,
+                this->_requestedPortToOpen,
+                _protocol.c_str(),
+                "0",
+                0
+            );
+            if(!redirectResult) this->_success = true;
         } catch(...) {
-            qDebug() << "UPNP run : exception caught while processing";
+            spdlog::debug("UPNP run : exception caught while processing");
         }
     }
 
-    ~uPnPHandler() {
-            // remove any redirect
-            if (retcode == 0) {
-                this->RemoveRedirect(this->targetPort, "TCP", NULL);
-
-                /*free*/
-                FreeUPNPUrls(&urls);
-                freeUPNPDevlist(devlist);
-                devlist = 0;
-            }
-
-            /*End websock*/
-            #ifdef _WIN32
-                WSACleanup();
-            #endif
-    }
-
- private:
-    void _initUPnP() {
+    RetCode _initUPnP() {
         #ifdef _WIN32
             /*start websock*/
             WSADATA wsaData;
             auto nResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-            if (nResult != NO_ERROR) {
-                qDebug() << "UPNP Inst : Cannot init socket with WSAStartup !";
+            if (nResult == NO_ERROR) {
+                spdlog::debug("UPNP Inst : Cannot init socket with WSAStartup !");
+                return 1;
             }
         #endif
 
@@ -110,14 +146,14 @@ class uPnPHandler {
             struct UPNPDev * device;
 
             if (devlist) {
-                qDebug() << "UPNP Inst : List of UPNP devices found on the network :";
+                spdlog::debug("UPNP Inst : List of UPNP devices found on the network :");
 
                 for (device = devlist; device; device = device->pNext) {
-                    qDebug() << "UPNP Inst : desc:" << device->descURL << "st:" << device->st;
+                    spdlog::debug("UPNP Inst : desc:{0} st:{1}", device->descURL, device->st);
                 }
 
             } else if (!rootdescurl) {
-                qDebug() << "UPNP Inst : upnpDiscover() error code=" << error;
+                spdlog::debug("UPNP Inst : upnpDiscover() error code={0:d}", error);
             }
 
             i = 1;
@@ -125,44 +161,46 @@ class uPnPHandler {
             if ((rootdescurl && UPNP_GetIGDFromUrl(rootdescurl, &urls, &data, lanaddr, sizeof(lanaddr))) || (i = UPNP_GetValidIGD(devlist, &urls, &data, lanaddr, sizeof(lanaddr)))) {
                 switch (i) {
                     case 1:
-                        qDebug() << "UPNP Inst : Found valid IGD :" << urls.controlURL;
+                        spdlog::debug("UPNP Inst : Found valid IGD : {}", urls.controlURL);
                         break;
                     case 2:
-                        qDebug() << "UPNP Inst : Found a (not connected?) IGD :" << urls.controlURL;
-                        qDebug() << "UPNP Inst : Trying to continue anyway";
+                        spdlog::debug("UPNP Inst : Found a (not connected?) IGD : {}", urls.controlURL);
+                        spdlog::debug("UPNP Inst : Trying to continue anyway");
                         break;
                     case 3:
-                        qDebug() << "UPNP Inst : UPnP device found. Is it an IGD ? :" << urls.controlURL;
-                        qDebug() << "UPNP Inst : Trying to continue anyway";
+                        spdlog::debug("UPNP Inst : UPnP device found. Is it an IGD ? : {}", urls.controlURL);
+                        spdlog::debug("UPNP Inst : Trying to continue anyway");
                         break;
                     default:
-                        qDebug() << "UPNP Inst : Found device (igd ?) :" << urls.controlURL;
-                        qDebug() << "UPNP Inst : Trying to continue anyway";
+                        spdlog::debug("UPNP Inst : Found device (igd ?) : {}", urls.controlURL);
+                        spdlog::debug("UPNP Inst : Trying to continue anyway");
                 }
 
-                qDebug() << "UPNP Inst : Local LAN ip address" << lanaddr;
+                spdlog::debug("UPNP Inst : Local LAN ip address {}", lanaddr);
 
                 char externalIPAddress[40];
                 int r = UPNP_GetExternalIPAddress(urls.controlURL,
                     data.first.servicetype,
                     externalIPAddress);
                 if (r != UPNPCOMMAND_SUCCESS) {
-                    qDebug() << "UPNP AskRedirect : GetExternalIPAddress No IGD UPnP Device. ";
+                    spdlog::debug("UPNP AskRedirect : GetExternalIPAddress No IGD UPnP Device. ");
                 } else {
-                    qDebug() << "UPNP AskRedirect : ExternalIPAddress =" << externalIPAddress;
-                    emit uPnPExtIpFound(externalIPAddress);
+                    spdlog::debug("UPNP AskRedirect : ExternalIPAddress = {}", externalIPAddress);
+                    this->_externalIp = externalIPAddress;
                 }
             } else {
-                qDebug() << "UPNP Inst : No valid UPNP Internet Gateway Device found.";
-                retcode = 1;
+                spdlog::debug("UPNP Inst : No valid UPNP Internet Gateway Device found.");
+                return 1;
             }
         } else {
-            qDebug() << "UPNP Inst : No IGD UPnP Device found on the network !";
-            retcode = 1;
+            spdlog::debug("UPNP Inst : No IGD UPnP Device found on the network !");
+            return 1;
         }
+
+        return 0;
     }
 
-    int SetRedirectAndTest(const char * iaddr, const std::string &iport, std::string eport, const char * proto, const char * leaseDuration, int addAny) {
+    RetCode _SetRedirectAndTest(const char * iaddr, const std::string &iport, std::string eport, const char * proto, const char * leaseDuration, int addAny) {
         char externalIPAddress[40];
         char intClient[40];
         char intPort[6];
@@ -170,13 +208,13 @@ class uPnPHandler {
         char duration[16];
         int r;
 
-        if (!iaddr || iport.isEmpty() || eport.isEmpty() || !proto) {
-            qDebug() << "UPNP AskRedirect : Wrong arguments";
+        if (!iaddr || !iport.length() || !eport.length() || !proto) {
+            spdlog::debug("UPNP AskRedirect : Wrong arguments");
             return -1;
         }
-        proto = protofix(proto);
+        proto = _protofix(proto);
         if (!proto) {
-            qDebug() << "UPNP AskRedirect : invalid protocol";
+            spdlog::debug("UPNP AskRedirect : invalid protocol");
             return -1;
         }
 
@@ -184,16 +222,16 @@ class uPnPHandler {
                         data.first.servicetype,
                         externalIPAddress);
         if (r != UPNPCOMMAND_SUCCESS)
-            qDebug() << "UPNP AskRedirect : GetExternalIPAddress No IGD UPnP Device.";
+            spdlog::debug("UPNP AskRedirect : GetExternalIPAddress No IGD UPnP Device.");
 
         if (addAny) {
             r = UPNP_AddAnyPortMapping(
                         urls.controlURL,
                         data.first.servicetype,
-                        qUtf8Printable(eport),
-                        qUtf8Printable(iport),
+                        eport.c_str(),
+                        iport.c_str(),
                         iaddr,
-                        qUtf8Printable(description),
+                        this->_requestDescription.c_str(),
                         proto,
                         0,
                         leaseDuration,
@@ -202,21 +240,33 @@ class uPnPHandler {
             if (r == UPNPCOMMAND_SUCCESS)
                 eport = reservedPort;
             else
-                qDebug() << "UPNP AskRedirect : AddAnyPortMapping(" << eport << "," << iport << "," << iaddr << ") failed with code" << r << "(" << strupnperror(r) << ")";
+                spdlog::debug("UPNP AskRedirect : AddAnyPortMapping({0}, {1}, {2}) failed with code {3:d} ({4})",
+                    eport,
+                    iport,
+                    iaddr,
+                    r,
+                    strupnperror(r)
+                );
         } else {
             r = UPNP_AddPortMapping(
                     urls.controlURL,
                     data.first.servicetype,
-                    qUtf8Printable(eport),
-                    qUtf8Printable(iport),
+                    eport.c_str(),
+                    iport.c_str(),
                     iaddr,
-                    qUtf8Printable(description),
+                    this->_requestDescription.c_str(),
                     proto,
                     NULL /*remoteHost*/,
                     leaseDuration
                 );
             if (r != UPNPCOMMAND_SUCCESS) {
-                qDebug() << "UPNP AskRedirect : AddPortMapping(" << eport << "," << iport << "," << iaddr << ") failed with code" << r << "(" << strupnperror(r) << ")";
+                spdlog::debug("UPNP AskRedirect : AddPortMapping({0}, {1}, {2}) failed with code {3:d} ({4})",
+                    eport,
+                    iport,
+                    iaddr,
+                    r,
+                    strupnperror(r)
+                );
                 return -2;
             }
         }
@@ -224,7 +274,7 @@ class uPnPHandler {
         r = UPNP_GetSpecificPortMappingEntry(
                 urls.controlURL,
                 data.first.servicetype,
-                qUtf8Printable(eport),
+                eport.c_str(),
                 proto,
                 NULL /*remoteHost*/,
                 intClient,
@@ -234,144 +284,53 @@ class uPnPHandler {
                 duration
             );
         if (r != UPNPCOMMAND_SUCCESS) {
-            qDebug() << "UPNP AskRedirect : GetSpecificPortMappingEntry() failed with code" << r <<"(" << strupnperror(r) << ")";
+            spdlog::debug("UPNP AskRedirect : GetSpecificPortMappingEntry() failed with code {0:d} ({1})", r, strupnperror(r));
             return -2;
         } else {
-            qDebug() << "UPNP AskRedirect : external" << externalIPAddress << ":" << eport << proto << "is redirected to internal" << intClient << ":" << intPort << "(duration=" << duration << ")";
+            spdlog::debug("UPNP AskRedirect : external {0} : {1} {2} is redirected to internal {3} : {4} (duration={5})",
+                externalIPAddress,
+                eport,
+                proto,
+                intClient,
+                intPort,
+                duration
+            );
         }
         return 0;
     }
 
-    int RemoveRedirect(const std::string &eport,
+    RetCode _RemoveRedirect(const std::string &eport,
                 const char * proto,
                 const char * remoteHost) {
         int r;
-        if (!proto || eport.isEmpty()) {
-            qDebug() << "UPNP RemoveRedirect : invalid arguments";
+        if (!proto || !eport.length()) {
+            spdlog::debug("UPNP _RemoveRedirect : invalid arguments");
             return -1;
         }
-        proto = protofix(proto);
+        proto = _protofix(proto);
         if (!proto) {
-            qDebug() << "UPNP RemoveRedirect : protocol invalid";
+            spdlog::debug("UPNP _RemoveRedirect : protocol invalid");
             return -1;
         }
         r = UPNP_DeletePortMapping(
             urls.controlURL,
             data.first.servicetype,
-            qUtf8Printable(eport),
+            eport.c_str(),
             proto,
             remoteHost
         );
         if (r != UPNPCOMMAND_SUCCESS) {
-            qDebug() << "UPNP RemoveRedirect : UPNP_DeletePortMapping() failed with code :" << r << "";
+            spdlog::debug("UPNP _RemoveRedirect : UPNP_DeletePortMapping() failed with code : {0:d}", r);
             return -2;
         } else {
-            qDebug() << "UPNP RemoveRedirect : UPNP_DeletePortMapping() returned :" << r << "";
+            spdlog::debug("UPNP _RemoveRedirect : UPNP_DeletePortMapping() returned : {0:d}", rad10);
         }
         return 0;
     }
 
-    void ListRedirections() {
-        int r;
-        i = 0;
-        char index[6];
-        char intClient[40];
-        char intPort[6];
-        char extPort[6];
-        char protocol[4];
-        char desc[80];
-        char enabled[6];
-        char rHost[64];
-        char duration[16];
-
-        qDebug() << "UPNP List : i protocol exPort->inAddr:inPort description remoteHost leaseTime";
-
-        do {
-            snprintf(index, sizeof(index), "%d", i);
-            rHost[0] = '\0';
-            enabled[0] = '\0';
-            duration[0] = '\0';
-            desc[0] = '\0';
-            extPort[0] = '\0';
-            intPort[0] = '\0';
-            intClient[0] = '\0';
-            r = UPNP_GetGenericPortMappingEntry(urls.controlURL,
-                                        data.first.servicetype,
-                                        index,
-                                        extPort, intClient, intPort,
-                                        protocol, desc, enabled,
-                                        rHost, duration);
-            if (r == 0)
-                qDebug() << "UPNP List :" << i << protocol << extPort << "->" << intClient << ":" << intPort << "'" << desc << "''" << rHost << "'" << duration << "";
-            else
-                qDebug() << "UPNP List : GetGenericPortMappingEntry() returned" << r << "(" << strupnperror(r) << ")";
-            i++;
-        } while (r == 0);
-    }
-
-    void DisplayInfos() {
-        char externalIPAddress[40];
-        char connectionType[64];
-        char status[64];
-        char lastconnerr[64];
-        unsigned int uptime = 0;
-        unsigned int brUp, brDown;
-        int r;
-        if (UPNP_GetConnectionTypeInfo(urls.controlURL,
-                                    data.first.servicetype,
-                                    connectionType) != UPNPCOMMAND_SUCCESS)
-            qDebug() << "UPNP Info : GetConnectionTypeInfo failed.";
-        else
-            qDebug() << "UPNP Info : Connection Type :" << connectionType << "";
-        if (UPNP_GetStatusInfo(urls.controlURL, data.first.servicetype,
-                            status, &uptime, lastconnerr) != UPNPCOMMAND_SUCCESS)
-            qDebug() << "UPNP Info : GetStatusInfo failed.";
-        else
-            qDebug() << "UPNP Info : Status :" << status << ", uptime=" << uptime << ", LastConnectionError :" << lastconnerr << "";
-        if (uptime > 0) {
-            time_t timenow, timestarted;
-            timenow = time(NULL);
-            timestarted = timenow - uptime;
-            auto tt = ctime(&timestarted);
-            // char tt[26];
-            // ctime_s(tt, sizeof(tt), &timestarted);
-            qDebug() << "UPNP Info :  Time started :" << tt;
-        }
-        if (UPNP_GetLinkLayerMaxBitRates(urls.controlURL_CIF, data.CIF.servicetype,
-                                        &brDown, &brUp) != UPNPCOMMAND_SUCCESS) {
-            qDebug() << "UPNP Info : GetLinkLayerMaxBitRates failed.";
-        } else {
-            qDebug() << "UPNP Info : MaxBitRateDown :" << brDown << " bps";
-            if (brDown >= 1000000) {
-                qDebug() << "UPNP Info : (" << brDown / 1000000 << "." << (brDown / 100000) % 10 << "Mbps)";
-            } else if (brDown >= 1000) {
-                qDebug() << "UPNP Info : (" << brDown / 1000 << " Kbps)";
-            }
-            qDebug() << "UPNP Info : MaxBitRateUp " << brUp << " bps";
-            if (brUp >= 1000000) {
-                qDebug() << "UPNP Info : (" << brUp / 1000000 << "." << (brUp / 100000) % 10 << "Mbps)";
-            } else if (brUp >= 1000) {
-                qDebug() << "UPNP Info : (" << brUp / 1000 << "Kbps)";
-            }
-            qDebug() << "";
-        }
-        r = UPNP_GetExternalIPAddress(urls.controlURL,
-                                data.first.servicetype,
-                                externalIPAddress);
-        if (r != UPNPCOMMAND_SUCCESS) {
-            qDebug() << "UPNP Info : GetExternalIPAddress failed. (errorcode=" << r << ")";
-        } else {
-            qDebug() << "UPNP Info : ExternalIPAddress=" << externalIPAddress << "";
-        }
-    }
-
- private:
-    uint16_t _requestedPortToOpen = 0;
-    std::string _requestDescription;
-
     /* protofix() checks if protocol is "UDP" or "TCP"
     * returns NULL if not */
-    static const char * protofix(const char * proto) {
+    static const char * _protofix(const char * proto) {
         static const char proto_tcp[4] = { 'T', 'C', 'P', 0};
         static const char proto_udp[4] = { 'U', 'D', 'P', 0};
         int i, b;
