@@ -25,8 +25,8 @@ SET (CMAKE_ASM_MASM_COMPILER    "uasm")
 SET (CMAKE_C_COMPILER           "clang")
 SET (CMAKE_CXX_COMPILER         "clang++")
 
-SET (CMAKE_C_FLAGS              "-fuse-ld=lld")
-SET (CMAKE_CXX_FLAGS            ${CMAKE_C_FLAGS})
+# SET (CMAKE_C_FLAGS              "-fuse-ld=lld")
+# SET (CMAKE_CXX_FLAGS            ${CMAKE_C_FLAGS})
 
 SET (CMAKE_C_FLAGS_DEBUG        "-O0 -g")
 SET (CMAKE_CXX_FLAGS_DEBUG      ${CMAKE_C_FLAGS_DEBUG})

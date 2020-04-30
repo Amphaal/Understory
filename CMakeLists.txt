@@ -23,6 +23,8 @@ project(UnderStory
     LANGUAGES C CXX
 )
 
+include(FetchContent)
+
 ################################
 ## CPP Compiler Configuration ##
 ################################
@@ -45,8 +47,9 @@ endif()
 # configure header with basic app informations
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/_understory.h 
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/understory.h
+    understory.h
 )
+SET(CMAKE_INCLUDE_CURRENT_DIR ON) #to integrate header
 
 ######################################
 ## define executables and libraries ##
@@ -54,10 +57,6 @@ configure_file(
 
 # define app executable
 add_executable(appExec ${APP_BUNDLE_TYPE})
-target_include_directories(appExec PRIVATE
-    "include"
-    "libs"
-)
 set_target_properties(appExec PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")  # define executable name
 target_compile_definitions(appExec PRIVATE $<$<CONFIG:Debug>:_DEBUG>)  # define _DEBUG markup if in DEBUG config
 
@@ -66,7 +65,8 @@ target_compile_definitions(appExec PRIVATE $<$<CONFIG:Debug>:_DEBUG>)  # define 
 #############
 
 target_sources(appExec PRIVATE 
-    "src/main.cpp"
+    src/main.cpp
+    src/app/Application.hpp
 )
 
 ###############
@@ -84,18 +84,55 @@ cmrc_add_resource_library(appResources
 
 target_link_libraries(appExec PRIVATE appResources)
 
+###################
+## Deps : spdlog ##
+###################
+
+#find miniupnpc
+find_package(spdlog REQUIRED)
+
+#link
+target_link_libraries(appExec PRIVATE spdlog::spdlog)
+
+######################
+## Deps : miniupnpc ##
+######################
+
+#find miniupnpc
+find_package(miniupnpc REQUIRED)
+
+#link
+target_link_libraries(appExec PRIVATE miniupnpc)
+
 ################
 ## Deps : stb ##
 ################
 
-add_library(stb STATIC "libs/stb_image.h")
-target_compile_definitions(stb PUBLIC STB_IMAGE_IMPLEMENTATION)
+#fetch
+FetchContent_Declare(stb
+    GIT_REPOSITORY  "https://github.com/nothings/stb.git"
+)
+FetchContent_Populate(stb)
+
+#define lib
+add_library(stb STATIC "${stb_SOURCE_DIR}/stb_image.h")
+target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
+target_compile_definitions(stb INTERFACE STB_IMAGE_IMPLEMENTATION)
 set_target_properties(stb PROPERTIES LINKER_LANGUAGE CXX)
+
+#link
 target_link_libraries(appExec PRIVATE stb)
 
-#################
-## Deps : GLFW ##
-#################
+###################
+## Deps : Magnum ##
+###################
 
-find_package(glfw3 REQUIRED)
-target_link_libraries(appExec PRIVATE glfw3)
+find_package(Magnum REQUIRED GL Sdl2Application)
+find_package(Corrade REQUIRED Main)
+
+target_link_libraries(appExec PRIVATE
+    Corrade::Main
+    Magnum::Application
+    Magnum::GL
+    Magnum::Magnum
+)
