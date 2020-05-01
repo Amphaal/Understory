@@ -19,9 +19,12 @@
 
 #pragma once
 
+#include <understory.h>
+
 #include <stb_image.h>
 
 #include <vector>
+#include <string>
 
 // resources
 #include <cmrc/cmrc.hpp>
@@ -31,10 +34,13 @@ namespace UnderStory {
 
 class Utility {
  public:
+    static inline const uint16_t UPNP_DEFAULT_TARGET_PORT = 31138;
+    static inline const std::string UPNP_REQUEST_DESCRIPTION = APP_NAME;
+
     struct RawImage {
-        stbi_uc * pixels;
         int x;
         int y;
+        stbi_uc * pixels;
         int channels;
     };
 
@@ -53,9 +59,9 @@ class Utility {
         );
 
         return {
-            logoAsBMP,
             x,
             y,
+            logoAsBMP,
             channels
         };
     }

@@ -22,7 +22,7 @@
 #include <understory.h>
 
 #include <Magnum/GL/DefaultFramebuffer.h>
-#include <Magnum/Platform/Sdl2Application.h>
+#include <Magnum/Platform/GlfwApplication.h>
 
 #include "Utility.hpp"
 
@@ -45,22 +45,12 @@ class Application: public Magnum::Platform::Application {
     }
 
     void defineIcon(const Utility::RawImage &iconImage) {
-        // create surface
-        auto surface = SDL_CreateRGBSurfaceFrom(
-            iconImage.pixels,
-            iconImage.x,
-            iconImage.y,
-            iconImage.channels * 8,
-            iconImage.x * iconImage.channels,
-            0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000  // PNG always expected
-        );
-
-        // set icon
-        SDL_SetWindowIcon(this->window(), surface);
-
+        // cast
+        GLFWimage wIcon { iconImage.x, iconImage.y, iconImage.pixels };
+        // define
+        glfwSetWindowIcon(this->window(), 1, &wIcon);
         // clear
         delete iconImage.pixels;
-        SDL_FreeSurface(surface);
     }
 };
 

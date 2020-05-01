@@ -19,30 +19,33 @@
 
 #pragma once
 
-#include <miniupnpc.h>
-#include <upnpcommands.h>
-#include <portlistingparse.h>
-#include <upnperrors.h>
+#include <miniupnpc/miniupnpc.h>
+#include <miniupnpc/upnpcommands.h>
+#include <miniupnpc/portlistingparse.h>
+#include <miniupnpc/upnperrors.h>
 
 #ifdef _WIN32
     #include <time.h>
     #include <windows.h>
+    #include <winsock2.h>
 #else
 /* for IPPROTO_TCP / IPPROTO_UDP */
     #include <time.h>
     #include <netinet/in.h>
 #endif
 
-#include <spdlog.h>
+#include <spdlog/spdlog.h>
 
 #include <string>
 #include <future>
 
-class uPnPHandler {
+namespace UnderStory {
+
+class UPnPHandler {
  public:
     using RetCode = int;
 
-    uPnPHandler(uint16_t portToOpen, std::string requestDescription) :
+    UPnPHandler(uint16_t portToOpen, std::string requestDescription) :
         _requestedPortToOpen(std::to_string(portToOpen)),
         _requestDescription(requestDescription) {}
 
@@ -62,12 +65,12 @@ class uPnPHandler {
     std::future<void> run() {
         return std::async(
             std::launch::async,
-            &uPnPHandler::_queryRedirection,
-            this->_queryRedirection
+            &UPnPHandler::_queryRedirection,
+            this
         );
     }
 
-    ~uPnPHandler() {
+    ~UPnPHandler() {
         // if any redirect succeded
         if(_success) {
             // remove any redirect
@@ -323,7 +326,7 @@ class uPnPHandler {
             spdlog::debug("UPNP _RemoveRedirect : UPNP_DeletePortMapping() failed with code : {0:d}", r);
             return -2;
         } else {
-            spdlog::debug("UPNP _RemoveRedirect : UPNP_DeletePortMapping() returned : {0:d}", rad10);
+            spdlog::debug("UPNP _RemoveRedirect : UPNP_DeletePortMapping() returned : {0:d}", r);
         }
         return 0;
     }
@@ -351,3 +354,5 @@ class uPnPHandler {
         return 0;
     }
 };
+
+}  // namespace UnderStory

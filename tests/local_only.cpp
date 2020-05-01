@@ -17,16 +17,27 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
+#include <chrono>
+
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include <catch2/catch.hpp>
 
-#include "src/network/uPnPHandler.hpp"
+#include "src/network/UPnPHandler.hpp"
+#include "src/app/Utility.hpp"
 
 //
 // Test cases
 //
 
 TEST_CASE("Test uPnP", "[network]") {
-    // TODO(amphaal) do testing
-    REQUIRE(true);
+    UnderStory::UPnPHandler handler(
+        UnderStory::Utility::UPNP_DEFAULT_TARGET_PORT,
+        UnderStory::Utility::UPNP_REQUEST_DESCRIPTION
+    );
+
+    auto request = handler.run();
+    auto status = request.wait_for(std::chrono::seconds(5));
+
+    REQUIRE(status != std::future_status::timeout);
+    REQUIRE(handler.hasSucceded());
 }

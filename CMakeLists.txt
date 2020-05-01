@@ -49,7 +49,6 @@ configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/include/_understory.h 
     understory.h
 )
-SET(CMAKE_INCLUDE_CURRENT_DIR ON) #to integrate header
 
 ######################################
 ## define executables and libraries ##
@@ -70,11 +69,15 @@ add_library(UnderStory::core ALIAS appCore)
 
 target_sources(appCore PRIVATE 
     src/app/Application.hpp
-    src/network/uPnPHandler.hpp
+    src/network/UPnPHandler.hpp
 )
 set_target_properties(appCore PROPERTIES LINKER_LANGUAGE CXX)
+#for generated config header
+target_include_directories(appCore PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+)
 
-target_link_libraries(appExec PRIVATE appCore)
+target_link_libraries(appExec PUBLIC appCore)
 
 ###############
 ## Resources ##
@@ -112,7 +115,12 @@ target_link_libraries(appCore PUBLIC spdlog::spdlog)
 find_package(miniupnpc REQUIRED)
 
 #link
-target_link_libraries(appCore PRIVATE miniupnpc)
+target_link_libraries(appCore PUBLIC miniupnpc)
+
+#WSA functions !
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_link_libraries(appCore PUBLIC ws2_32) 
+endif()
 
 ################
 ## Deps : stb ##
@@ -126,8 +134,8 @@ FetchContent_Populate(stb)
 
 #define lib
 add_library(stb STATIC "${stb_SOURCE_DIR}/stb_image.h")
-target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
-target_compile_definitions(stb INTERFACE STB_IMAGE_IMPLEMENTATION)
+target_include_directories(stb PUBLIC ${stb_SOURCE_DIR})
+target_compile_definitions(stb PUBLIC STB_IMAGE_IMPLEMENTATION)
 set_target_properties(stb PROPERTIES LINKER_LANGUAGE CXX)
 
 #link
@@ -137,14 +145,14 @@ target_link_libraries(appCore PUBLIC stb)
 ## Deps : Magnum ##
 ###################
 
-find_package(Magnum REQUIRED GL Sdl2Application)
+find_package(Magnum REQUIRED GL GlfwApplication)
 find_package(Corrade REQUIRED Main)
 
-target_link_libraries(appCore PUBLIC
-    Corrade::Main
+target_link_libraries(appCore PRIVATE
+    Corrade::Main    
     Magnum::Application
-    Magnum::GL
     Magnum::Magnum
+    Magnum::GL
 )
 
 ###########
@@ -152,6 +160,6 @@ target_link_libraries(appCore PUBLIC
 ###########
 
 #dont build tests if included as submodule
-if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
-    add_subdirectory(tests)
-endif()
+# if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
+#     add_subdirectory(tests)
+# endif()

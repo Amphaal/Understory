@@ -7,6 +7,6 @@ mingw64/mingw-w64-x86_64-pkg-config
 mingw64/mingw-w64-x86_64-spdlog
 mingw64/mingw-w64-x86_64-miniupnpc
 mingw64/mingw-w64-x86_64-magnum
-mingw64/mingw-w64-x86_64-sdl2
+mingw64/mingw-w64-x86_64-glfw
 mingw64/mingw-w64-x86_64-qt-installer-framework
 mingw64/mingw-w64-x86_64-vlc
