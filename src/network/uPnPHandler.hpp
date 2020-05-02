@@ -54,7 +54,7 @@ class UPnPHandler {
     }
 
     bool hasSucceded() const {
-        return this->_success;
+        return this->_redirectSuccessful;
     }
 
     std::string externalIp() const {
@@ -70,25 +70,27 @@ class UPnPHandler {
         );
     }
 
+    // remove redirects
+    std::future<RetCode> stop() {
+        return std::async(
+            std::launch::async,
+            &UPnPHandler::_autoRemoveRedirect,
+            this
+        );
+    }
+
     ~UPnPHandler() {
         // if any redirect succeded
-        if(_success) {
-            // remove any redirect
-            this->_RemoveRedirect(
-                this->_requestedPortToOpen.c_str(),
-                this->_protocol.c_str(),
-                NULL
-            );
+        this->_autoRemoveRedirect();
 
-            /*free*/
-            FreeUPNPUrls(&urls);
-            freeUPNPDevlist(devlist);
-            devlist = 0;
-        }
+        /*free*/
+        FreeUPNPUrls(&urls);
+        freeUPNPDevlist(devlist);
+        devlist = 0;
 
         /*End websock*/
         #ifdef _WIN32
-            WSACleanup();
+            if(_WSAStarted) WSACleanup();
         #endif
     }
 
@@ -97,7 +99,10 @@ class UPnPHandler {
     std::string _requestedPortToOpen;
     std::string _requestDescription;
     std::string _externalIp;
-    bool _success = false;
+    bool _redirectSuccessful = false;
+    #ifdef _WIN32
+        bool _WSAStarted = false;
+    #endif
 
     struct UPNPUrls urls;
     struct IGDdatas data;
@@ -111,6 +116,17 @@ class UPnPHandler {
     int error = 0;
     int ipv6 = 0;
     unsigned char ttl = 2; /* defaulting to 2 */
+
+    RetCode _autoRemoveRedirect() {
+        if(!_redirectSuccessful) return 0;
+        auto failed = this->_RemoveRedirect(
+            this->_requestedPortToOpen.c_str(),
+            this->_protocol.c_str(),
+            NULL
+        );
+        if(!failed) _redirectSuccessful = false;
+        return failed;
+    }
 
     void _queryRedirection() {
         try {
@@ -127,7 +143,7 @@ class UPnPHandler {
                 "0",
                 0
             );
-            if(!redirectResult) this->_success = true;
+            if(!redirectResult) this->_redirectSuccessful = true;
         } catch(...) {
             spdlog::debug("UPNP run : exception caught while processing");
         }
@@ -142,6 +158,7 @@ class UPnPHandler {
                 spdlog::debug("UPNP Inst : Cannot init socket with WSAStartup !");
                 return 1;
             }
+            _WSAStarted = true;
         #endif
 
         /*discover*/

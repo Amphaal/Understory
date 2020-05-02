@@ -37,9 +37,15 @@ TEST_CASE("Test uPnP", "[network]") {
         UnderStory::Utility::UPNP_REQUEST_DESCRIPTION
     );
 
-    auto request = handler.run();
-    auto status = request.wait_for(std::chrono::seconds(5));
-
+    // request redirect
+    auto redirectRequest = handler.run();
+    auto status = redirectRequest.wait_for(std::chrono::seconds(5));
     REQUIRE(status != std::future_status::timeout);
     REQUIRE(handler.hasSucceded());
+
+    // request undirect
+    auto undirectRequest = handler.stop();
+    status = undirectRequest.wait_for(std::chrono::seconds(5));
+    REQUIRE(status != std::future_status::timeout);
+    REQUIRE(undirectRequest.get() == 0);
 }

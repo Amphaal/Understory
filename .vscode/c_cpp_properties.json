@@ -12,6 +12,7 @@
                 "limitSymbolsToIncludedHeaders": true
             },
             "includePath": [
+                "${workspaceFolder}/_gen/_deps/catch2-src/single_include"
             ],
             "defines": [
                 "_DEBUG",
