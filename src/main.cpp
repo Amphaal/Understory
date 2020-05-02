@@ -19,4 +19,4 @@
 
 #include "app/Application.hpp"
 
-MAGNUM_APPLICATION_MAIN(Application)
+MAGNUM_APPLICATION_MAIN(UnderStory::Application)

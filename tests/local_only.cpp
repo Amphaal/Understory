@@ -30,6 +30,8 @@
 //
 
 TEST_CASE("Test uPnP", "[network]") {
+    spdlog::set_level(spdlog::level::debug);
+
     UnderStory::UPnPHandler handler(
         UnderStory::Utility::UPNP_DEFAULT_TARGET_PORT,
         UnderStory::Utility::UPNP_REQUEST_DESCRIPTION

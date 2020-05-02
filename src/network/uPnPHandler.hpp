@@ -138,7 +138,7 @@ class UPnPHandler {
             /*start websock*/
             WSADATA wsaData;
             auto nResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
-            if (nResult == NO_ERROR) {
+            if (nResult != NO_ERROR) {
                 spdlog::debug("UPNP Inst : Cannot init socket with WSAStartup !");
                 return 1;
             }

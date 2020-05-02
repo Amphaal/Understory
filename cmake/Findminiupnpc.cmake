@@ -20,37 +20,20 @@ endif ()
 
 find_path(MINIUPNP_INCLUDE_DIR miniupnpc.h PATH_SUFFIXES miniupnpc)
 find_library(MINIUPNP_LIBRARY miniupnpc)
-find_library(MINIUPNP_STATIC_LIBRARY libminiupnpc.a)
-
-set(MINIUPNP_INCLUDE_DIRS ${MINIUPNP_INCLUDE_DIR})
-set(MINIUPNP_LIBRARIES ${MINIUPNP_LIBRARY})
-set(MINIUPNP_STATIC_LIBRARIES ${MINIUPNP_STATIC_LIBRARY})
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(
   miniupnpc DEFAULT_MSG
-  MINIUPNP_INCLUDE_DIR
   MINIUPNP_LIBRARY
+  MINIUPNP_INCLUDE_DIR
 )
 
-IF(MINIUPNPC_FOUND)
-  file(STRINGS "${MINIUPNP_INCLUDE_DIR}/miniupnpc.h" MINIUPNPC_API_VERSION_STR REGEX "^#define[\t ]+MINIUPNPC_API_VERSION[\t ]+[0-9]+")
-  if(MINIUPNPC_API_VERSION_STR MATCHES "^#define[\t ]+MINIUPNPC_API_VERSION[\t ]+([0-9]+)")
-    set(MINIUPNPC_API_VERSION "${CMAKE_MATCH_1}")
-	if (${MINIUPNPC_API_VERSION} GREATER "10" OR ${MINIUPNPC_API_VERSION} EQUAL "10")
-		set(MINIUPNP_FOUND true)
-		set(MINIUPNPC_VERSION_1_7_OR_HIGHER true)
-	endif()
-  endif()
-
-ENDIF()
-
-add_library(miniupnpc UNKNOWN IMPORTED)
+add_library(miniupnpc STATIC IMPORTED)
 set_target_properties(miniupnpc 
   PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${MINIUPNP_INCLUDE_DIR}"
     IMPORTED_LOCATION "${MINIUPNP_LIBRARY}"
 )
 
-mark_as_advanced(MINIUPNP_INCLUDE_DIR MINIUPNP_LIBRARY MINIUPNP_STATIC_LIBRARY)
+mark_as_advanced(MINIUPNP_INCLUDE_DIR MINIUPNP_LIBRARY)
 # --------------------------------- FindMiniupnpc End ---------------------------------

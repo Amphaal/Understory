@@ -58,7 +58,7 @@ configure_file(
 add_executable(appExec ${APP_BUNDLE_TYPE} src/main.cpp)
 add_executable(UnderStory::executable ALIAS appExec)
 set_target_properties(appExec PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")  # define executable name
-target_compile_definitions(appExec PRIVATE $<$<CONFIG:Debug>:_DEBUG>)  # define _DEBUG markup if in DEBUG config
+
 
 #############
 ## Sources ##
@@ -67,17 +67,20 @@ target_compile_definitions(appExec PRIVATE $<$<CONFIG:Debug>:_DEBUG>)  # define 
 add_library(appCore STATIC)
 add_library(UnderStory::core ALIAS appCore)
 
-target_sources(appCore PRIVATE 
+target_compile_definitions(appCore PRIVATE $<$<CONFIG:Debug>:_DEBUG>)  # define _DEBUG markup if in DEBUG config
+
+target_sources(appCore PRIVATE
     src/app/Application.hpp
-    src/network/UPnPHandler.hpp
+    src/app/Utility.hpp
+    src/network/uPnPHandler.hpp
 )
-set_target_properties(appCore PROPERTIES LINKER_LANGUAGE CXX)
+
 #for generated config header
 target_include_directories(appCore PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )
 
-target_link_libraries(appExec PUBLIC appCore)
+target_link_libraries(appExec PRIVATE appCore)
 
 ###############
 ## Resources ##
@@ -115,11 +118,11 @@ target_link_libraries(appCore PUBLIC spdlog::spdlog)
 find_package(miniupnpc REQUIRED)
 
 #link
-target_link_libraries(appCore PUBLIC miniupnpc)
+target_link_libraries(appCore PRIVATE miniupnpc)
 
 #WSA functions !
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_link_libraries(appCore PUBLIC ws2_32) 
+    target_link_libraries(appCore PRIVATE ws2_32) 
 endif()
 
 ################
@@ -134,8 +137,8 @@ FetchContent_Populate(stb)
 
 #define lib
 add_library(stb STATIC "${stb_SOURCE_DIR}/stb_image.h")
-target_include_directories(stb PUBLIC ${stb_SOURCE_DIR})
-target_compile_definitions(stb PUBLIC STB_IMAGE_IMPLEMENTATION)
+target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
+target_compile_definitions(stb INTERFACE STB_IMAGE_IMPLEMENTATION)
 set_target_properties(stb PROPERTIES LINKER_LANGUAGE CXX)
 
 #link
@@ -145,13 +148,13 @@ target_link_libraries(appCore PUBLIC stb)
 ## Deps : Magnum ##
 ###################
 
+
 find_package(Magnum REQUIRED GL GlfwApplication)
 find_package(Corrade REQUIRED Main)
 
-target_link_libraries(appCore PRIVATE
+target_link_libraries(appCore PUBLIC
     Corrade::Main    
     Magnum::Application
-    Magnum::Magnum
     Magnum::GL
 )
 
@@ -160,6 +163,6 @@ target_link_libraries(appCore PRIVATE
 ###########
 
 #dont build tests if included as submodule
-# if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
-#     add_subdirectory(tests)
-# endif()
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
+    add_subdirectory(tests)
+endif()

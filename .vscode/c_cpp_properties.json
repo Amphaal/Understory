@@ -12,16 +12,6 @@
                 "limitSymbolsToIncludedHeaders": true
             },
             "includePath": [
-                "${workspaceFolder}",
-                "${workspaceFolder}/include",
-                "${workspaceFolder}/_gen",
-                "${workspaceFolder}/_gen/_cmrc/include",
-                "${workspaceFolder}/_gen/_deps/stb-src",
-                "${workspaceFolder}/_gen/_deps/catch2-src/single_include",
-                "C:/msys64/mingw64/include",
-                "C:/msys64/mingw64/include/spdlog",
-                "C:/msys64/mingw64/include/SDL2",
-                "C:/msys64/mingw64/include/miniupnpc"
             ],
             "defines": [
                 "_DEBUG",
