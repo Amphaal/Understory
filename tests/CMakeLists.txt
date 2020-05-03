@@ -30,10 +30,10 @@ FetchContent_MakeAvailable(Catch2)
 #link
 foreach(TEST_TARGET IN LISTS TARGETS_TO_TEST)
     target_include_directories(${TEST_TARGET} PRIVATE
-        $<BUILD_INTERFACE:$<TARGET_PROPERTY:UnderStory::core,SOURCE_DIR>>
+        $<BUILD_INTERFACE:${CMAKE_SOURCE_DIR}>
     )
     target_link_libraries(${TEST_TARGET} PRIVATE
-        UnderStory::core
+        UnderStory::network
         Catch2::Catch2
     )
 endforeach()
