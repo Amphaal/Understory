@@ -1,6 +1,12 @@
 
+#define executable
+add_executable(tests tests.cpp)
+add_executable(UnderStory::tests ALIAS tests)
+list(APPEND TARGETS_TO_TEST 
+    tests
+)
+
 #determine local tests
-SET(TARGETS_TO_TEST "")
 if(LOCAL_TESTING)
     #define executable
     add_executable(localTests local_only.cpp)

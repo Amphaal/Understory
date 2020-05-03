@@ -13,7 +13,7 @@
                 "kind": "test"
             },
             "type": "shell",
-            "command": "cmake -GNinja -B_gen -H. -DBUILD_TESTING=ON -DLOCAL_TESTING=ON -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/msys2.cmake"
+            "command": "cmake -GNinja -B_gen -H. -DBUILD_TESTING=ON -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/msys2.cmake"
         },
         {
             "label": "3. Build",

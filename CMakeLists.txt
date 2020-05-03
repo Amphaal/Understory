@@ -9,7 +9,7 @@ endif()
 # default configuration
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE CACHE INTERNAL "")
+# set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE CACHE INTERNAL "")
 
 # pre-startup
 cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
@@ -50,16 +50,6 @@ configure_file(
     understory.h
 )
 
-######################################
-## define executables and libraries ##
-######################################
-
-# define app executable
-add_executable(appExec ${APP_BUNDLE_TYPE} src/main.cpp)
-add_executable(UnderStory::executable ALIAS appExec)
-set_target_properties(appExec PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")  # define executable name
-
-
 #############
 ## Sources ##
 #############
@@ -79,8 +69,6 @@ target_sources(appCore PRIVATE
 target_include_directories(appCore PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
 )
-
-target_link_libraries(appExec PRIVATE appCore)
 
 ###############
 ## Resources ##
@@ -105,7 +93,7 @@ target_link_libraries(appCore PUBLIC appResources)
 find_package(spdlog REQUIRED)
 
 #hardcore definition to handle external reference
-add_definitions(-DSPDLOG_FMT_EXTERNAL)
+target_compile_definitions(spdlog::spdlog INTERFACE SPDLOG_FMT_EXTERNAL)
 
 #link
 target_link_libraries(appCore PUBLIC spdlog::spdlog)
@@ -144,10 +132,22 @@ set_target_properties(stb PROPERTIES LINKER_LANGUAGE CXX)
 #link
 target_link_libraries(appCore PUBLIC stb)
 
+##################
+## Deps : cista ##
+##################
+
+#fetch
+FetchContent_Declare(cista
+    GIT_REPOSITORY  "https://github.com/felixguendling/cista.git"
+)
+FetchContent_MakeAvailable(cista)
+
+#link
+target_link_libraries(appCore PUBLIC cista)
+
 ###################
 ## Deps : Magnum ##
 ###################
-
 
 find_package(Magnum REQUIRED GL GlfwApplication)
 find_package(Corrade REQUIRED Main)
@@ -165,4 +165,10 @@ target_link_libraries(appCore PUBLIC
 #dont build tests if included as submodule
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
     add_subdirectory(tests)
+else()
+    # define app executable
+    add_executable(appExec ${APP_BUNDLE_TYPE} src/main.cpp)
+    add_executable(UnderStory::executable ALIAS appExec)
+    set_target_properties(appExec PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")  # define executable name
+    target_link_libraries(appExec PRIVATE appCore)
 endif()

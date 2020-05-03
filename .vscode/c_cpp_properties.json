@@ -12,7 +12,13 @@
                 "limitSymbolsToIncludedHeaders": true
             },
             "includePath": [
-                "${workspaceFolder}/_gen/_deps/catch2-src/single_include"
+                "${workspaceFolder}/_gen/_deps/catch2-src/single_include",
+                "${workspaceFolder}/_gen/_deps/cista-src/include",
+                "${workspaceFolder}",
+                "${workspaceFolder}/_gen",
+                "${workspaceFolder}/_gen/_deps/stb-src",
+                "${workspaceFolder}/_gen/_cmrc/include",
+                "C:/msys64/mingw64/include/llvm/Support"
             ],
             "defines": [
                 "_DEBUG",
@@ -23,8 +29,7 @@
             "compilerPath": "C:/msys64/mingw64/bin/clang++.exe",
             "cStandard": "c11",
             "cppStandard": "c++17",
-            "intelliSenseMode": "clang-x64",
-            "compileCommands": "${workspaceFolder}/_gen/compile_commands.json"
+            "intelliSenseMode": "clang-x64"
         }
     ],
     "version": 4

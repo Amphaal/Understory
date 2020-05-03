@@ -17,33 +17,28 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
-#include <chrono>
+#include <spdlog/spdlog.h>
 
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include <catch2/catch.hpp>
 
-#include "src/network/UPnPHandler.hpp"
-#include "src/app/Utility.hpp"
+#include "src/network/payloads/Payloads.h"
 
 //
 // Test cases
 //
 
-TEST_CASE("Test uPnP", "[network]") {
-    UnderStory::UPnPHandler handler(
-        UnderStory::Utility::UPNP_DEFAULT_TARGET_PORT,
-        UnderStory::Utility::UPNP_REQUEST_DESCRIPTION
-    );
+using namespace UnderStory::Network;
 
-    // request redirect
-    auto redirectRequest = handler.run();
-    auto status = redirectRequest.wait_for(std::chrono::seconds(5));
-    REQUIRE(status != std::future_status::timeout);
-    REQUIRE(handler.hasSucceded());
+TEST_CASE("Payloads", "[network]") {
+    spdlog::set_level(spdlog::level::debug);
 
-    // request undirect
-    auto undirectRequest = handler.stop();
-    status = undirectRequest.wait_for(std::chrono::seconds(5));
-    REQUIRE(status != std::future_status::timeout);
-    REQUIRE(undirectRequest.get() == 0);
+    ResetPayload p;
+    REQUIRE(p.alterationType() == Alteration::Reset);
+    REQUIRE(p.networkHandled());
+
+    auto in = p.serialize();
+    auto out = ResetPayload::deserialize(in);
+
+    spdlog::debug(out);
 }
