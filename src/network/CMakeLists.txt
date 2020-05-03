@@ -4,9 +4,6 @@
 
 add_library(appNetwork STATIC 
     uPnPHandler.hpp
-    payloads/Payloads.h
-    payloads/_Payload.hpp
-    payloads/specialized/Reset.hpp
 )
 add_library(UnderStory::network ALIAS appNetwork)
 
@@ -38,15 +35,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_link_libraries(appNetwork PRIVATE ws2_32) 
 endif()
 
-##################
-## Deps : cista ##
-##################
+######################
+## Deps : capnproto ##
+######################
 
 #fetch
-FetchContent_Declare(cista
-    GIT_REPOSITORY  "https://github.com/felixguendling/cista.git"
+find_package(CapnProto REQUIRED)
+target_sources(appNetwork PRIVATE
+    payloads/Payload.capnp
 )
-FetchContent_MakeAvailable(cista)
-
-#link
-target_link_libraries(appNetwork PUBLIC cista)

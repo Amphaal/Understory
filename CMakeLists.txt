@@ -15,6 +15,8 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
 message(STATUS "Using toolchain file: [${CMAKE_TOOLCHAIN_FILE}].")
 
+
+
 # project setup
 project(UnderStory
     VERSION 0.0.1
@@ -22,8 +24,6 @@ project(UnderStory
     HOMEPAGE_URL "https://github.com/Amphaal/Understory"
     LANGUAGES C CXX
 )
-
-find_package(Vulkan REQUIRED)
 
 include(FetchContent)
 
