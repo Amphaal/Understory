@@ -4,9 +4,9 @@ mingw64/mingw-w64-x86_64-ninja
 mingw64/mingw-w64-x86_64-clang
 mingw64/mingw-w64-x86_64-lld
 mingw64/mingw-w64-x86_64-pkg-config
-mingw64/mingw-w64-x86_64-spdlog
 mingw64/mingw-w64-x86_64-miniupnpc
 mingw64/mingw-w64-x86_64-magnum
 mingw64/mingw-w64-x86_64-qt-installer-framework
 mingw64/mingw-w64-x86_64-vlc
 mingw64/mingw-w64-x86_64-capnproto
+mingw64/mingw-w64-x86_64-catch

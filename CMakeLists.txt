@@ -58,6 +58,7 @@ add_compile_definitions($<$<CONFIG:Debug>:_DEBUG>)
 ###########
 
 add_subdirectory(src/network)
+add_subdirectory(src/models)
 
 #dont build tests if included as submodule
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)

@@ -19,7 +19,8 @@
                 "${workspaceFolder}/_gen/_deps/stb-src",
                 "${workspaceFolder}/_gen/_cmrc/include",
                 "C:/msys64/mingw64/include/llvm/Support",
-                "${workspaceFolder}/_gen/_deps/stb-src"
+                "${workspaceFolder}/_gen/_deps/stb-src",
+                "${workspaceFolder}/_gen/_deps/spdlog-src/include"
             ],
             "defines": [
                 "_DEBUG",

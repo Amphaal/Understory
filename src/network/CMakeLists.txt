@@ -5,11 +5,14 @@
 add_library(appNetwork STATIC 
     uPnPHandler.hpp
 )
+set_target_properties(appNetwork PROPERTIES LINKER_LANGUAGE CXX)
 add_library(UnderStory::network ALIAS appNetwork)
 
 ###################
 ## Deps : spdlog ##
 ###################
+
+#using header-only version to prevent linking errors with static lib version
 
 include(FetchContent)
 
@@ -20,8 +23,11 @@ FetchContent_Declare(spdlog
 )
 FetchContent_Populate(spdlog)
 
+add_library(spdlog INTERFACE)
+target_include_directories(spdlog INTERFACE ${spdlog_SOURCE_DIR}/include)
+
 #link
-target_include_directories(appNetwork PRIVATE ${spdlog_SOURCE_DIR}/include)
+target_link_libraries(appNetwork PRIVATE spdlog)
 
 ######################
 ## Deps : miniupnpc ##
@@ -37,19 +43,3 @@ target_link_libraries(appNetwork PUBLIC miniupnpc)
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_link_libraries(appNetwork PRIVATE ws2_32) 
 endif()
-
-######################
-## Deps : capnproto ##
-######################
-
-#fetch
-find_package(CapnProto REQUIRED)
-
-capnp_generate_cpp(CAPNP_SRCS CAPNP_HDRS 
-    payloads/Payload.capnp
-)
-
-target_sources(appNetwork PRIVATE ${CAPNP_SRCS})
-
-target_include_directories(appNetwork PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(appNetwork PRIVATE CapnProto::capnp-rpc)
