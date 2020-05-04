@@ -11,14 +11,17 @@ add_library(UnderStory::network ALIAS appNetwork)
 ## Deps : spdlog ##
 ###################
 
-#find spdlog
-find_package(spdlog REQUIRED)
+include(FetchContent)
 
-#hardcore definition to handle external reference
-target_compile_definitions(spdlog::spdlog INTERFACE SPDLOG_FMT_EXTERNAL)
+#fetch
+FetchContent_Declare(spdlog
+    GIT_REPOSITORY  "https://github.com/gabime/spdlog.git"
+    GIT_TAG "v1.x"    
+)
+FetchContent_Populate(spdlog)
 
 #link
-target_link_libraries(appNetwork PUBLIC spdlog::spdlog)
+target_include_directories(appNetwork PRIVATE ${spdlog_SOURCE_DIR}/include)
 
 ######################
 ## Deps : miniupnpc ##
@@ -41,6 +44,12 @@ endif()
 
 #fetch
 find_package(CapnProto REQUIRED)
-target_sources(appNetwork PRIVATE
+
+capnp_generate_cpp(CAPNP_SRCS CAPNP_HDRS 
     payloads/Payload.capnp
 )
+
+target_sources(appNetwork PRIVATE ${CAPNP_SRCS})
+
+target_include_directories(appNetwork PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_link_libraries(appNetwork PRIVATE CapnProto::capnp-rpc)

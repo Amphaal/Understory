@@ -29,5 +29,5 @@ SET (CMAKE_CXX_COMPILER         "clang++")
 SET (CMAKE_C_FLAGS              "-fuse-ld=lld")
 SET (CMAKE_CXX_FLAGS            ${CMAKE_C_FLAGS})
 
-SET (CMAKE_C_FLAGS_DEBUG        "-O0 -g -Wall -Wextra")
+SET (CMAKE_C_FLAGS_DEBUG        "-O0 -g")
 SET (CMAKE_CXX_FLAGS_DEBUG      ${CMAKE_C_FLAGS_DEBUG})

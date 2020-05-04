@@ -17,6 +17,6 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
-#include "app/Application.hpp"
+#include "Application.hpp"
 
 MAGNUM_APPLICATION_MAIN(UnderStory::Application)
