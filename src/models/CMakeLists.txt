@@ -11,6 +11,12 @@ find_package(CapnProto REQUIRED)
 
 capnp_generate_cpp(CAPNP_SRCS CAPNP_HDRS 
     Asset.capnp
+    Character.capnp
+    Handshake.capnp
+    Message.capnp
+    SharedDocument.capnp
+    User.capnp
+    YoutubeVideo.capnp
 )
 
 target_include_directories(appModels PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
