@@ -48,10 +48,27 @@ configure_file(
 #for generated config header
 include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
 # define _DEBUG markup if in DEBUG config
 add_compile_definitions($<$<CONFIG:Debug>:_DEBUG>) 
+
+################
+## Deps : stb ##
+################
+
+#fetch
+FetchContent_Declare(stb
+    GIT_REPOSITORY  "https://github.com/nothings/stb.git"
+)
+FetchContent_Populate(stb)
+
+#define lib
+add_library(stb STATIC "${stb_SOURCE_DIR}/stb_image.h")
+target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
+target_compile_definitions(stb INTERFACE STB_IMAGE_IMPLEMENTATION)
+set_target_properties(stb PROPERTIES LINKER_LANGUAGE CXX)
 
 ###########
 ## Tests ##
@@ -59,6 +76,7 @@ add_compile_definitions($<$<CONFIG:Debug>:_DEBUG>)
 
 add_subdirectory(src/network)
 add_subdirectory(src/models)
+add_subdirectory(src/core)
 
 #dont build tests if included as submodule
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)

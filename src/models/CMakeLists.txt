@@ -9,6 +9,10 @@ add_library(UnderStory::models ALIAS appModels)
 #fetch
 find_package(CapnProto REQUIRED)
 
+#link
+target_link_libraries(appModels PRIVATE CapnProto::capnp)
+
+#generate
 capnp_generate_cpp(CAPNP_SRCS CAPNP_HDRS 
     Asset.capnp
     Character.capnp

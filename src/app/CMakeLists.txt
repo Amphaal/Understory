@@ -40,21 +40,8 @@ target_link_libraries(appExec PRIVATE appResources)
 ## Deps : stb ##
 ################
 
-#fetch
-FetchContent_Declare(stb
-    GIT_REPOSITORY  "https://github.com/nothings/stb.git"
-)
-FetchContent_Populate(stb)
-
-#define lib
-add_library(stb STATIC "${stb_SOURCE_DIR}/stb_image.h")
-target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
-target_compile_definitions(stb INTERFACE STB_IMAGE_IMPLEMENTATION)
-set_target_properties(stb PROPERTIES LINKER_LANGUAGE CXX)
-
 #link
 target_link_libraries(appExec PRIVATE stb)
-
 
 ###################
 ## Deps : Magnum ##

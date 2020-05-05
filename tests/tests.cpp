@@ -22,7 +22,7 @@
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include <catch2/catch.hpp>
 
-#include "src/models/Asset.capnp.h"
+#include "src/core/AssetIntegrator.hpp"
 
 //
 // Test cases
@@ -33,10 +33,5 @@
 TEST_CASE("Payloads", "[network]") {
     spdlog::set_level(spdlog::level::debug);
 
-    // ResetPayload p;
-    // REQUIRE(p.alterationType() == Alteration::Reset);
-    // REQUIRE(p.networkHandled());
-
-    // auto in = p.serialize();
-    // auto out = ResetPayload::deserialize(in);
+    auto asset = UnderStory::AssetIntegrator::createAsset("C:/Users/Amphaal/Desktop/logo.png");
 }

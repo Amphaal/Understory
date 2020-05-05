@@ -5,6 +5,7 @@ struct Asset {
   fileExtension @1 :Text;
   fnv1aHash @2 :UInt64;
   file @3 :Data;
+  size @4 :Size;
   struct Size {
     width @0 :UInt32;
     height @1 :UInt32;

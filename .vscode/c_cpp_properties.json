@@ -12,15 +12,12 @@
                 "limitSymbolsToIncludedHeaders": true
             },
             "includePath": [
-                "${workspaceFolder}/_gen/_deps/catch2-src/single_include",
-                "${workspaceFolder}/_gen/_deps/cista-src/include",
                 "${workspaceFolder}",
                 "${workspaceFolder}/_gen",
                 "${workspaceFolder}/_gen/_deps/stb-src",
                 "${workspaceFolder}/_gen/_cmrc/include",
-                "C:/msys64/mingw64/include/llvm/Support",
-                "${workspaceFolder}/_gen/_deps/stb-src",
-                "${workspaceFolder}/_gen/_deps/spdlog-src/include"
+                "${workspaceFolder}/_gen/_deps/spdlog-src/include",
+                "${workspaceFolder}/_gen/_deps/stb-src"
             ],
             "defines": [
                 "_DEBUG",

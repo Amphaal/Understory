@@ -3,7 +3,7 @@
 add_executable(tests tests.cpp)
 add_executable(UnderStory::tests ALIAS tests)
 target_link_libraries(tests PRIVATE
-    UnderStory::models
+    UnderStory::core
 )
 list(APPEND TARGETS_TO_TEST 
     tests
