@@ -35,7 +35,6 @@ cmrc_add_resource_library(appResources
 
 target_link_libraries(appExec PRIVATE appResources)
 
-
 ################
 ## Deps : stb ##
 ################
