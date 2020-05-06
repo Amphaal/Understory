@@ -1,12 +1,10 @@
 syntax = "proto3";
 
+import "File.proto";
+
 message Asset {
-  string name = 1;
-  string fileExtension = 2;
-  int64 fnv1aHash = 3;
-  bytes file = 4;
-  int64 fileLength = 5;
-  Size dimensions = 6;
+  File file = 1;
+  Size dimensions = 2;
   message Size {
     int32 width = 1;
     int32 height = 2;

@@ -14,6 +14,7 @@ target_link_libraries(appModels INTERFACE protobuf::libprotobuf)
 
 #generate
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
+    File.proto
     Asset.proto
     # Character.proto
     # Handshake.proto

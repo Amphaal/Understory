@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+message File {
+    string name = 1;
+    string fileExtension = 2;
+    int64 fnv1aHash = 3;
+    bytes content = 4;
+    int32 contentLength = 5;
+}

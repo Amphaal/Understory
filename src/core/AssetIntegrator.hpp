@@ -21,42 +21,24 @@
 
 #include <stb_image.h>
 
-#include <cassert>
-#include <filesystem>
-#include <fstream>
-#include <string>
-#include <utility>
-#include <algorithm>
-
+#include "FileIntegrator.hpp"
 #include "src/models/Asset.pb.h"
 
-#include "hash_fnv1a.hpp"
 
 namespace UnderStory {
 
 class AssetIntegrator {
  public:
     static Asset createAsset(const std::filesystem::path &filePath) {
-        assert(std::filesystem::exists(filePath));
-
-        // read file content
-        std::ifstream fileStream(filePath.c_str(), std::ifstream::in | std::ios::binary);
-        std::string fileContent;
-        fileContent.assign(std::istreambuf_iterator<char>(fileStream), std::istreambuf_iterator<char>());
+        //generate file
+        auto file = FileIntegrator::createFile(filePath);
 
         // get size of image
         auto size = _getWidthAndHeight(filePath);
 
-        // get image hash
-        auto hash = hash_64_fnv1a(fileContent.c_str(), fileContent.length());
-
         // bind to Asset
         Asset asset;
-        asset.set_name(filePath.stem().string());
-        asset.set_fileextension(filePath.extension().string());
-        asset.set_fnv1ahash(hash);
-        asset.set_file(fileContent.c_str());
-        asset.set_filelength(fileContent.length());
+        asset.set_allocated_file(file);
         asset.set_allocated_dimensions(size);
 
         return asset;
