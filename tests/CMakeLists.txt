@@ -1,4 +1,3 @@
-
 #define executable
 add_executable(tests tests.cpp)
 add_executable(UnderStory::tests ALIAS tests)

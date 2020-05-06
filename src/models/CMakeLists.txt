@@ -7,20 +7,20 @@ add_library(UnderStory::models ALIAS appModels)
 ######################
 
 #fetch
-find_package(CapnProto REQUIRED)
+find_package(Protobuf REQUIRED)
 
 #link (for using libs)
-target_link_libraries(appModels INTERFACE CapnProto::capnp)
+target_link_libraries(appModels INTERFACE protobuf::libprotobuf)
 
 #generate
-capnp_generate_cpp(CAPNP_SRCS CAPNP_HDRS 
-    Asset.capnp
-    Character.capnp
-    Handshake.capnp
-    Message.capnp
-    SharedDocument.capnp
-    User.capnp
-    YoutubeVideo.capnp
+protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
+    Asset.proto
+    # Character.proto
+    # Handshake.proto
+    # Message.proto
+    # SharedDocument.proto
+    # User.proto
+    # YoutubeVideo.proto
 )
 
 target_include_directories(appModels PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
@@ -29,4 +29,4 @@ target_include_directories(appModels PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 ## Sources ##
 #############
 
-target_sources(appModels PRIVATE ${CAPNP_SRCS})
+target_sources(appModels PRIVATE ${PROTO_SRCS} ${PROTO_HDRS})

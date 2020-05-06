@@ -21,9 +21,6 @@
 
 #include <stb_image.h>
 
-#include <capnp/message.h>
-#include <capnp/serialize-packed.h>
-
 #include <cassert>
 #include <filesystem>
 #include <fstream>
@@ -31,47 +28,46 @@
 #include <utility>
 #include <algorithm>
 
-#include "hash_fnv1a.hpp"
+#include "src/models/Asset.pb.h"
 
-#include "src/models/Asset.capnp.h"
+#include "hash_fnv1a.hpp"
 
 namespace UnderStory {
 
 class AssetIntegrator {
  public:
-    static Asset::Builder createAsset(const std::filesystem::path &filePath) {
+    static Asset createAsset(const std::filesystem::path &filePath) {
         assert(std::filesystem::exists(filePath));
 
-        ::capnp::MallocMessageBuilder message;
-        auto asset = message.initRoot<Asset>();
+        // read file content
+        std::ifstream fileStream(filePath.c_str(), std::ifstream::in | std::ios::binary);
+        std::string fileContent;
+        fileContent.assign(std::istreambuf_iterator<char>(fileStream), std::istreambuf_iterator<char>());
 
-        // set file extension
-        {
-            auto ext = filePath.extension().string();
-            auto extBuilder = asset.initFileExtension(ext.length());
-            std::copy(ext.begin(), ext.end(), extBuilder.begin());
-            asset.setFileExtension(extBuilder);
-        }
+        // get size of image
+        auto size = _getWidthAndHeight(filePath);
 
-        // std::ifstream fileStream(filePath.c_str(), std::ifstream::in);
-        // assert(fileStream);
+        // get image hash
+        auto hash = hash_64_fnv1a(fileContent.c_str(), fileContent.length());
 
-
-        //     _fillWidthAndHeight(asset, fileStream);
-        //     auto file = asset.initFile(10);
-        //     fileStream->
-
+        // bind to Asset
+        Asset asset;
+        asset.set_name(filePath.stem().string());
+        asset.set_fileextension(filePath.extension().string());
+        asset.set_fnv1ahash(hash);
+        asset.set_file(fileContent.c_str());
+        asset.set_filelength(fileContent.length());
+        asset.set_allocated_dimensions(size);
 
         return asset;
     }
 
  private:
-    static void _fillWidthAndHeight(Asset::Builder &asset, const std::filesystem::path &filePath) {
+    static Asset_Size* _getWidthAndHeight(const std::filesystem::path &filePath) {
+        // find x and y
         int x, y, channels;
-
         auto fileStream = fopen(filePath.string().c_str(), "r");
         assert(fileStream);
-
             auto logoAsBMP = stbi_load_from_file(
                 fileStream,
                 &x,
@@ -79,14 +75,14 @@ class AssetIntegrator {
                 &channels,
                 0
             );
-
         fclose(fileStream);
 
-        auto size = asset.initSize();
-        size.setHeight(y);
-        size.setWidth(x);
+        // fill container
+        auto size = new Asset_Size;
+        size->set_width(x);
+        size->set_height(y);
 
-        asset.setSize(size);
+        return size;
     }
 };
 

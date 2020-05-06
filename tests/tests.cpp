@@ -30,8 +30,14 @@
 
 // using namespace UnderStory::Network;
 
-TEST_CASE("Payloads", "[network]") {
-    spdlog::set_level(spdlog::level::debug);
+TEST_CASE("Test asset integration", "[assets]") {
+    auto path = std::filesystem::absolute("./tests/resources/test.png");
+    auto asset = UnderStory::AssetIntegrator::createAsset(path);
 
-    auto asset = UnderStory::AssetIntegrator::createAsset("C:/Users/Amphaal/Desktop/logo.png");
+    REQUIRE(asset.name() == "test");
+    REQUIRE(asset.fileextension() == ".png");
+    REQUIRE(asset.fnv1ahash() == 9008380550126030887);
+    REQUIRE(asset.filelength() == 25579);
+    REQUIRE(asset.dimensions().width() == 290);
+    REQUIRE(asset.dimensions().height() == 300);
 }

@@ -6,6 +6,7 @@
     "twxs.cmake",
     "mrmlnc.vscode-remark",
     "mine.cpplint",
-    "surajbarkale.ninja"
+    "surajbarkale.ninja",
+    "zxh404.vscode-proto3"
   ]
 }
