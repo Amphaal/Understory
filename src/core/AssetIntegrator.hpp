@@ -66,16 +66,13 @@ class AssetIntegrator {
     static Asset_Size* _getWidthAndHeight(const std::filesystem::path &filePath) {
         // find x and y
         int x, y, channels;
-        auto fileStream = fopen(filePath.string().c_str(), "r");
-        assert(fileStream);
-            auto logoAsBMP = stbi_load_from_file(
-                fileStream,
-                &x,
-                &y,
-                &channels,
-                0
-            );
-        fclose(fileStream);
+        stbi_load(
+            filePath.string().c_str(),
+            &x,
+            &y,
+            &channels,
+            0
+        );
 
         // fill container
         auto size = new Asset_Size;
