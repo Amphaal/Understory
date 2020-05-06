@@ -45,10 +45,12 @@ class AssetIntegrator {
         ::capnp::MallocMessageBuilder message;
         auto asset = message.initRoot<Asset>();
 
+        // set file extension
         {
             auto ext = filePath.extension().string();
             auto extBuilder = asset.initFileExtension(ext.length());
             std::copy(ext.begin(), ext.end(), extBuilder.begin());
+            asset.setFileExtension(extBuilder);
         }
 
         // std::ifstream fileStream(filePath.c_str(), std::ifstream::in);
