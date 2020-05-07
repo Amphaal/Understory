@@ -2,8 +2,10 @@
 ## Sources ##
 #############
 
-add_library(appNetwork STATIC 
+add_library(appNetwork STATIC)
+target_sources(appNetwork PRIVATE 
     uPnPHandler.hpp
+    services/AssetFetcher.cpp
 )
 set_target_properties(appNetwork PROPERTIES LINKER_LANGUAGE CXX)
 add_library(UnderStory::network ALIAS appNetwork)

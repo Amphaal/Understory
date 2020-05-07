@@ -17,28 +17,11 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
-#include <spdlog/spdlog.h>
+#include "src/models/AssetFetcher.grpc.pb.h"
 
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-#include <catch2/catch.hpp>
-
-#include "src/core/AssetIntegrator.hpp"
-
-//
-// Test cases
-//
-
-// using namespace UnderStory::Network;
-
-TEST_CASE("Test asset integration", "[assets]") {
-    auto path = std::filesystem::absolute("./tests/resources/test.png");
-    auto asset = UnderStory::AssetIntegrator::createAsset(path);
-
-    REQUIRE(asset.file().file_description().name() == "test");
-    REQUIRE(asset.file().file_description().file_extension() == ".png");
-    REQUIRE(asset.file().file_description().fnv1a_hash() == 9008380550126030887);
-    REQUIRE(asset.file().content_length() == 25579);
-    REQUIRE(asset.dimensions().width() == 290);
-    REQUIRE(asset.dimensions().height() == 300);
-}
-
+class AssetFetcherImpl final : public AssetFetcher::Service {
+    grpc::Status RequestAssets(grpc::ServerContext* context, const AssetsRequest* request, grpc::ServerWriter<Asset>* writer) override {
+        // TODO
+        return grpc::Status::OK;
+    }
+};

@@ -14,10 +14,6 @@ message Asset {
   }
 }
 
-message AssetsRequest {
-  repeated int64 requested_file_hashes = 1;
-}
-
 message AssetDatabase {
   map<uint64, Asset> assets = 1;
 }
