@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+message Character {
+    uint64 id = 13;
+    string name = 1;
+    string archtype = 2;
+    string description = 3;
+    string story = 4;
+    int32 level = 5;
+    repeated string bonuses  = 6;
+    repeated string maluses = 7;
+    repeated string notes = 8;
+    repeated Ability abilities = 9;
+    repeated Inventory inventories = 10;
+    repeated Gauge gauges = 11;
+    int64 bound_portrait_hash = 12;
+}
+
+message CharacterDatabase {
+    map<uint64, Character> characters = 1;
+}
+
+message Gauge {
+    int64 current = 1;
+    int64 min = 2;
+    int64 max = 3;
+    string name = 4;
+    int64 color = 5;
+    bool is_visible_under_portrait = 6;
+}
+
+message Ability {
+    string name = 1;
+    string category = 2;
+    string description = 3;
+    bool is_favorite = 4;
+}
+
+message Inventory {
+    string name = 1;
+    repeated InventorySlot slots = 2;
+
+    message InventorySlot {
+        string name = 1;
+        int64 how_many = 2;
+        string category = 3;
+        string description = 4;
+        int64 weight = 5;
+    }
+}

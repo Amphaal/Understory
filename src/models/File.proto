@@ -1,9 +1,21 @@
 syntax = "proto3";
 
 message File {
-    string name = 1;
-    string fileExtension = 2;
-    int64 fnv1aHash = 3;
+    FileDescriptor file_description = 1;
     bytes content = 4;
-    int32 contentLength = 5;
+    int32 content_length = 5;
+}
+
+message FileDescriptor {
+    string name = 1;
+    string file_extension = 2;
+    uint64 fnv1a_hash = 3;
+}
+
+message AvailableFileShares {
+    repeated FileDescriptor available_files = 1;
+}
+
+message FileShareDatabase {
+    map<uint64, File> shared_files = 1;
 }

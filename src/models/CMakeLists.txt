@@ -16,12 +16,10 @@ target_link_libraries(appModels INTERFACE protobuf::libprotobuf)
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
     File.proto
     Asset.proto
-    # Character.proto
-    # Handshake.proto
-    # Message.proto
-    # SharedDocument.proto
-    # User.proto
-    # YoutubeVideo.proto
+    Character.proto
+    Message.proto
+    User.proto
+    YoutubeVideo.proto
 )
 
 target_include_directories(appModels PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

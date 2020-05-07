@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+import "Character.proto";
+
+message User {
+    uint64 id = 1;
+    string username = 2;
+    Type type = 3;
+    uint64 color = 4;
+    uint64 bound_character_id = 5;
+
+    enum Type {
+        HOST = 0;
+        PLAYER = 1;
+        OBSERVER = 2;
+    }
+}
+
+message Handshake {
+    string username = 1;
+    string client_version = 2;
+    Character to_incarnate = 3;
+}
+
+message UserDatabase {
+    map<uint64, User> users = 1;
+}

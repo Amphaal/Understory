@@ -34,10 +34,10 @@ TEST_CASE("Test asset integration", "[assets]") {
     auto path = std::filesystem::absolute("./tests/resources/test.png");
     auto asset = UnderStory::AssetIntegrator::createAsset(path);
 
-    REQUIRE(asset.file().name() == "test");
-    REQUIRE(asset.file().fileextension() == ".png");
-    REQUIRE(asset.file().fnv1ahash() == 9008380550126030887);
-    REQUIRE(asset.file().contentlength() == 25579);
+    REQUIRE(asset.file().file_description().name() == "test");
+    REQUIRE(asset.file().file_description().file_extension() == ".png");
+    REQUIRE(asset.file().file_description().fnv1a_hash() == 9008380550126030887);
+    REQUIRE(asset.file().content_length() == 25579);
     REQUIRE(asset.dimensions().width() == 290);
     REQUIRE(asset.dimensions().height() == 300);
 }

@@ -1,6 +1,11 @@
 syntax = "proto3";
 
 message YoutubeVideo {
-    int32 id = 1;
+    string yt_id = 1;
     string name = 2;
+    repeated string tags = 3;
+}
+
+message YoutubeDatabase {
+    map<string, YoutubeVideo> videos = 1;
 }

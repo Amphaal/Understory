@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+message Message {
+    uint64 date = 1;
+    uint64 message_id = 2;
+    uint64 sender_id = 3;
+    repeated uint64 target_character_ids = 4;
+    uint64 response_to_id = 5;
+    oneof content {
+        string text = 6;
+        uint64 disconnected_user_id = 7;
+        uint64 connected_user_id = 8;
+        DiceThrow dice_throw = 9;
+    }
+}
+
+message MessageAck {
+    uint64 message_id = 1;
+}
+
+message DiceThrow {
+    uint32 dices = 1;
+    uint32 faces = 2;
+    int64 mod = 3;
+}
+
+message MessageDatabase {
+    map<uint64, Message> messages = 1;
+}

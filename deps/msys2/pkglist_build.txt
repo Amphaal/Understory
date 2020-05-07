@@ -1,12 +1,9 @@
-msys/git
-mingw64/mingw-w64-x86_64-cmake
-mingw64/mingw-w64-x86_64-ninja
-mingw64/mingw-w64-x86_64-clang
-mingw64/mingw-w64-x86_64-lld
-mingw64/mingw-w64-x86_64-pkg-config
-mingw64/mingw-w64-x86_64-miniupnpc
 mingw64/mingw-w64-x86_64-magnum
 mingw64/mingw-w64-x86_64-qt-installer-framework
-mingw64/mingw-w64-x86_64-vlc
+mingw64/mingw-w64-x86_64-gstreamer
+mingw64/mingw-w64-x86_64-gst-plugins-good
 mingw64/mingw-w64-x86_64-protobuf
+mingw64/mingw-w64-x86_64-grpc
 mingw64/mingw-w64-x86_64-catch
+mingw64/mingw-w64-x86_64-gettext
+mingw64/mingw-w64-x86_64-miniupnpc

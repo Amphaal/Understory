@@ -21,6 +21,8 @@
 
 #include <stb_image.h>
 
+#include <string>
+
 #include "FileIntegrator.hpp"
 #include "src/models/Asset.pb.h"
 
@@ -30,7 +32,7 @@ namespace UnderStory {
 class AssetIntegrator {
  public:
     static Asset createAsset(const std::filesystem::path &filePath) {
-        //generate file
+        // generate file
         auto file = FileIntegrator::createFile(filePath);
 
         // get size of image

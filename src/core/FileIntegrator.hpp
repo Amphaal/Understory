@@ -46,14 +46,17 @@ class FileIntegrator {
         auto hash = hash_64_fnv1a(fileContent.c_str(), fileContent.length());
 
         // bind to File
-        auto asset = new File;
-        asset->set_name(filePath.stem().string());
-        asset->set_fileextension(filePath.extension().string());
-        asset->set_fnv1ahash(hash);
-        asset->set_content(fileContent.c_str());
-        asset->set_contentlength(fileContent.length());
+        auto file = new File;
+            auto description = new FileDescriptor;
+            description->set_name(filePath.stem().string());
+            description->set_file_extension(filePath.extension().string());
+            description->set_fnv1a_hash(hash);
 
-        return asset;
+        file->set_content(fileContent.c_str());
+        file->set_content_length(fileContent.length());
+        file->set_allocated_file_description(description);
+
+        return file;
     }
 };
 

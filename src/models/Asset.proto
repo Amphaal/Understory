@@ -5,8 +5,19 @@ import "File.proto";
 message Asset {
   File file = 1;
   Size dimensions = 2;
+  repeated string tags = 3;
+  repeated string tool_tags = 4;
+  
   message Size {
     int32 width = 1;
     int32 height = 2;
   }
+}
+
+message AssetsRequest {
+  repeated int64 requested_file_hashes = 1;
+}
+
+message AssetDatabase {
+  map<uint64, Asset> assets = 1;
 }
