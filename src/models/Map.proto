@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+import "Base.proto";
+import "Asset.proto";
+import "Character.proto";
+
+message Map {
+    map<uint64, Atom> atoms = 1;
+    repeated uint64 assets_in_map_ids = 2;
+    MapParameters map_parameters = 3;
+}
+
+message MapParameters {
+    Point start_pos = 1;
+    uint64 map_size = 2;
+    float min_zoom = 3;
+    float max_zoom = 4;
+    float tile_to_ingame_meters = 5;
+    float tile_to_sceen_centimeters = 6;
+    MovementSystem movement_system = 7;
+
+    enum MovementSystem {
+        LINEAR = 0;
+        GRID = 1;
+    }
+}
+
+message Atom {
+    uint64 id = 1;
+    Point pos = 2;
+    bool hidden = 3;
+    Rectangle rect = 4;
+    bool locked = 5;
+    oneof subtype {
+        Drawing drawing = 6;
+        Event event = 7;
+        Player player = 8;
+        NPC npc = 9;
+        Object object = 10;
+    }
+}
+
+message Object {
+    uint64 asset_id = 1;
+    int32 layer = 2;
+    float scale = 3;
+    float rotation = 4;
+    float opacity = 5;
+    uint64 color = 6;
+    oneof specifics {
+        Drawing drawing_style = 7;
+        Shape shape_style = 8;
+    }
+    ObjectType type = 9;
+
+    enum ObjectType {
+        SOLID = 0;
+        STAMP = 1;
+        RECTANGLE = 2;
+        OVALE = 3;
+        CUTTER = 4;
+        SCISSORS = 5;
+        BRUSH = 6;
+    }
+}
+
+message Drawing {
+    Shape shape = 1;
+    float pen_size = 2;
+    uint64 color = 3;
+}
+
+message Event {
+    string name = 1;
+    string description = 2;
+    uint64 color = 3;
+    Visibility visibility = 4;
+
+    enum Visibility {
+        GM_ONLY = 0;
+        ALL = 1;
+    }
+}
+
+message Player {
+    uint64 color = 1;
+    Character bound_character = 2;
+}
+
+message NPC {
+    float health = 1;
+    float min_health = 2;
+    float max_health = 3;
+    string name = 4;
+    Attitude attitude = 5;
+    string description = 6;
+    uint64 asset_id = 7;
+    TokenSize size = 8;
+
+    enum Attitude {
+        UNKNOWN = 0;
+        NEUTRAL = 1;
+        HOSTILE = 2;
+        FRIENDLY = 3;
+    }
+}

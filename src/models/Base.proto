@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+message Rectangle {
+    Point point1 = 1;
+    Point point2 = 2;
+}
+
+message Shape {
+    repeated Point polygon = 1;
+    Point center = 2;
+}
+
+message Point {
+    float x = 1;
+    float y = 2;
+}

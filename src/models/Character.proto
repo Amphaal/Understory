@@ -1,19 +1,26 @@
 syntax = "proto3";
 
 message Character {
-    uint64 id = 13;
-    string name = 1;
-    string archtype = 2;
-    string description = 3;
-    string story = 4;
-    int32 level = 5;
-    repeated string bonuses  = 6;
-    repeated string maluses = 7;
-    repeated string notes = 8;
-    repeated Ability abilities = 9;
-    repeated Inventory inventories = 10;
-    repeated Gauge gauges = 11;
-    int64 bound_portrait_hash = 12;
+    uint64 id = 1;
+    string name = 2;
+    string archtype = 3;
+    string description = 4;
+    string story = 5;
+    int32 level = 6;
+    repeated string bonuses = 7;
+    repeated string maluses = 8;
+    repeated string notes = 9;
+    repeated Ability abilities = 10;
+    repeated Inventory inventories = 11;
+    repeated Gauge gauges = 12;
+    int64 bound_portrait_hash = 13;
+    TokenSize size = 14;
+}
+
+enum TokenSize {
+    NORMAL = 0; 
+    BIG = 1;
+    VERY_BIG = 2;
 }
 
 message CharacterDatabase {

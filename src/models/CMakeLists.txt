@@ -21,6 +21,8 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
         Message.proto
         User.proto
         YoutubeVideo.proto
+        Base.proto
+        Map.proto
 )
 
 target_include_directories(appModels PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
