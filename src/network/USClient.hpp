@@ -19,47 +19,33 @@
 
 #pragma once
 
-#include <stb_image.h>
+#include <grpcpp/grpcpp.h>
 
-#include <vector>
+#include <spdlog/spdlog.h>
+
 #include <string>
+#include <memory>
+#include <utility>
 
-// resources
-#include <cmrc/cmrc.hpp>
-CMRC_DECLARE(appResources);
+#include "src/models/AssetFetcher.grpc.pb.h"
+
+#include "src/core/Defaults.hpp"
 
 namespace UnderStory {
 
-class Utility {
+class USClient {
  public:
-    struct RawImage {
-        int x;
-        int y;
-        stbi_uc * pixels;
-        int channels;
-    };
-
-    static const RawImage getIcon() {
-        auto iconF = cmrc::appResources::get_filesystem().open("logo.png");
-        std::vector<unsigned char> icon{iconF.begin(), iconF.end()};
-
-        int x, y, channels;
-        auto logoAsBMP = stbi_load_from_memory(
-            icon.data(),
-            icon.size(),
-            &x,
-            &y,
-            &channels,
-            0
+    explicit USClient(const std::string &addressWithoutPort) {
+        auto channel = grpc::CreateChannel(
+            UnderStory::Defaults::connectionAddress(addressWithoutPort),
+            grpc::InsecureChannelCredentials()
         );
 
-        return {
-            x,
-            y,
-            logoAsBMP,
-            channels
-        };
+        this->_assetStub = std::move(AssetFetcher::NewStub(channel));
     }
+
+ private:
+    std::unique_ptr<AssetFetcher::Stub> _assetStub;
 };
 
-}  // namespace UnderStory
+}   // namespace UnderStory

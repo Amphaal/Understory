@@ -17,11 +17,23 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
-#include "src/models/AssetFetcher.grpc.pb.h"
+#pragma once
 
-class AssetFetcherImpl final : public AssetFetcher::Service {
-    grpc::Status RequestAssets(grpc::ServerContext* context, const AssetsRequest* request, grpc::ServerWriter<Asset>* writer) override {
-        // TODO
-        return grpc::Status::OK;
+#include <understory.h>
+
+#include <string>
+
+namespace UnderStory {
+
+class Defaults {
+ public:
+    static inline const uint16_t UPNP_DEFAULT_TARGET_PORT = 31138;
+    static inline const std::string UPNP_REQUEST_DESCRIPTION = APP_NAME;
+
+    static std::string connectionAddress(std::string addressWithoutPort) {
+        address += ":" + UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT;
+        return address;
     }
 };
+
+}   // namespace UnderStory

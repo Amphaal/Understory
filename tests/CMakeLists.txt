@@ -16,6 +16,7 @@ if(LOCAL_TESTING)
     add_executable(UnderStory::localTests ALIAS localTests)
     target_link_libraries(localTests PRIVATE
         UnderStory::network
+        UnderStory::core
     )
     list(APPEND TARGETS_TO_TEST 
         localTests

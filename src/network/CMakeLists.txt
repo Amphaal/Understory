@@ -5,6 +5,8 @@
 add_library(appNetwork STATIC)
 target_sources(appNetwork PRIVATE 
     uPnPHandler.hpp
+    USClient.hpp
+    USServer.hpp
     services/AssetFetcher.cpp
 )
 set_target_properties(appNetwork PROPERTIES LINKER_LANGUAGE CXX)

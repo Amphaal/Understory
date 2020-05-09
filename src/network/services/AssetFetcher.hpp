@@ -19,47 +19,10 @@
 
 #pragma once
 
-#include <stb_image.h>
+#include "src/models/AssetFetcher.grpc.pb.h"
 
-#include <vector>
-#include <string>
-
-// resources
-#include <cmrc/cmrc.hpp>
-CMRC_DECLARE(appResources);
-
-namespace UnderStory {
-
-class Utility {
- public:
-    struct RawImage {
-        int x;
-        int y;
-        stbi_uc * pixels;
-        int channels;
-    };
-
-    static const RawImage getIcon() {
-        auto iconF = cmrc::appResources::get_filesystem().open("logo.png");
-        std::vector<unsigned char> icon{iconF.begin(), iconF.end()};
-
-        int x, y, channels;
-        auto logoAsBMP = stbi_load_from_memory(
-            icon.data(),
-            icon.size(),
-            &x,
-            &y,
-            &channels,
-            0
-        );
-
-        return {
-            x,
-            y,
-            logoAsBMP,
-            channels
-        };
+class AssetFetcherImpl final : public AssetFetcher::Service {
+    grpc::Status RequestAssets(grpc::ServerContext* context, const AssetsRequest* request, grpc::ServerWriter<Asset>* writer) override {
+        return grpc::Status::OK;
     }
 };
-
-}  // namespace UnderStory

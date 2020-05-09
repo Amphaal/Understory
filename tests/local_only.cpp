@@ -23,7 +23,8 @@
 #include <catch2/catch.hpp>
 
 #include "src/network/UPnPHandler.hpp"
-#include "src/app/Utility.hpp"
+
+#include "src/core/Defaults.hpp"
 
 //
 // Test cases
@@ -31,8 +32,8 @@
 
 TEST_CASE("Test uPnP", "[network]") {
     UnderStory::UPnPHandler handler(
-        UnderStory::Utility::UPNP_DEFAULT_TARGET_PORT,
-        UnderStory::Utility::UPNP_REQUEST_DESCRIPTION
+        UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT,
+        UnderStory::Defaults::UPNP_REQUEST_DESCRIPTION
     );
 
     // request redirect
@@ -46,4 +47,8 @@ TEST_CASE("Test uPnP", "[network]") {
     status = undirectRequest.wait_for(std::chrono::seconds(5));
     REQUIRE(status != std::future_status::timeout);
     REQUIRE(undirectRequest.get() == 0);
+}
+
+TEST_CASE("gRPC", "[network]") {
+
 }

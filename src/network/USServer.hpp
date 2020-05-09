@@ -19,47 +19,37 @@
 
 #pragma once
 
-#include <stb_image.h>
+#include <grpcpp/grpcpp.h>
 
-#include <vector>
+#include <spdlog/spdlog.h>
+
 #include <string>
+#include <memory>
+#include <utility>
 
-// resources
-#include <cmrc/cmrc.hpp>
-CMRC_DECLARE(appResources);
+#include "src/network/services/AssetFetcher.hpp"
+
+#include "src/core/Defaults.hpp"
 
 namespace UnderStory {
 
-class Utility {
+class USServer {
  public:
-    struct RawImage {
-        int x;
-        int y;
-        stbi_uc * pixels;
-        int channels;
-    };
-
-    static const RawImage getIcon() {
-        auto iconF = cmrc::appResources::get_filesystem().open("logo.png");
-        std::vector<unsigned char> icon{iconF.begin(), iconF.end()};
-
-        int x, y, channels;
-        auto logoAsBMP = stbi_load_from_memory(
-            icon.data(),
-            icon.size(),
-            &x,
-            &y,
-            &channels,
-            0
-        );
-
-        return {
-            x,
-            y,
-            logoAsBMP,
-            channels
-        };
+    explicit USServer(const std::string &addressWithoutPort) {
+        AssetFetcherImpl service;
+        this->_builder.AddListeningPort(UnderStory::Defaults::connectionAddress(addressWithoutPort), grpc::InsecureServerCredentials());
+        this->_builder.RegisterService(&service);
     }
+
+    void run() {
+        auto server = std::move(this->_builder.BuildAndStart());
+        spdlog::debug("UnderStory server listening on port: {}", UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT);
+        
+        server->Wait();
+    }
+
+ private:
+    grpc::ServerBuilder _builder;
 };
 
-}  // namespace UnderStory
+}   // namespace UnderStory

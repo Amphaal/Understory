@@ -1,5 +1,7 @@
 add_library(appCore STATIC 
     AssetIntegrator.hpp
+    FileIntegrator.hpp
+    Defaults.hpp
     hash_fnv1a.hpp
 )
 set_target_properties(appCore PROPERTIES LINKER_LANGUAGE CXX)
