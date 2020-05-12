@@ -13,6 +13,14 @@ set_target_properties(appNetwork PROPERTIES LINKER_LANGUAGE CXX)
 add_library(UnderStory::network ALIAS appNetwork)
 
 ###################
+## Deps : ZeroMQ ##
+###################
+
+find_package(ZMQ REQUIRED)
+
+target_link_libraries(appNetwork PRIVATE zmq)
+
+###################
 ## Deps : spdlog ##
 ###################
 

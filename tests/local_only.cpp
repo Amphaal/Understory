@@ -49,6 +49,6 @@ TEST_CASE("Test uPnP", "[network]") {
     REQUIRE(undirectRequest.get() == 0);
 }
 
-TEST_CASE("gRPC", "[network]") {
+TEST_CASE("client / server sample", "[network]") {
 
 }

@@ -31,8 +31,8 @@ class Defaults {
     static inline const std::string UPNP_REQUEST_DESCRIPTION = APP_NAME;
 
     static std::string connectionAddress(std::string addressWithoutPort) {
-        address += ":" + UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT;
-        return address;
+        addressWithoutPort = "tcp://" + addressWithoutPort + ":" + std::to_string(UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT);
+        return addressWithoutPort;
     }
 };
 

@@ -19,15 +19,13 @@
 
 #pragma once
 
-#include <grpcpp/grpcpp.h>
+#include <zmq.h>
 
 #include <spdlog/spdlog.h>
 
 #include <string>
 #include <memory>
 #include <utility>
-
-#include "src/network/services/AssetFetcher.hpp"
 
 #include "src/core/Defaults.hpp"
 
@@ -36,20 +34,20 @@ namespace UnderStory {
 class USServer {
  public:
     explicit USServer(const std::string &addressWithoutPort) {
-        AssetFetcherImpl service;
-        this->_builder.AddListeningPort(UnderStory::Defaults::connectionAddress(addressWithoutPort), grpc::InsecureServerCredentials());
-        this->_builder.RegisterService(&service);
+        this->_boundAddress = UnderStory::Defaults::connectionAddress(addressWithoutPort);
     }
 
     void run() {
-        auto server = std::move(this->_builder.BuildAndStart());
+        //TODO
+        zmq::socket_type::
+        zmq::socket_t t();
         spdlog::debug("UnderStory server listening on port: {}", UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT);
-        
-        server->Wait();
     }
 
  private:
-    grpc::ServerBuilder _builder;
+    zmq::context_t ctx_;
+    zmq::socket_t àclient_socket;
+    std::string _boundAddress;
 };
 
 }   // namespace UnderStory
