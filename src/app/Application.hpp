@@ -19,10 +19,10 @@
 
 #pragma once
 
-#include <understory.h>
-
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/Platform/GlfwApplication.h>
+
+#include "src/base/understory.h"
 
 #include "Utility.hpp"
 

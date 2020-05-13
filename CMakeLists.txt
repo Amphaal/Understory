@@ -42,12 +42,6 @@ set(CMAKE_C_STANDARD 11)
 ## define bundle configuration ##
 #################################
 
-# configure header with basic app informations
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/_understory.h 
-    understory.h
-)
-
 #for generated config header
 include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
@@ -76,6 +70,7 @@ target_compile_definitions(stb INTERFACE STB_IMAGE_IMPLEMENTATION)
 ## Tests ##
 ###########
 
+add_subdirectory(src/base)
 add_subdirectory(src/network)
 add_subdirectory(src/models)
 add_subdirectory(src/core)
@@ -83,6 +78,6 @@ add_subdirectory(src/core)
 #dont build tests if included as submodule
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
     add_subdirectory(tests)
-else()
-    add_subdirectory(src/app)
 endif()
+
+add_subdirectory(src/app)

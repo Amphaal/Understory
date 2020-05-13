@@ -19,21 +19,7 @@
 
 #pragma once
 
-#include <string>
+#include <libintl.h>
+#include <locale.h>
 
-#include "src/base/understory.h"
-
-namespace UnderStory {
-
-class Defaults {
- public:
-    static inline const uint16_t UPNP_DEFAULT_TARGET_PORT = 31138;
-    static inline const std::string UPNP_REQUEST_DESCRIPTION = APP_NAME;
-
-    static std::string connectionAddress(std::string addressWithoutPort) {
-        addressWithoutPort = "tcp://" + addressWithoutPort + ":" + std::to_string(UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT);
-        return addressWithoutPort;
-    }
-};
-
-}   // namespace UnderStory
+#define _(STRING) gettext(STRING)

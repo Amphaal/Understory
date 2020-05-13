@@ -43,6 +43,21 @@ target_link_libraries(appExec PRIVATE appResources)
 target_link_libraries(appExec PRIVATE stb)
 
 ###################
+## Deps : sciter ##
+###################
+
+IF(APPLE)
+    SET(SCITER_PLAFORM "osx")
+elseif(WIN32)
+    SET(SCITER_PLAFORM "win")
+endif()
+
+FetchContent_Declare(sciter
+    URL "https://github.com/c-smile/sciter-sdk/tree/master/bin.${SCITER_PLATFORM}"
+)
+FetchContent_Populate(sciter)
+
+###################
 ## Deps : Magnum ##
 ###################
 
