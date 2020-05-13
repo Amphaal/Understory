@@ -25,6 +25,11 @@ project(UnderStory
 
 include(FetchContent)
 
+#policies
+if(COMMAND cmake_policy)
+    cmake_policy(SET CMP0076 NEW)
+endif()
+
 ################################
 ## CPP Compiler Configuration ##
 ################################
@@ -63,10 +68,9 @@ FetchContent_Declare(stb
 FetchContent_Populate(stb)
 
 #define lib
-add_library(stb STATIC "${stb_SOURCE_DIR}/stb_image.h")
+add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
 target_compile_definitions(stb INTERFACE STB_IMAGE_IMPLEMENTATION)
-set_target_properties(stb PROPERTIES LINKER_LANGUAGE CXX)
 
 ###########
 ## Tests ##

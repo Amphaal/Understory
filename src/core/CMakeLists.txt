@@ -1,10 +1,10 @@
-add_library(appCore STATIC 
+add_library(appCore INTERFACE)
+target_sources(appCore INTERFACE
     AssetIntegrator.hpp
     FileIntegrator.hpp
     Defaults.hpp
     hash_fnv1a.hpp
 )
-set_target_properties(appCore PROPERTIES LINKER_LANGUAGE CXX)
 add_library(UnderStory::core ALIAS appCore)
 
 ################
@@ -12,10 +12,10 @@ add_library(UnderStory::core ALIAS appCore)
 ################
 
 #link
-target_link_libraries(appCore PUBLIC stb)
+target_link_libraries(appCore INTERFACE stb)
 
 ##
 ## MODELS
 ##
 
-target_link_libraries(appCore PRIVATE UnderStory::models)
+target_link_libraries(appCore INTERFACE UnderStory::models)

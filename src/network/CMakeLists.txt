@@ -2,23 +2,21 @@
 ## Sources ##
 #############
 
-add_library(appNetwork STATIC)
-target_sources(appNetwork PRIVATE 
+add_library(appNetwork INTERFACE)
+target_sources(appNetwork INTERFACE 
     uPnPHandler.hpp
     USClient.hpp
     USServer.hpp
-    services/AssetFetcher.cpp
 )
-set_target_properties(appNetwork PROPERTIES LINKER_LANGUAGE CXX)
 add_library(UnderStory::network ALIAS appNetwork)
 
 ###################
 ## Deps : ZeroMQ ##
 ###################
 
-find_package(ZMQ REQUIRED)
+find_package(ZeroMQ REQUIRED)
 
-target_link_libraries(appNetwork PRIVATE zmq)
+target_link_libraries(appNetwork INTERFACE libzmq)
 
 ###################
 ## Deps : spdlog ##
@@ -39,7 +37,7 @@ add_library(spdlog INTERFACE)
 target_include_directories(spdlog INTERFACE ${spdlog_SOURCE_DIR}/include)
 
 #link
-target_link_libraries(appNetwork PRIVATE spdlog)
+target_link_libraries(appNetwork INTERFACE spdlog)
 
 ######################
 ## Deps : miniupnpc ##
@@ -49,9 +47,9 @@ target_link_libraries(appNetwork PRIVATE spdlog)
 find_package(miniupnpc REQUIRED)
 
 #link
-target_link_libraries(appNetwork PUBLIC miniupnpc)
+target_link_libraries(appNetwork INTERFACE miniupnpc)
 
 #WSA functions !
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_link_libraries(appNetwork PRIVATE ws2_32) 
+    target_link_libraries(appNetwork INTERFACE ws2_32) 
 endif()

@@ -39,8 +39,6 @@ class USServer {
 
     void run() {
         //TODO
-        zmq::socket_type::
-        zmq::socket_t t();
         spdlog::debug("UnderStory server listening on port: {}", UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT);
     }
 

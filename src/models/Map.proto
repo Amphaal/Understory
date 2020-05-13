@@ -1,7 +1,6 @@
 syntax = "proto3";
 
 import "Base.proto";
-import "Asset.proto";
 import "Character.proto";
 
 message Map {

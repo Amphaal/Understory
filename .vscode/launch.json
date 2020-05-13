@@ -11,9 +11,13 @@
             "name" : "Tests",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "MIMode": "gdb",
-            "program": "${workspaceFolder}/_gen/bin/tests.exe",
-            "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe"
+            "program": "${workspaceFolder}/_gen/bin/tests",
+            "MIMode": "lldb",
+            "windows": {
+                "program": "${workspaceFolder}/_gen/bin/tests.exe",
+                "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe",
+                "MIMode": "gdb"
+            }
         },
         {
             "targetArchitecture": "x64",
@@ -22,9 +26,13 @@
             "name" : "Local Tests",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "MIMode": "gdb",
-            "program": "${workspaceFolder}/_gen/bin/localTests.exe",
-            "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe"
+            "program": "${workspaceFolder}/_gen/bin/localTests",
+            "MIMode": "lldb",
+            "windows": {
+                "program": "${workspaceFolder}/_gen/bin/localTests.exe",
+                "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe",
+                "MIMode": "gdb"
+            }
         },
         {
             "targetArchitecture": "x64",
@@ -33,9 +41,13 @@
             "name" : "Launch",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "MIMode": "gdb",
-            "program": "${workspaceFolder}/_gen/bin/UnderStory.exe",
-            "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe"
+            "program": "${workspaceFolder}/_gen/bin/UnderStory",
+            "MIMode": "lldb",
+            "windows": {
+                "program": "${workspaceFolder}/_gen/bin/UnderStory.exe",
+                "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe",
+                "MIMode": "gdb"
+            }
         }
     ]
 }

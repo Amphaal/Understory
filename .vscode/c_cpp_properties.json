@@ -28,6 +28,25 @@
             "cStandard": "c11",
             "cppStandard": "c++17",
             "intelliSenseMode": "clang-x64"
+        },
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/usr/local/Cellar/zeromq/4.3.2/include",
+                "/usr/local/Cellar/miniupnpc/2.1/include"
+            ],
+            "defines": [],
+            "macFrameworkPath": [],
+            "browse": {
+                "path": [
+                    "/usr/local/include",
+                    "${workspaceFolder}"
+                ]
+            },
+            "cStandard": "c11",
+            "cppStandard": "gnu++14",
+            "intelliSenseMode": "clang-x64"
         }
     ],
     "version": 4

@@ -19,15 +19,13 @@
 
 #pragma once
 
-#include <grpcpp/grpcpp.h>
+#include <zmq.h>
 
 #include <spdlog/spdlog.h>
 
 #include <string>
 #include <memory>
 #include <utility>
-
-#include "src/models/AssetFetcher.grpc.pb.h"
 
 #include "src/core/Defaults.hpp"
 
@@ -36,16 +34,7 @@ namespace UnderStory {
 class USClient {
  public:
     explicit USClient(const std::string &addressWithoutPort) {
-        auto channel = grpc::CreateChannel(
-            UnderStory::Defaults::connectionAddress(addressWithoutPort),
-            grpc::InsecureChannelCredentials()
-        );
-
-        this->_assetStub = std::move(AssetFetcher::NewStub(channel));
     }
-
- private:
-    std::unique_ptr<AssetFetcher::Stub> _assetStub;
 };
 
 }   // namespace UnderStory
