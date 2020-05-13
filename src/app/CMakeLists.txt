@@ -47,9 +47,9 @@ target_link_libraries(appExec PRIVATE stb)
 ###################
 
 IF(APPLE)
-    SET(SCITER_PLAFORM "osx")
+    SET(SCITER_PLATFORM "osx")
 elseif(WIN32)
-    SET(SCITER_PLAFORM "win")
+    SET(SCITER_PLATFORM "win")
 endif()
 
 FetchContent_Declare(sciter
