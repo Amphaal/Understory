@@ -58,8 +58,11 @@ TEST_CASE("client / server sample", "[network]") {
 
     // define handshake
     Handshake hsIn;
-    auto currentVersion = new std::string(APP_CURRENT_VERSION);
-    hsIn.set_allocated_client_version(currentVersion);
+        auto currentVersion = new std::string(APP_CURRENT_VERSION);
+        hsIn.set_allocated_client_version(currentVersion);
+
+        auto username = new std::string("TestUser");
+        hsIn.set_allocated_username(username);
 
     // send
     client1.sendHandshake(hsIn);
@@ -68,9 +71,11 @@ TEST_CASE("client / server sample", "[network]") {
     auto payload = server.waitForRawPayload();
     REQUIRE(payload.type == UnderStory::PayloadType::HANDSHAKE);
 
-    // check payload content
+    // parse
     Handshake hsOut;
     hsOut.ParseFromString(payload.bytes);
-    spdlog::debug(hsOut.client_version());
+
+    // check payload content
     REQUIRE(hsOut.client_version() == *currentVersion);
+    REQUIRE(hsOut.username() == *username);
 }

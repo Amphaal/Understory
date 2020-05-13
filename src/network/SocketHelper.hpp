@@ -99,18 +99,18 @@ class SocketHelper {
             assert (rc == 0);
 
             // create sub-buffer
-            auto cp = new std::string(index, messageSize);
-            assert(cp->length() == messageSize);
+            auto data = malloc(messageSize);
+            memcpy(data, index, messageSize);
 
             // init data
             zmq_msg_init_data(
                 &msg,
-                cp,
-                cp->length(),
+                data,
+                messageSize,
                 [](void *data, void *hint) {
-                    delete (std::string*)hint;
+                    free(data);
                 },
-                cp
+                nullptr
             );
 
             // send
@@ -124,13 +124,24 @@ class SocketHelper {
     }
 
     void _sendPayloadType(const UnderStory::RawPayload &payload) {
-        int payloadType = static_cast<int>(payload.type);
-        auto expectedSize = sizeof(payloadType);
+        auto payloadType = new int(static_cast<int>(payload.type));
+        auto expectedSize = sizeof(&payloadType);
 
         // build message
         zmq_msg_t msg;
         auto rc = zmq_msg_init_size(&msg, expectedSize);
-        assert (rc == 0);
+        assert(rc == 0);
+
+        // init data
+        zmq_msg_init_data(
+            &msg,
+            payloadType,
+            expectedSize,
+            [](void *data, void *hint) {
+                free(data);
+            },
+            nullptr
+        );
 
         // send
         rc = zmq_msg_send(&msg, this->_socket, ZMQ_SNDMORE);
@@ -148,26 +159,29 @@ class SocketHelper {
             /* Create an empty ØMQ message to hold the message part */
             zmq_msg_t part;
             int rc = zmq_msg_init(&part);
-            assert (rc == 0);
+            assert(rc == 0);
 
             /* Block until a message is available to be received from socket */
             rc = zmq_msg_recv(&part, this->_socket, 0);
-            assert (rc != -1);
+            assert(rc != -1);
 
             /* Determine if more message parts are to follow */
             rc = zmq_getsockopt(this->_socket, ZMQ_RCVMORE, &more, &more_size);
-            assert (rc == 0);
+            assert(rc == 0);
 
             // content
             auto partData = zmq_msg_data(&part);
             auto partSize = zmq_msg_size(&part);
 
-            if(!count) {   // append PayloadType
-                int type;
+            if(!count) {   // identity
+                // do nothing ?
+            } else if(count == 1) {   // append PayloadType
+                int type = -1;
                 std::memcpy(&type, partData, partSize);
                 payload.type = static_cast<PayloadType>(type);
             } else {   // append content
-                payload.bytes.append(reinterpret_cast<char*>(partData), partSize);
+                std::string part(reinterpret_cast<char*>(partData), partSize);
+                payload.bytes += part;
             }
 
             // iterate
