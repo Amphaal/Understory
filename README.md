@@ -26,6 +26,9 @@ Follow-up to https://github.com/Amphaal/rpgrpz.
 
 Prepare your build environement:
 
+- Download Sciter SDK `https://sciter.com/sdk/sciter-sdk.zip` and extract it on your machine
+- Create env. variable SCITER_SDK (ex : C:/sciter-sdk)
+
 -   For Windows
     -   Install MSYS2 : <https://www.msys2.org/>
     -   Create env. variable MINGW64_ROOT (ex : C:/msys64/mingw64)

@@ -8,7 +8,7 @@ target_link_libraries(appNetwork INTERFACE UnderStory::base)
 #############
 
 target_sources(appNetwork INTERFACE 
-    uPnPHandler.hpp
+    uPnPHdlr.hpp
     USClient.hpp
     USServer.hpp
     SocketHelper.hpp
