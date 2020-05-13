@@ -19,33 +19,32 @@
 
 #pragma once
 
-#include <zmq.h>
-
-#include <spdlog/spdlog.h>
-
 #include <string>
-#include <memory>
-#include <utility>
 
-#include "src/core/Defaults.hpp"
+#include "SocketHelper.hpp"
 
 namespace UnderStory {
 
-class USServer {
+class USServer : public SocketHelper {
  public:
-    explicit USServer(const std::string &addressWithoutPort) {
-        this->_boundAddress = UnderStory::Defaults::connectionAddress(addressWithoutPort);
+    explicit USServer(const std::string &addressWithoutPort) : SocketHelper(addressWithoutPort, ZMQ_ROUTER) {
+        spdlog::debug("UnderStory server listening on {}", this->boundAddress());
+    }
+
+    std::future<void> runAsync() {
+        return std::async(std::launch::async, &USServer::run, this);
     }
 
     void run() {
-        //TODO
-        spdlog::debug("UnderStory server listening on port: {}", UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT);
+        // loop
+        while (!this->_mustShutdown) {
+            auto payload = this->waitForRawPayload();
+            // TODO handle
+        }
     }
 
  private:
-    zmq::context_t ctx_;
-    zmq::socket_t àclient_socket;
-    std::string _boundAddress;
+    bool _mustShutdown = false;
 };
 
 }   // namespace UnderStory

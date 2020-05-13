@@ -19,21 +19,33 @@
 
 #pragma once
 
-#include <zmq.h>
-
-#include <spdlog/spdlog.h>
-
 #include <string>
-#include <memory>
-#include <utility>
 
-#include "src/core/Defaults.hpp"
+#include "SocketHelper.hpp"
+
+#include "src/models/User.pb.h"
 
 namespace UnderStory {
 
-class USClient {
+class USClient : public SocketHelper {
  public:
-    explicit USClient(const std::string &addressWithoutPort) {
+    explicit USClient(const std::string &addressWithoutPort) : SocketHelper(addressWithoutPort, ZMQ_DEALER, false) {
+        spdlog::debug("UnderStory client connection initiated with {}", this->boundAddress());
+    }
+
+    std::future<void> sendHandshake(const Handshake &handshake) {
+        return std::async(std::launch::async, &USClient::_sendHandshake, this, handshake);
+    }
+
+ private:
+    void _sendHandshake(const Handshake &handshake) {
+        // create payload
+        RawPayload raw {PayloadType::HANDSHAKE};
+        auto success = handshake.SerializeToString(&raw.bytes);
+        assert(success);
+
+        // send
+        this->sendPayload(raw);
     }
 };
 

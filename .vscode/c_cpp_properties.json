@@ -37,7 +37,9 @@
                 "/usr/local/Cellar/miniupnpc/2.1/include"
             ],
             "defines": [],
-            "macFrameworkPath": [],
+            "macFrameworkPath": [
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
+            ],
             "browse": {
                 "path": [
                     "/usr/local/include",

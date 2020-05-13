@@ -7,6 +7,7 @@ target_sources(appNetwork INTERFACE
     uPnPHandler.hpp
     USClient.hpp
     USServer.hpp
+    SocketHelper.hpp
 )
 add_library(UnderStory::network ALIAS appNetwork)
 

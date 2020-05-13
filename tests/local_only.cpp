@@ -24,13 +24,14 @@
 
 #include "src/network/uPnPHandler.hpp"
 
-#include "src/core/Defaults.hpp"
+#include "src/network/USServer.hpp"
+#include "src/network/USClient.hpp"
 
 //
 // Test cases
 //
 
-TEST_CASE("Test uPnP", "[network]") {
+/* TEST_CASE("Test uPnP", "[network]") {
     UnderStory::UPnPHandler handler(
         UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT,
         UnderStory::Defaults::UPNP_REQUEST_DESCRIPTION
@@ -47,8 +48,29 @@ TEST_CASE("Test uPnP", "[network]") {
     status = undirectRequest.wait_for(std::chrono::seconds(5));
     REQUIRE(status != std::future_status::timeout);
     REQUIRE(undirectRequest.get() == 0);
-}
+} */
 
 TEST_CASE("client / server sample", "[network]") {
+    spdlog::set_level(spdlog::level::debug);
 
+    UnderStory::USServer server("*");
+    UnderStory::USClient client1("127.0.0.1");
+
+    // define handshake
+    Handshake hsIn;
+    auto currentVersion = new std::string(APP_CURRENT_VERSION);
+    hsIn.set_allocated_client_version(currentVersion);
+
+    // send
+    client1.sendHandshake(hsIn);
+
+    // check raw payload
+    auto payload = server.waitForRawPayload();
+    REQUIRE(payload.type == UnderStory::PayloadType::HANDSHAKE);
+
+    // check payload content
+    Handshake hsOut;
+    hsOut.ParseFromString(payload.bytes);
+    spdlog::debug(hsOut.client_version());
+    REQUIRE(hsOut.client_version() == *currentVersion);
 }
