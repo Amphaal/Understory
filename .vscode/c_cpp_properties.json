@@ -16,7 +16,8 @@
                 "${workspaceFolder}/_gen",
                 "${workspaceFolder}/_gen/_deps/stb-src",
                 "${workspaceFolder}/_gen/_deps/spdlog-src/include",
-                "${workspaceFolder}/_gen/_cmrc/include"
+                "${workspaceFolder}/_gen/_cmrc/include",
+                "C:/msys64/mingw64/include/c++/v1"
             ],
             "defines": [
                 "_DEBUG",
@@ -33,7 +34,6 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/local/Cellar/zeromq/4.3.2/include",
                 "/usr/local/Cellar/miniupnpc/2.1/include"
             ],
             "defines": [],

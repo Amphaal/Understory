@@ -14,13 +14,15 @@ target_sources(appNetwork INTERFACE
     SocketHelper.hpp
 )
 
-###################
-## Deps : ZeroMQ ##
-###################
+#################
+## Deps : asio ##
+#################
 
-find_package(ZeroMQ REQUIRED)
+find_file(ASIO_HEADER asio.hpp)
+add_library(asio INTERFACE IMPORTED)
+target_sources(asio INTERFACE ${ASIO_HEADER})
 
-target_link_libraries(appNetwork INTERFACE libzmq)
+target_link_libraries(appNetwork INTERFACE asio)
 
 ######################
 ## Deps : miniupnpc ##

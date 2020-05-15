@@ -22,7 +22,7 @@
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include <catch2/catch.hpp>
 
-#include "src/network/uPnPHandler.hpp"
+#include "src/network/uPnPHdlr.hpp"
 
 #include "src/network/USServer.hpp"
 #include "src/network/USClient.hpp"

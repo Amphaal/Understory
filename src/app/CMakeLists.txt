@@ -43,14 +43,6 @@ target_link_libraries(appExec PRIVATE appResources)
 target_link_libraries(appExec PRIVATE stb)
 
 ###################
-## Deps : sciter ##
-###################
-
-find_package(Sciter REQUIRED)
-
-target_link_libraries(appExec PRIVATE sciter)
-
-###################
 ## Deps : Magnum ##
 ###################
 
