@@ -20,31 +20,87 @@
 #pragma once
 
 #include <string>
+#include <set>
+#include <memory>
+#include <utility>
 
-#include "SocketHelper.hpp"
+#include <asio.hpp>
+using asio::ip::tcp;
 
 namespace UnderStory {
 
-class USServer : public SocketHelper {
+namespace Server {
+
+using ClientSockets = std::set<ClientSocket*>;
+
+class ClientSocket : public std::enable_shared_from_this<ClientSocket> {
  public:
-    explicit USServer(const std::string &addressWithoutPort) : SocketHelper(addressWithoutPort, ZMQ_ROUTER) {
-        spdlog::debug("UnderStory server listening on {}", this->boundAddress());
+    ClientSocket(tcp::socket socket, ClientSockets* sockets) : _socket(std::move(socket)), _clientSockets(sockets) {
+        this->_clientSockets->insert(this);
+
+        asio::async_read(
+            this->_socket,
+            asio::buffer(this->_packageBufferPtr, UnderStory::Defaults::MAXIMUM_BYTES_AS_NETWORK_BUFFER),
+            _onSocketRead
+        );
     }
 
-    std::future<void> runAsync() {
-        return std::async(std::launch::async, &USServer::run, this);
+    void _onSocketRead(std::error_code ec, std::size_t length) {
+        if(ec) return this->_onSocketError(ec);
+
+        // TODO
     }
 
-    void run() {
-        // loop
-        while (!this->_mustShutdown) {
-            auto payload = this->waitForRawPayload();
-            // TODO handle
-        }
+    void _onSocketError(std::error_code ec) {
+        delete this;
+    }
+
+    ~ClientSocket() {
+        this->_clientSockets->erase(this);
     }
 
  private:
-    bool _mustShutdown = false;
+    tcp::socket _socket;
+    ClientSockets* _clientSockets = nullptr;
+    void* _packageBufferPtr = nullptr;
 };
+
+class USServer {
+ public:
+    USServer() { }
+
+    std::future<void> startAsync() {
+        return std::async(std::launch::async, &USServer::start, this);
+    }
+
+    void start() {
+        asio::io_context io_context;
+        tcp::endpoint endpoint(tcp::v4(), UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT);
+        this->_acceptor = new tcp::acceptor(io_context, endpoint);
+        this->_acceptConnections();
+
+        spdlog::debug("UnderStory server listening on {}", UnderStory::Defaults::connectionAddress("*"));
+        io_context.run();
+    }
+
+ private:
+    tcp::acceptor * _acceptor = nullptr;
+    ClientSockets _clientSockets;
+
+    void _onNewConnection(std::error_code ec, tcp::socket socket) {
+        if(!ec) {
+            new ClientSocket(std::move(socket), &this->_clientSockets);
+        }
+
+        // accept next connections anyway ?
+        this->_acceptConnections();
+    }
+
+    void _acceptConnections() {
+        this->_acceptor->async_accept(_onNewConnection);
+    }
+};
+
+}   // namespace Server
 
 }   // namespace UnderStory

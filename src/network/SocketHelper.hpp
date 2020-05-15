@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <zmq.h>
-
 #include <spdlog/spdlog.h>
 
 #include <string>

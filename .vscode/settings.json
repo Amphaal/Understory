@@ -97,6 +97,7 @@
         "stack": "cpp",
         "filesystem": "cpp",
         "cassert": "cpp",
-        "complex": "cpp"
+        "complex": "cpp",
+        "coroutine": "cpp"
     }
 }
