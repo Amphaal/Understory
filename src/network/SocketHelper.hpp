@@ -32,6 +32,8 @@
 
 namespace UnderStory {
 
+namespace Network {
+
 enum class PayloadType {
     PING = 0,
     HANDSHAKE = 1
@@ -41,5 +43,11 @@ struct RawPayload {
     PayloadType type;
     std::string bytes;
 };
+
+class SocketHelper {
+
+};
+
+}   // namespace Network
 
 }   // namespace UnderStory

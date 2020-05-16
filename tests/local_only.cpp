@@ -25,7 +25,7 @@
 #include "src/network/uPnPHdlr.hpp"
 
 #include "src/network/USServer.hpp"
-// #include "src/network/USClient.hpp"
+#include "src/network/USClient.hpp"
 
 //
 // Test cases
@@ -50,12 +50,21 @@
     REQUIRE(undirectRequest.get() == 0);
 } */
 
+using UnderStory::Network::Server::USServer;
+using UnderStory::Network::USClient;
+
 TEST_CASE("client / server sample", "[network]") {
     spdlog::set_level(spdlog::level::debug);
 
-    UnderStory::Server::USServer server;
-    server.startAsync();
-    // UnderStory::USClient client1("127.0.0.1");
+    // start server
+    asio::io_context serverContext;
+    USServer server(serverContext);
+    std::thread serverThread([&serverContext](){ serverContext.run(); });
+
+    // start client
+    asio::io_context clientContext;
+    USClient client1(clientContext, "127.0.0.1");
+    std::thread clientThread([&clientContext](){ clientContext.run(); });
 
     // define handshake
     Handshake hsIn;

@@ -31,76 +31,69 @@ using asio::ip::tcp;
 
 namespace UnderStory {
 
+namespace Network {
+
 namespace Server {
 
 class ClientSocket : public std::enable_shared_from_this<ClientSocket> {
  public:
-    ClientSocket(tcp::socket socket, ClientSockets* sockets) : _socket(std::move(socket)), _clientSockets(sockets) {
-        this->_clientSockets->insert(this);
-
-        asio::async_read(
-            this->_socket,
-            asio::buffer(this->_packageBufferPtr, UnderStory::Defaults::MAXIMUM_BYTES_AS_NETWORK_BUFFER),
-            _onSocketRead
-        );
+    ClientSocket(tcp::socket socket, std::set<std::shared_ptr<ClientSocket>> &clientSockets)
+        : _socket(std::move(socket)), _clientSockets(clientSockets) {
+        this->_clientSockets.insert(shared_from_this());
     }
 
-    void _onSocketRead(std::error_code ec, std::size_t length) {
-        if(ec) return this->_onSocketError(ec);
-
-        // TODO
-    }
-
-    void _onSocketError(std::error_code ec) {
-        delete this;
-    }
-
-    ~ClientSocket() {
-        this->_clientSockets->erase(this);
+    void start() {
+        this->_readIncoming();
     }
 
  private:
     tcp::socket _socket;
-    ClientSockets* _clientSockets = nullptr;
-    void* _packageBufferPtr = nullptr;
+    std::set<std::shared_ptr<ClientSocket>> &_clientSockets;
+    void* _readBuffer = nullptr;
+
+    void _readIncoming() {
+        asio::async_read(this->_socket,
+            asio::buffer(this->_readBuffer, UnderStory::Defaults::MAXIMUM_BYTES_AS_NETWORK_BUFFER),
+            [&](std::error_code ec, std::size_t length) {
+                if(ec) return this->_onSocketError(ec);
+
+                // TODO
+                auto i = true;
+                //this->_readIncoming();
+        });
+    }
+
+    void _onSocketError(std::error_code ec) {
+        this->_clientSockets.erase(shared_from_this());
+    }
 };
 
 class USServer {
  public:
-    USServer() { }
-
-    std::future<void> startAsync() {
-        return std::async(std::launch::async, &USServer::start, this);
-    }
-
-    void start() {
-        asio::io_context io_context;
-        tcp::endpoint endpoint(tcp::v4(), UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT);
-        this->_acceptor = new tcp::acceptor(io_context, endpoint);
-        this->_acceptConnections();
-
-        spdlog::debug("UnderStory server listening on {}", UnderStory::Defaults::connectionAddress("*"));
-        io_context.run();
-    }
-
- private:
-    tcp::acceptor * _acceptor = nullptr;
-    ClientSockets _clientSockets;
-
-    void _onNewConnection(std::error_code ec, tcp::socket socket) {
-        if(!ec) {
-            new ClientSocket(std::move(socket), &this->_clientSockets);
+    explicit USServer(asio::io_context &context, unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT)
+        : _endpoint(tcp::v4(), port), _acceptor(context, _endpoint) {
+            spdlog::debug("UnderStory server listening on port {}", port);
+            this->_acceptConnections();
         }
 
-        // accept next connections anyway ?
-        this->_acceptConnections();
-    }
+ private:
+    tcp::acceptor _acceptor;
+    tcp::endpoint _endpoint;
+    std::set<std::shared_ptr<ClientSocket>> _clientSockets;
 
     void _acceptConnections() {
-        this->_acceptor->async_accept(_onNewConnection);
+        this->_acceptor.async_accept(
+            [&](std::error_code ec, tcp::socket socket) {
+                if(!ec) {
+                    std::make_shared<ClientSocket>(std::move(socket), this->_clientSockets)->start();
+                }
+                this->_acceptConnections();
+        });
     }
 };
 
 }   // namespace Server
+
+}   // namespace Network
 
 }   // namespace UnderStory
