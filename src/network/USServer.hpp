@@ -27,11 +27,11 @@
 #include <asio.hpp>
 using asio::ip::tcp;
 
+#include "src/network/SocketHelper.hpp"
+
 namespace UnderStory {
 
 namespace Server {
-
-using ClientSockets = std::set<ClientSocket*>;
 
 class ClientSocket : public std::enable_shared_from_this<ClientSocket> {
  public:
