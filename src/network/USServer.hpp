@@ -38,11 +38,10 @@ namespace Server {
 class ClientSocket : public std::enable_shared_from_this<ClientSocket> {
  public:
     ClientSocket(tcp::socket socket, std::set<std::shared_ptr<ClientSocket>> &clientSockets)
-        : _socket(std::move(socket)), _clientSockets(clientSockets) {
-        this->_clientSockets.insert(shared_from_this());
-    }
+        : _socket(std::move(socket)), _clientSockets(clientSockets) { }
 
     void start() {
+        this->_clientSockets.insert(shared_from_this());
         this->_readIncoming();
     }
 
@@ -71,14 +70,13 @@ class ClientSocket : public std::enable_shared_from_this<ClientSocket> {
 class USServer {
  public:
     explicit USServer(asio::io_context &context, unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT)
-        : _endpoint(tcp::v4(), port), _acceptor(context, _endpoint) {
+        : _acceptor(context, tcp::endpoint(tcp::v4(), port)) {
             spdlog::debug("UnderStory server listening on port {}", port);
             this->_acceptConnections();
         }
 
  private:
     tcp::acceptor _acceptor;
-    tcp::endpoint _endpoint;
     std::set<std::shared_ptr<ClientSocket>> _clientSockets;
 
     void _acceptConnections() {

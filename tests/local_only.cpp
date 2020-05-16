@@ -67,12 +67,7 @@ TEST_CASE("client / server sample", "[network]") {
     std::thread clientThread([&clientContext](){ clientContext.run(); });
 
     // define handshake
-    Handshake hsIn;
-        auto currentVersion = new std::string(APP_CURRENT_VERSION);
-        hsIn.set_allocated_client_version(currentVersion);
-
-        auto username = new std::string("TestUser");
-        hsIn.set_allocated_username(username);
+    client1.connectAs("TestUser");
 
     // send
     // client1.sendHandshake(hsIn);
@@ -88,4 +83,7 @@ TEST_CASE("client / server sample", "[network]") {
     // // check payload content
     // REQUIRE(hsOut.client_version() == *currentVersion);
     // REQUIRE(hsOut.username() == *username);
+    
+    serverThread.join();
+    clientThread.join();
 }

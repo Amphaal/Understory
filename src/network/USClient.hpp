@@ -23,9 +23,7 @@
 #include <set>
 #include <memory>
 #include <utility>
-
-#include <asio.hpp>
-using asio::ip::tcp;
+#include <queue>
 
 #include "src/network/SocketHelper.hpp"
 
@@ -33,34 +31,54 @@ namespace UnderStory {
 
 namespace Network {
 
-class USClient {
+class USClient : public SocketHelper {
  public:
     USClient(asio::io_context &context, const std::string &host, unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT)
-        : _io_context(context), _socket(context) {
-            // resolve host
-            tcp::resolver resolver(context);
-            auto endpoints = resolver.resolve(host, std::to_string(port));
+        : SocketHelper(context), _io_context(context) {
+        // resolve host
+        tcp::resolver resolver(context);
+        auto endpoints = resolver.resolve(host, std::to_string(port));
 
-            // on connection
-            asio::async_connect(this->_socket, endpoints, [&](std::error_code ec, tcp::endpoint endpoint){
-                if(ec) return this->_onError(ec);
-                spdlog::debug("UnderStory client connected to {}", endpoint.address().to_string());
-                this->_readIncoming();
-            });
-        }
+        // on connection
+        asio::async_connect(this->_socket, endpoints, [&](std::error_code ec, tcp::endpoint endpoint){
+            if(ec) return this->_onError(ec);
+            spdlog::debug("UnderStory client connected to {}", endpoint.address().to_string());
+            this->_readIncoming();
+        });
+    }
+
+    std::future<void> connectAs(const std::string &userName) {
+        // define handshake
+        Handshake hsIn;
+            auto currentVersion = new std::string(APP_CURRENT_VERSION);
+            hsIn.set_allocated_client_version(currentVersion);
+
+            auto username = new std::string(userName);
+            hsIn.set_allocated_username(username);
+
+        // package it
+        std::string raw;
+        hsIn.SerializePartialToString(&raw);
+        RawPayload payload {PayloadType::HANDSHAKE, std::move(raw)};
+
+        // send
+        asio::post(this->_io_context, [this, payload]() {
+            
+        });
+    }
 
  private:
     asio::io_context& _io_context;
-    tcp::socket _socket;
 
-    void _onError(const std::error_code &ec) {
+    void _onError(const std::error_code &ec) override {
         spdlog::error("Client error : {}", ec.message());
+        SocketHelper::_onError(ec);
     }
 
-    void _readIncoming() {
+    void _handlePayload(const RawPayload &payload) override {
+        // TODO
         auto i = true;
-    }
-
+    };
 };
 
 }   // namespace Network

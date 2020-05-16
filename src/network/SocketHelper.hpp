@@ -28,6 +28,9 @@
 
 #include "src/models/User.pb.h"
 
+#include <asio.hpp>
+using asio::ip::tcp;
+
 #include "src/core/Defaults.hpp"
 
 namespace UnderStory {
@@ -45,7 +48,61 @@ struct RawPayload {
 };
 
 class SocketHelper {
+ public:
+    explicit SocketHelper(tcp::socket socket) : _socket(std::move(socket)) {}
+    explicit SocketHelper(asio::io_context &context) : _socket(context) {}
 
+ protected:
+    virtual void _onError(const std::error_code &ec) {
+        this->_socket.close();
+    }
+    virtual void _handlePayload(const RawPayload &payload) = 0;
+
+ private:
+    tcp::socket _socket;
+    RawPayload* _readBufferPayload = nullptr;
+
+    void _sendPayload(const RawPayload &payload) {
+        asio::async_write(this->_socket,
+            asio::buffer(payload.bytes),
+            [this](std::error_code ec, std::size_t length) {
+                if(ec) return this->_onError(ec);
+
+                // TODO register upload speed
+        });
+    }
+
+    void _receivePayloadType() {
+        // new buffer
+        this->_readBufferPayload = new RawPayload;
+
+        // get payload type
+        asio::async_read(this->_socket,
+            asio::buffer(&this->_readBufferPayload->type, sizeof(this->_readBufferPayload->type)),
+            [this](std::error_code ec, std::size_t length) {
+                if(ec) return this->_onError(ec);
+
+                this->_receivePayloadBytes();
+                // TODO register download speed
+        });
+    }
+
+    void _receivePayloadBytes() {
+        asio::async_read(this->_socket,
+            asio::buffer(this->_readBufferPayload->bytes),
+            [this](std::error_code ec, std::size_t length) {
+                if(ec) return this->_onError(ec);
+
+                // handle payload
+                this->_handlePayload(*this->_readBufferPayload);
+                delete this->_readBufferPayload;
+                this->_readBufferPayload = nullptr;
+
+                // receive new payload
+                this->_receivePayloadType();
+                // TODO register download speed
+        });
+    }
 };
 
 }   // namespace Network
