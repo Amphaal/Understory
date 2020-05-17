@@ -24,6 +24,10 @@ target_sources(asio INTERFACE ${ASIO_HEADER})
 
 target_link_libraries(appNetwork INTERFACE asio)
 
+if(WIN32)
+    target_link_libraries(appNetwork INTERFACE wsock32)
+endif()
+
 ######################
 ## Deps : miniupnpc ##
 ######################

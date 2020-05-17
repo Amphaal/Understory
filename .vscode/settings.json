@@ -98,6 +98,11 @@
         "filesystem": "cpp",
         "cassert": "cpp",
         "complex": "cpp",
-        "coroutine": "cpp"
+        "coroutine": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "ranges": "cpp",
+        "stop_token": "cpp",
+        "*.inc": "cpp"
     }
 }

@@ -83,7 +83,7 @@ TEST_CASE("client / server sample", "[network]") {
     // // check payload content
     // REQUIRE(hsOut.client_version() == *currentVersion);
     // REQUIRE(hsOut.username() == *username);
-    
+
     serverThread.join();
     clientThread.join();
 }

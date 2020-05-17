@@ -40,14 +40,15 @@ class USClient : public SocketHelper {
         auto endpoints = resolver.resolve(host, std::to_string(port));
 
         // on connection
-        asio::async_connect(this->_socket, endpoints, [&](std::error_code ec, tcp::endpoint endpoint){
+        asio::async_connect(this->socket(), endpoints, [&](std::error_code ec, tcp::endpoint endpoint){
             if(ec) return this->_onError(ec);
+
             spdlog::debug("UnderStory client connected to {}", endpoint.address().to_string());
-            this->_readIncoming();
+            this->start();
         });
     }
 
-    std::future<void> connectAs(const std::string &userName) {
+    void connectAs(const std::string &userName) {
         // define handshake
         Handshake hsIn;
             auto currentVersion = new std::string(APP_CURRENT_VERSION);
@@ -56,14 +57,10 @@ class USClient : public SocketHelper {
             auto username = new std::string(userName);
             hsIn.set_allocated_username(username);
 
-        // package it
-        std::string raw;
-        hsIn.SerializePartialToString(&raw);
-        RawPayload payload {PayloadType::HANDSHAKE, std::move(raw)};
-
         // send
-        asio::post(this->_io_context, [this, payload]() {
-            
+        asio::post(this->_io_context, [this, hsIn]() {
+            auto payload = serialize(hsIn);
+            this->sendPayload(payload);
         });
     }
 

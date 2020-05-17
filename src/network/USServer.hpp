@@ -35,45 +35,42 @@ namespace Network {
 
 namespace Server {
 
-class ClientSocket : public std::enable_shared_from_this<ClientSocket> {
+class ClientSocket : public SocketHelper, public std::enable_shared_from_this<ClientSocket> {
  public:
     ClientSocket(tcp::socket socket, std::set<std::shared_ptr<ClientSocket>> &clientSockets)
-        : _socket(std::move(socket)), _clientSockets(clientSockets) { }
+        : SocketHelper(std::move(socket)), _clientSockets(clientSockets) { }
 
-    void start() {
+    void start() override {
         this->_clientSockets.insert(shared_from_this());
-        this->_readIncoming();
+        SocketHelper::start();
     }
 
  private:
-    tcp::socket _socket;
     std::set<std::shared_ptr<ClientSocket>> &_clientSockets;
-    void* _readBuffer = nullptr;
 
-    void _readIncoming() {
-        asio::async_read(this->_socket,
-            asio::buffer(this->_readBuffer, UnderStory::Defaults::MAXIMUM_BYTES_AS_NETWORK_BUFFER),
-            [&](std::error_code ec, std::size_t length) {
-                if(ec) return this->_onSocketError(ec);
-
-                // TODO
-                auto i = true;
-                //this->_readIncoming();
-        });
-    }
-
-    void _onSocketError(std::error_code ec) {
+    void _onError(const std::error_code &ec) override {
+        SocketHelper::_onError(ec);
         this->_clientSockets.erase(shared_from_this());
     }
+
+    void _handlePayload(const RawPayload &payload) override {
+        switch(payload.type) {
+            case PayloadType::HANDSHAKE: {
+                Handshake handshake;
+                handshake.ParseFromString(payload.bytes);
+            }
+            break;
+        }
+    };
 };
 
 class USServer {
  public:
     explicit USServer(asio::io_context &context, unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT)
         : _acceptor(context, tcp::endpoint(tcp::v4(), port)) {
-            spdlog::debug("UnderStory server listening on port {}", port);
-            this->_acceptConnections();
-        }
+        spdlog::debug("UnderStory server listening on port {}", port);
+        this->_acceptConnections();
+    }
 
  private:
     tcp::acceptor _acceptor;
@@ -83,7 +80,8 @@ class USServer {
         this->_acceptor.async_accept(
             [&](std::error_code ec, tcp::socket socket) {
                 if(!ec) {
-                    std::make_shared<ClientSocket>(std::move(socket), this->_clientSockets)->start();
+                    auto client = std::make_shared<ClientSocket>(std::move(socket), this->_clientSockets);
+                    client->start();
                 }
                 this->_acceptConnections();
         });
