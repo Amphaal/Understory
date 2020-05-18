@@ -35,37 +35,29 @@ namespace Network {
 
 namespace Server {
 
-class ClientSocket : public SocketHelper, public std::enable_shared_from_this<ClientSocket> {
+class ClientSocket : public SocketHelper {
  public:
-    ClientSocket(tcp::socket socket, std::set<std::shared_ptr<ClientSocket>> &clientSockets)
-        : SocketHelper(std::move(socket)), _clientSockets(clientSockets) { }
+    ClientSocket(tcp::socket socket, std::set<ClientSocket*> &clientSockets, SocketCallbacks &cb)
+        : SocketHelper(std::move(socket), cb), _clientSockets(clientSockets) { }
 
     void start() override {
-        this->_clientSockets.insert(shared_from_this());
+        this->_clientSockets.insert(this);
         SocketHelper::start();
     }
 
  private:
-    std::set<std::shared_ptr<ClientSocket>> &_clientSockets;
+    std::set<ClientSocket*> &_clientSockets;
 
     void _onError(const std::error_code &ec) override {
         SocketHelper::_onError(ec);
-        this->_clientSockets.erase(shared_from_this());
+        this->_clientSockets.erase(this);
     }
-
-    void _handlePayload(const RawPayload &payload) override {
-        switch(payload.type) {
-            case PayloadType::HANDSHAKE: {
-                Handshake handshake;
-                handshake.ParseFromString(payload.bytes);
-            }
-            break;
-        }
-    };
 };
 
 class USServer {
  public:
+    SocketCallbacks callbacks;
+
     explicit USServer(asio::io_context &context, unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT)
         : _acceptor(context, tcp::endpoint(tcp::v4(), port)) {
         spdlog::debug("UnderStory server listening on port {}", port);
@@ -74,13 +66,13 @@ class USServer {
 
  private:
     tcp::acceptor _acceptor;
-    std::set<std::shared_ptr<ClientSocket>> _clientSockets;
+    std::set<ClientSocket*> _clientSockets;
 
     void _acceptConnections() {
         this->_acceptor.async_accept(
             [&](std::error_code ec, tcp::socket socket) {
                 if(!ec) {
-                    auto client = std::make_shared<ClientSocket>(std::move(socket), this->_clientSockets);
+                    auto client = new ClientSocket(std::move(socket), this->_clientSockets, this->callbacks);
                     client->start();
                 }
                 this->_acceptConnections();

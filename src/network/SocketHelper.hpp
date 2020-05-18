@@ -65,10 +65,19 @@ class Marshaller {
     }
 };
 
+using OnPayloadReceivedCallback = std::function<void(const RawPayload&)>;
+using OnBytesUploadedCallback = std::function<void(size_t)>;
+using OnBytesDownloadedCallback = std::function<void(size_t)>;
+struct SocketCallbacks {
+    OnPayloadReceivedCallback onPayloadReceived;
+    OnBytesUploadedCallback onBytesUploaded;
+    OnBytesDownloadedCallback onBytesDownloaded;
+};
+
 class SocketHelper : public Marshaller {
  public:
-    explicit SocketHelper(tcp::socket socket) : _socket(std::move(socket)) {}
-    explicit SocketHelper(asio::io_context& context) : _socket(context) {}
+    explicit SocketHelper(tcp::socket socket, SocketCallbacks &cb) : _callbacks(cb), _socket(std::move(socket)) {}
+    explicit SocketHelper(asio::io_context& context, SocketCallbacks &cb) : _callbacks(cb), _socket(context) {}
 
     virtual void start() {
         this->_receivePayloadType();
@@ -82,7 +91,6 @@ class SocketHelper : public Marshaller {
     virtual void _onError(const std::error_code &ec) {
         this->_socket.close();
     }
-    virtual void _handlePayload(const RawPayload &payload) = 0;
 
     tcp::socket& socket() {
         return this->_socket;
@@ -93,6 +101,7 @@ class SocketHelper : public Marshaller {
     RawPayload* _rBuf = nullptr;
     size_t _rOffset = 0;
     size_t _wOffset = 0;
+    SocketCallbacks& _callbacks;
 
     void _sendPayloadType(const RawPayload &payload) {
         asio::async_write(this->_socket,
@@ -130,6 +139,11 @@ class SocketHelper : public Marshaller {
                 // increment buffer offset
                 this->_wOffset += length;
 
+                // callback
+                if(this->_callbacks.onBytesUploaded) {
+                    this->_callbacks.onBytesUploaded(length);
+                }
+
                 // keep sending while offset is not at the end
                 if(this->_wOffset < payload.bytesSize) {
                     return this->_sendPayloadBytes(payload);
@@ -137,8 +151,6 @@ class SocketHelper : public Marshaller {
 
                 // reset offset
                 this->_wOffset = 0;
-
-                // TODO(amphaal) register upload speed
         });
     }
 
@@ -184,13 +196,20 @@ class SocketHelper : public Marshaller {
                 // increment buffer offset
                 this->_rOffset += length;
 
+                // callback
+                if(this->_callbacks.onBytesDownloaded) {
+                    this->_callbacks.onBytesDownloaded(length);
+                }
+
                 // keep sending while offset is not at the end
                 if(this->_rOffset < this->_rBuf->bytesSize) {
                     return this->_receivePayloadBytes();
                 }
 
-                // handle payload
-                this->_handlePayload(*this->_rBuf);
+                // callback
+                if(this->_callbacks.onPayloadReceived) {
+                    this->_callbacks.onPayloadReceived(*this->_rBuf);
+                }
 
                 // clear buffer
                 delete this->_rBuf;
@@ -199,8 +218,6 @@ class SocketHelper : public Marshaller {
 
                 // restart : wait to receive the next payload
                 this->_receivePayloadType();
-
-                // TODO(amphaal) register download speed
         });
     }
 };

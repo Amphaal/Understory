@@ -52,8 +52,11 @@
 
 using UnderStory::Network::Server::USServer;
 using UnderStory::Network::USClient;
+using UnderStory::Network::RawPayload;
+using UnderStory::Network::PayloadType;
+using UnderStory::Defaults;
 
-TEST_CASE("client / server sample", "[network]") {
+TEST_CASE("client / server - Handshake", "[network]") {
     spdlog::set_level(spdlog::level::debug);
 
     // start server
@@ -66,24 +69,31 @@ TEST_CASE("client / server sample", "[network]") {
     USClient client1(clientContext, "127.0.0.1");
     std::thread clientThread([&clientContext](){ clientContext.run(); });
 
-    // define handshake
-    client1.connectAs("TestUser");
+    // define env
+    auto username = "TestUser";
 
-    // send
-    // client1.sendHandshake(hsIn);
+    // define test
+    server.callbacks.onPayloadReceived = [username, &serverContext, &clientContext](const RawPayload & payload) {
+        // check type
+        REQUIRE(payload.type == PayloadType::HANDSHAKE);
 
-    // // check raw payload
-    // auto payload = server.waitForRawPayload();
-    // REQUIRE(payload.type == UnderStory::PayloadType::HANDSHAKE);
+        // parse
+        Handshake hsOut;
+        hsOut.ParseFromString(payload.bytes);
 
-    // // parse
-    // Handshake hsOut;
-    // hsOut.ParseFromString(payload.bytes);
+        // check payload content
+        REQUIRE(hsOut.client_version() == APP_CURRENT_VERSION);
+        REQUIRE(hsOut.username() == username);
 
-    // // check payload content
-    // REQUIRE(hsOut.client_version() == *currentVersion);
-    // REQUIRE(hsOut.username() == *username);
+        // stop contexts
+        serverContext.stop();
+        clientContext.stop();
+    };
 
+    // send handshake to server
+    client1.connectAs(username);
+
+    // wait for threads to finish
     serverThread.join();
     clientThread.join();
 }

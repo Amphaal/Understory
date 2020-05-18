@@ -33,8 +33,10 @@ namespace Network {
 
 class USClient : public SocketHelper {
  public:
+    SocketCallbacks callbacks;
+
     USClient(asio::io_context &context, const std::string &host, unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT)
-        : SocketHelper(context), _io_context(context) {
+        : SocketHelper(context, this->callbacks), _io_context(context) {
         // resolve host
         tcp::resolver resolver(context);
         auto endpoints = resolver.resolve(host, std::to_string(port));
@@ -71,11 +73,6 @@ class USClient : public SocketHelper {
         spdlog::error("Client error : {}", ec.message());
         SocketHelper::_onError(ec);
     }
-
-    void _handlePayload(const RawPayload &payload) override {
-        // TODO
-        auto i = true;
-    };
 };
 
 }   // namespace Network
