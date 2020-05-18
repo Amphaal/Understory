@@ -24,6 +24,7 @@
 #include <string>
 #include <memory>
 #include <utility>
+#include <algorithm>
 #include <future>
 
 #include <asio.hpp>
@@ -38,7 +39,8 @@ namespace UnderStory {
 namespace Network {
 
 enum class PayloadType {
-    HANDSHAKE = 0
+    UNKNOWN = 0,
+    HANDSHAKE = 1
 };
 
 struct RawPayload {
@@ -89,6 +91,8 @@ class SocketHelper : public Marshaller {
  private:
     tcp::socket _socket;
     RawPayload* _rBuf = nullptr;
+    size_t _rOffset = 0;
+    size_t _wOffset = 0;
 
     void _sendPayloadType(const RawPayload &payload) {
         asio::async_write(this->_socket,
@@ -111,11 +115,30 @@ class SocketHelper : public Marshaller {
     }
 
     void _sendPayloadBytes(const RawPayload &payload) {
+        // determine how many bytes to write
+        auto bytesToWrite = std::min(
+            payload.bytesSize - this->_wOffset,
+            Defaults::MAXIMUM_BYTES_AS_NETWORK_BUFFER
+        );
+
+        // write
         asio::async_write(this->_socket,
-            asio::buffer(payload.bytes),
-            [this](std::error_code ec, std::size_t length) {
+            asio::buffer(payload.bytes.c_str() + this->_wOffset, bytesToWrite),
+            [this, payload](std::error_code ec, std::size_t length) {
                 if(ec) return this->_onError(ec);
-                // TODO register upload speed
+
+                // increment buffer offset
+                this->_wOffset += length;
+
+                // keep sending while offset is not at the end
+                if(this->_wOffset < payload.bytesSize) {
+                    return this->_sendPayloadBytes(payload);
+                }
+
+                // reset offset
+                this->_wOffset = 0;
+
+                // TODO(amphaal) register upload speed
         });
     }
 
@@ -146,19 +169,38 @@ class SocketHelper : public Marshaller {
     }
 
     void _receivePayloadBytes() {
+        // determine how many bytes to write
+        auto bytesToRead = std::min(
+            this->_rBuf->bytesSize - this->_rOffset,
+            Defaults::MAXIMUM_BYTES_AS_NETWORK_BUFFER
+        );
+
+        // read
         asio::async_read(this->_socket,
-            asio::buffer(this->_rBuf->bytes),
+            asio::buffer(this->_rBuf->bytes.begin().base() + this->_rOffset, bytesToRead),
             [this](std::error_code ec, std::size_t length) {
                 if(ec) return this->_onError(ec);
 
+                // increment buffer offset
+                this->_rOffset += length;
+
+                // keep sending while offset is not at the end
+                if(this->_rOffset < this->_rBuf->bytesSize) {
+                    return this->_receivePayloadBytes();
+                }
+
                 // handle payload
                 this->_handlePayload(*this->_rBuf);
+
+                // clear buffer
                 delete this->_rBuf;
                 this->_rBuf = nullptr;
+                this->_rOffset = 0;
 
-                // receive new payload
+                // restart : wait to receive the next payload
                 this->_receivePayloadType();
-                // TODO register download speed
+
+                // TODO(amphaal) register download speed
         });
     }
 };

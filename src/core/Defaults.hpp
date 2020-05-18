@@ -29,7 +29,7 @@ class Defaults {
  public:
     static inline const uint16_t UPNP_DEFAULT_TARGET_PORT = 31138;
     static inline const std::string UPNP_REQUEST_DESCRIPTION = APP_NAME;
-    static inline int MAXIMUM_BYTES_AS_NETWORK_BUFFER = 64000;
+    static inline size_t MAXIMUM_BYTES_AS_NETWORK_BUFFER = 64000;
 };
 
 }   // namespace UnderStory
