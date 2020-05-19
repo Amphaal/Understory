@@ -53,7 +53,7 @@ class FileIntegrator {
             description->set_file_extension(filePath.extension().string());
             description->set_fnv1a_hash(hash);
 
-        file->set_content(fileContent.c_str());
+        file->set_content(fileContent);
         file->set_content_length(fileContent.length());
         file->set_allocated_file_description(description);
 

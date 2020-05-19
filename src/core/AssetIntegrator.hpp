@@ -42,23 +42,56 @@ class AssetContext : public ContextImplementation {
         stream.close();
     }
 
-    void integrateAsset(Asset asset) {
-        auto &fileDescr = asset.file().file_description();
-        auto hash = fileDescr.fnv1a_hash();
+    Asset fetchAsset(const google::protobuf::uint64 &fileId) {
+        auto assets = this->_database.mutable_assets();
+        if(!assets->contains(fileId)) {
+            spdlog::warn("Cannot find [{}] asset from database", fileId);
+            return Asset();
+        }
 
+        // duplicate
+        Asset asset;
+        asset.CopyFrom(assets->at(fileId));
+
+        // get asset file path
+        auto assetFilePath = _assetFilePath(asset);
+        if(!fs::exists(assetFilePath)) {
+            spdlog::warn("Cannot find [{}] asset file", assetFilePath.string());
+            return Asset();
+        }
+
+        // read
+        std::string assetFileBytes;
+        {
+            std::ifstream assetFile(assetFilePath);
+            assetFile >> assetFileBytes;
+            assetFile.close();
+        }
+
+        // bind
+        asset.mutable_file()->set_content(assetFileBytes);
+        return asset;
+    }
+
+    void integrateAsset(Asset asset) {
         // determine asset file path
-        auto dest = this->_context.path() / resourcesFolder / (std::to_string(hash) + fileDescr.file_extension());
+        auto dest = this->_assetFilePath(asset);
 
         // write asset file
-        std::ofstream assetFile(dest);
-        asset.mutable_file()->content();
-
+        {
+            std::ofstream assetFile(dest);
+            assetFile << asset.mutable_file()->content();
+            assetFile.close();
+        }
 
         // clear bytes
         asset.mutable_file()->clear_content();
 
-        // insert to container
+        // prepare
         auto assets = this->_database.mutable_assets();
+        auto hash = asset.file().file_description().fnv1a_hash();
+
+        // insert to container
         assets->insert({
             hash,
             asset
@@ -71,10 +104,19 @@ class AssetContext : public ContextImplementation {
  private:
     AssetDatabase _database;
 
+    const fs::path _assetFilePath(const Asset &asset) const {
+        auto &fileDescr = asset.file().file_description();
+        auto filename = (std::to_string(fileDescr.fnv1a_hash()) + fileDescr.file_extension());
+
+        return this->_context.path() / resourcesFolder / filename;
+    }
+
     void _saveState() override {
         std::string json;
-        google::protobuf::util::MessageToJsonString(this->_database, &json);
-        auto fs = std::fstream();
+        auto result = google::protobuf::util::MessageToJsonString(this->_database, &json);
+        assert(result == google::protobuf::util::Status::OK);
+
+        auto fs = this->_createWriteFS(resourcesDbFile);
         fs << json;
         fs.close();
     }
