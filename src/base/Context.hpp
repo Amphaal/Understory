@@ -21,8 +21,12 @@
 
 #include <spdlog/spdlog.h>
 
+#include <google/protobuf/util/json_util.h>
+
 #include <string>
 #include <random>
+#include <vector>
+#include <fstream>
 
 #include "src/base/fs_compat.h"
 
@@ -57,7 +61,7 @@ class Context {
         return Context(PredefinedEnvironement::CUSTOM, _getCustomContextPath(customContextName));
     }
 
-    const std::string path() const {
+    const fs::path path() const {
         return this->_pathToContext;
     }
 
@@ -107,9 +111,9 @@ class Context {
     static fs::path _getDefaultContextPath() {
         fs::path path;
 
-        #ifdef __APPLE__  // OSX
+        #if defined(__APPLE__)  // OSX
             path = std::string("/Library/Application Support/") + APP_NAME;
-        #elif WIN32  // Windows
+        #elif defined(WIN32)  // Windows
             path = std::string("C:/Users/") + std::getenv("USERNAME") + std::string("/AppData/Local/") + APP_NAME;
         #else  // Linux
             path = std::string("/usr/share/") + APP_NAME;
@@ -119,6 +123,35 @@ class Context {
 
         return path;
     }
+};
+
+class ContextImplementation {
+ public:
+    explicit ContextImplementation(const Context &context, const std::vector<std::string> &linkedSubfolders) : _context(context) {
+        // create subfolders
+        for(auto &subfolder : linkedSubfolders) {
+            auto concat = context.path() / "resources";
+            fs::create_directories(concat);
+            assert(fs::exists(concat));
+        }
+    }
+
+ protected:
+    Context _context;
+
+    std::ofstream _createWriteFS(const std::string &subfile) const {
+        return std::ofstream(_context.path() / subfile);
+    }
+
+    std::ofstream _createWriteFS(const std::string &subfile) const {
+        return std::ofstream(_context.path() / subfile);
+    }
+
+    std::ifstream _createReadFS(const std::string &subfile) const {
+        return std::ifstream(_context.path() / subfile);
+    }
+
+    void virtual _saveState() = 0;
 };
 
 }  // namespace UnderStory

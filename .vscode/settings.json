@@ -104,6 +104,7 @@
         "ranges": "cpp",
         "stop_token": "cpp",
         "*.inc": "cpp",
-        "__functional_03": "cpp"
+        "__functional_03": "cpp",
+        "*.ipp": "cpp"
     }
 }
