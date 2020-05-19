@@ -21,15 +21,10 @@
 
 #include <spdlog/spdlog.h>
 
-#include <filesystem>
 #include <string>
 #include <random>
 
-#ifdef __APPLE__
-namespace fs = std::__fs::filesystem;
-#else
-namespace fs = std::filesystem;
-#endif
+#include "src/base/fs_compat.h"
 
 #include "src/base/understory.h"
 

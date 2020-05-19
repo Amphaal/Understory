@@ -9,6 +9,7 @@ configure_file(
 
 target_sources(appBase INTERFACE 
     translate.h
+    fs_compat.h
     Context.hpp
     Defaults.hpp
 )

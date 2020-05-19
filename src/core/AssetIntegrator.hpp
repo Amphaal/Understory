@@ -31,7 +31,7 @@ namespace UnderStory {
 
 class AssetIntegrator {
  public:
-    static Asset createAsset(const std::filesystem::path &filePath) {
+    static Asset createAsset(const fs::path &filePath) {
         // generate file
         auto file = FileIntegrator::createFile(filePath);
 
@@ -47,7 +47,7 @@ class AssetIntegrator {
     }
 
  private:
-    static Asset_Size* _getWidthAndHeight(const std::filesystem::path &filePath) {
+    static Asset_Size* _getWidthAndHeight(const fs::path &filePath) {
         // find x and y
         int x, y, channels;
         stbi_load(

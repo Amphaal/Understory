@@ -17,28 +17,12 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
-#include <spdlog/spdlog.h>
+#pragma once
 
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-#include <catch2/catch.hpp>
+#include <filesystem>
 
-#include "src/core/AssetIntegrator.hpp"
-
-//
-// Test cases
-//
-
-// using namespace UnderStory::Network;
-
-TEST_CASE("Test asset integration", "[assets]") {
-    auto path = fs::absolute("./tests/resources/test.png");
-    auto asset = UnderStory::AssetIntegrator::createAsset(path);
-
-    REQUIRE(asset.file().file_description().name() == "test");
-    REQUIRE(asset.file().file_description().file_extension() == ".png");
-    REQUIRE(asset.file().file_description().fnv1a_hash() == 9008380550126030887);
-    REQUIRE(asset.file().content_length() == 25579);
-    REQUIRE(asset.dimensions().width() == 290);
-    REQUIRE(asset.dimensions().height() == 300);
-}
-
+#ifdef __APPLE__
+namespace fs = std::__fs::filesystem;
+#else
+namespace fs = std::filesystem;
+#endif

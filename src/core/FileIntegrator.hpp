@@ -20,11 +20,12 @@
 #pragma once
 
 #include <cassert>
-#include <filesystem>
 #include <fstream>
 #include <string>
 #include <utility>
 #include <algorithm>
+
+#include "src/base/fs_compat.h"
 
 #include "src/models/File.pb.h"
 
@@ -34,8 +35,8 @@ namespace UnderStory {
 
 class FileIntegrator {
  public:
-    static File* createFile(const std::filesystem::path &filePath) {
-        assert(std::filesystem::exists(filePath));
+    static File* createFile(const fs::path &filePath) {
+        assert(fs::exists(filePath));
 
         // read file content
         std::ifstream fileStream(filePath.c_str(), std::ifstream::in | std::ios::binary);
