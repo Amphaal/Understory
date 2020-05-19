@@ -46,11 +46,13 @@ target_link_libraries(appExec PRIVATE stb)
 ## Deps : Magnum ##
 ###################
 
-find_package(Magnum REQUIRED GL GlfwApplication)
+find_package(Magnum REQUIRED GL GlfwApplication Magnum Shaders)
 find_package(Corrade REQUIRED Main)
 
 target_link_libraries(appExec PRIVATE
     Corrade::Main    
     Magnum::Application
     Magnum::GL
+    Magnum::Magnum
+    Magnum::Shaders
 )
