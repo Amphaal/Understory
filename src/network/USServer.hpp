@@ -29,6 +29,8 @@ using asio::ip::tcp;
 
 #include "src/network/SocketHelper.hpp"
 
+#include "src/base/Context.hpp"
+
 namespace UnderStory {
 
 namespace Network {
@@ -58,8 +60,8 @@ class USServer {
  public:
     SocketCallbacks callbacks;
 
-    explicit USServer(asio::io_context &context, unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT)
-        : _acceptor(context, tcp::endpoint(tcp::v4(), port)) {
+    explicit USServer(Context &appContext, asio::io_context &context, unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT)
+        : _appContext(appContext), _acceptor(context, tcp::endpoint(tcp::v4(), port)) {
         spdlog::debug("UnderStory server listening on port {}", port);
         this->_acceptConnections();
     }
@@ -67,6 +69,7 @@ class USServer {
  private:
     tcp::acceptor _acceptor;
     std::set<ClientSocket*> _clientSockets;
+    Context _appContext;
 
     void _acceptConnections() {
         this->_acceptor.async_accept(

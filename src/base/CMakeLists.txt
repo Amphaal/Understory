@@ -7,6 +7,12 @@ configure_file(
     understory.h
 )
 
+target_sources(appBase INTERFACE 
+    translate.h
+    Context.hpp
+    Defaults.hpp
+)
+
 ###########################
 ## Deps : intl / gettext ##
 ###########################

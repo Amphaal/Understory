@@ -59,9 +59,12 @@ using UnderStory::Defaults;
 TEST_CASE("client / server - Handshake", "[network]") {
     spdlog::set_level(spdlog::level::debug);
 
+    // app Context
+    auto appContext = UnderStory::Context::random();
+
     // start server
     asio::io_context serverContext;
-    USServer server(serverContext);
+    USServer server(appContext, serverContext);
     std::thread serverThread([&serverContext](){ serverContext.run(); });
 
     // start client

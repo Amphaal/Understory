@@ -30,7 +30,7 @@
 #include <asio.hpp>
 using asio::ip::tcp;
 
-#include "src/core/Defaults.hpp"
+#include "src/base/Defaults.hpp"
 
 #include "src/models/User.pb.h"
 
@@ -104,8 +104,11 @@ class SocketHelper : public Marshaller {
     SocketCallbacks& _callbacks;
 
     void _sendPayloadType(const RawPayload &payload) {
+        // cast to int to prevent random behavior on tests
+        auto type = static_cast<int>(payload.type);
+
         asio::async_write(this->_socket,
-            asio::buffer(&payload.type, sizeof(payload.type)),
+            asio::buffer(&type, sizeof(type)),
             [this, payload](std::error_code ec, std::size_t length) {
                 if(ec) return this->_onError(ec);
 
