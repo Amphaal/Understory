@@ -143,10 +143,6 @@ class ContextImplementation {
         return std::ofstream(_context.path() / subfile);
     }
 
-    std::ofstream _createWriteFS(const std::string &subfile) const {
-        return std::ofstream(_context.path() / subfile);
-    }
-
     std::ifstream _createReadFS(const std::string &subfile) const {
         return std::ifstream(_context.path() / subfile);
     }

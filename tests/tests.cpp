@@ -31,6 +31,8 @@
 // using namespace UnderStory::Network;
 
 TEST_CASE("Test asset integration", "[assets]") {
+    spdlog::set_level(spdlog::level::debug);
+
     auto path = fs::absolute("./tests/resources/test.png");
     auto asset = UnderStory::AssetIntegrator::createAsset(path);
 
@@ -40,5 +42,11 @@ TEST_CASE("Test asset integration", "[assets]") {
     REQUIRE(asset.file().content_length() == 25579);
     REQUIRE(asset.dimensions().width() == 290);
     REQUIRE(asset.dimensions().height() == 300);
+
+    auto context = UnderStory::Context::random();
+    UnderStory::AssetContext integrator(context);
+    integrator.integrateAsset(asset);
+
+    // TODO test
 }
 
