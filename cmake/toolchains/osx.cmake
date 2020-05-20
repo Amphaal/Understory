@@ -2,6 +2,7 @@ SET(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
 
 list(APPEND CMAKE_PREFIX_PATH 
     "/usr/local/opt"
+    "/Library/vulkansdk/macOS"
 )
 
 SET(CMAKE_CXX_STANDARD_INCLUDE_DIRECTORIES

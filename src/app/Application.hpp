@@ -128,7 +128,7 @@ class HelloTriangleApplication {
             createInfo.pNext = nullptr;
         }
 
-        if (vkCreateInstance(&createInfo, nullptr, &this->_instance) != VK_SUCCESS) {
+        if (auto err = vkCreateInstance(&createInfo, nullptr, &this->_instance)) {
             throw std::runtime_error("failed to create instance!");
         }
     }

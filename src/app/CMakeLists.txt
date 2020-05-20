@@ -48,9 +48,7 @@ target_link_libraries(appExec PRIVATE stb)
 
 find_package(glfw3 REQUIRED)
 
-target_link_libraries(appExec PRIVATE
-    glfw3
-)
+target_link_libraries(appExec PRIVATE glfw)
 
 ###################
 ## Deps : Vulkan ##
@@ -60,10 +58,12 @@ find_package(Vulkan REQUIRED)
 
 # validation layers
 find_library(VulkanLKV VkLayer_khronos_validation)
-find_library(VulkanLU VkLayer_utils)
 
 target_link_libraries(appExec PRIVATE
-    Vulkan
-    ${VulkanVL}
-    ${VulkanLU}
+    ${Vulkan_LIBRARIES}
+    ${VulkanLKV}
+)
+
+target_include_directories(appExec PRIVATE
+    ${Vulkan_INCLUDE_DIRS}
 )
