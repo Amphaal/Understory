@@ -1,4 +1,3 @@
-mingw64/mingw-w64-x86_64-magnum
 mingw64/mingw-w64-x86_64-qt-installer-framework
 mingw64/mingw-w64-x86_64-gstreamer
 mingw64/mingw-w64-x86_64-gst-plugins-good
@@ -7,3 +6,5 @@ mingw64/mingw-w64-x86_64-asio
 mingw64/mingw-w64-x86_64-catch
 mingw64/mingw-w64-x86_64-gettext
 mingw64/mingw-w64-x86_64-miniupnpc
+mingw64/mingw-w64-x86_64-vulkan-devel
+mingw64/mingw-w64-x86_64-glfw

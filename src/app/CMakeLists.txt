@@ -42,17 +42,28 @@ target_link_libraries(appExec PRIVATE appResources)
 #link
 target_link_libraries(appExec PRIVATE stb)
 
-###################
-## Deps : Magnum ##
-###################
+#################
+## Deps : GLFW ##
+#################
 
-find_package(Magnum REQUIRED GL GlfwApplication Magnum Shaders)
-find_package(Corrade REQUIRED Main)
+find_package(glfw3 REQUIRED)
 
 target_link_libraries(appExec PRIVATE
-    Corrade::Main    
-    Magnum::Application
-    Magnum::GL
-    Magnum::Magnum
-    Magnum::Shaders
+    glfw3
+)
+
+###################
+## Deps : Vulkan ##
+###################
+
+find_package(Vulkan REQUIRED)
+
+# validation layers
+find_library(VulkanLKV VkLayer_khronos_validation)
+find_library(VulkanLU VkLayer_utils)
+
+target_link_libraries(appExec PRIVATE
+    Vulkan
+    ${VulkanVL}
+    ${VulkanLU}
 )
