@@ -47,7 +47,7 @@
                 ]
             },
             "cStandard": "c11",
-            "cppStandard": "gnu++14",
+            "cppStandard": "gnu++17",
             "intelliSenseMode": "clang-x64"
         }
     ],

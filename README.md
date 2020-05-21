@@ -35,6 +35,7 @@ Prepare your build environement:
     -   Run : `pacman -S --needed - < ./deps/msys2/pkglist_dev.txt` (From msys2_shell.cmd)
 -   For OSX
     -   Install latest XCode from the App Store
+    -   Install Vulkan SDK : <https://vulkan.lunarg.com/sdk/home#mac> to `/Library/vulkansdk`
     -   Run : `brew upgrade`
     -   Run : `brew install $(cat ./deps/osx/pkglist_build.txt)`
     -   Run : `brew install $(cat ./deps/osx/pkglist_dev.txt)`
