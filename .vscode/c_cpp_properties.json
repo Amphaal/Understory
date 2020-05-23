@@ -16,8 +16,7 @@
                 "${workspaceFolder}/_gen",
                 "${workspaceFolder}/_gen/_deps/stb-src",
                 "${workspaceFolder}/_gen/_deps/spdlog-src/include",
-                "${workspaceFolder}/_gen/_cmrc/include",
-                "C:/msys64/mingw64/include/c++/v1"
+                "${workspaceFolder}/_gen/_cmrc/include"
             ],
             "defines": [
                 "_DEBUG",
