@@ -32,6 +32,8 @@
 #include <set>
 #include <algorithm>
 
+#include <vulkan/vulkan.hpp>
+
 #include "src/base/understory.h"
 #include "Utility.hpp"
 

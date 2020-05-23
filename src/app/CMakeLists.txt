@@ -67,3 +67,30 @@ target_link_libraries(appExec PRIVATE
 target_include_directories(appExec PRIVATE
     ${Vulkan_INCLUDE_DIRS}
 )
+
+# glslc
+find_program(GLSLC_EXECUTABLE glslc)
+
+function(compile_to_spirv)
+    foreach(file ${ARGN})
+        set(generated_ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${file}.spv)
+        get_filename_component(_generated_directory_ ${generated_} DIRECTORY)
+        
+        add_custom_command(TARGET appExec PRE_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${_generated_directory_}
+            COMMAND ${GLSLC_EXECUTABLE} 
+                ${CMAKE_CURRENT_SOURCE_DIR}/${file} 
+                -o ${generated_}
+            BYPRODUCTS ${generated_}
+        )
+    endforeach()
+endfunction()
+
+##
+## shaders compilation
+##
+
+compile_to_spirv(
+    shaders/test.frag
+    shaders/test.vert
+)

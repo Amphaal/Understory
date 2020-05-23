@@ -7,6 +7,7 @@
     "mrmlnc.vscode-remark",
     "mine.cpplint",
     "surajbarkale.ninja",
-    "zxh404.vscode-proto3"
+    "zxh404.vscode-proto3",
+    "cadenas.vscode-glsllint"
   ]
 }
