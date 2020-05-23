@@ -65,7 +65,7 @@ void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT
     }
 }
 
-#ifdef NDEBUG
+#if defined(NDEBUG)
 const bool enableValidationLayers = false;
 #else
 const bool enableValidationLayers = true;
@@ -581,16 +581,18 @@ class HelloTriangleApplication {
         std::vector<VkLayerProperties> availableLayers(layerCount);
         vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
 
+        auto availableLayersFromRequested = 0;
+
         for (const char* layerName : validationLayers) {
             for (const auto& layerProperties : availableLayers) {
-                auto s = layerProperties.layerName;
                 if (strcmp(layerName, layerProperties.layerName) == 0) {
-                    return true;
+                    availableLayersFromRequested++;
+                    break;
                 }
             }
         }
 
-        return false;
+        return availableLayersFromRequested == validationLayers.size();
     }
 
     void _createLogicalDevice() {

@@ -43,17 +43,23 @@
             "cwd": "${workspaceFolder}/_gen/bin",
             "program": "${workspaceFolder}/_gen/bin/UnderStory",
             "MIMode": "lldb",
-            "environment": [{
-                "name": "VK_LAYER_PATH",
-                "value": "/Library/vulkansdk/macOS/share/vulkan/explicit_layer.d"
-            }, {
-                "name": "VK_ICD_FILENAMES",
-                "value": "/Library/vulkansdk/macOS/share/vulkan/icd.d/MoltenVK_icd.json"
-            }],
+            "osx": {
+                "environment": [{
+                    "name": "VK_LAYER_PATH",
+                    "value": "/Library/vulkansdk/macOS/share/vulkan/explicit_layer.d",
+                }, {
+                    "name": "VK_ICD_FILENAMES",
+                    "value": "/Library/vulkansdk/macOS/share/vulkan/icd.d/MoltenVK_icd.json"
+                }],
+            },
             "windows": {
                 "program": "${workspaceFolder}/_gen/bin/UnderStory.exe",
                 "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe",
-                "MIMode": "gdb"
+                "MIMode": "gdb",
+                "environment": [{
+                    "name": "VK_LAYER_PATH",
+                    "value": "C:/msys64/mingw64/lib",
+                }],
             }
         }
     ]

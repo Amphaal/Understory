@@ -69,7 +69,7 @@ target_include_directories(appExec PRIVATE
 )
 
 # glslc
-find_program(GLSLC_EXECUTABLE glslc)
+find_program(GLSLC_EXECUTABLE NAMES glslangValidator)
 
 function(compile_to_spirv)
     foreach(file ${ARGN})
@@ -78,7 +78,7 @@ function(compile_to_spirv)
         
         add_custom_command(TARGET appExec PRE_BUILD
             COMMAND ${CMAKE_COMMAND} -E make_directory ${_generated_directory_}
-            COMMAND ${GLSLC_EXECUTABLE} 
+            COMMAND ${GLSLC_EXECUTABLE} -V
                 ${CMAKE_CURRENT_SOURCE_DIR}/${file} 
                 -o ${generated_}
             BYPRODUCTS ${generated_}
