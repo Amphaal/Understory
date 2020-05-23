@@ -40,7 +40,7 @@
             "preLaunchTask": "3. Build",
             "name" : "Launch",
             "request": "launch",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/_gen/bin",
             "program": "${workspaceFolder}/_gen/bin/UnderStory",
             "MIMode": "lldb",
             "environment": [{
