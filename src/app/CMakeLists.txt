@@ -20,6 +20,8 @@ target_sources(appExec PRIVATE
     Utility.hpp
 )
 
+target_link_libraries(appExec PRIVATE appBase)
+
 #####################
 ## Deps : CMake RC ##
 #####################

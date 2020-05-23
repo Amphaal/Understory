@@ -22,6 +22,8 @@
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 
+#include <spdlog/spdlog.h>
+
 #include <cstdint>
 #include <iostream>
 #include <stdexcept>
@@ -32,8 +34,6 @@
 #include <set>
 #include <algorithm>
 #include <fstream>
-
-#include <vulkan/vulkan.hpp>
 
 #include "src/base/understory.h"
 #include "Utility.hpp"
@@ -235,7 +235,7 @@ class HelloTriangleApplication {
         pipelineLayoutInfo.setLayoutCount = 0;
         pipelineLayoutInfo.pushConstantRangeCount = 0;
 
-        if (vkCreatePipelineLayout(this->_device, &pipelineLayoutInfo, nullptr, &this->_pipelineLayout) != VK_SUCCESS) {
+        if (auto result = vkCreatePipelineLayout(this->_device, &pipelineLayoutInfo, nullptr, &this->_pipelineLayout)) {
             throw std::runtime_error("failed to create pipeline layout!");
         }
 
@@ -267,7 +267,7 @@ class HelloTriangleApplication {
         createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
 
         VkShaderModule shaderModule;
-        if (vkCreateShaderModule(this->_device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+        if (auto result = vkCreateShaderModule(this->_device, &createInfo, nullptr, &shaderModule)) {
             throw std::runtime_error("failed to create shader module!");
         }
 
@@ -295,7 +295,7 @@ class HelloTriangleApplication {
             createInfo.subresourceRange.baseArrayLayer = 0;
             createInfo.subresourceRange.layerCount = 1;
 
-            if (vkCreateImageView(this->_device, &createInfo, nullptr, &this->_swapChainImageViews[i]) != VK_SUCCESS) {
+            if (auto result = vkCreateImageView(this->_device, &createInfo, nullptr, &this->_swapChainImageViews[i])) {
                 throw std::runtime_error("failed to create image views!");
             }
         }
@@ -342,7 +342,7 @@ class HelloTriangleApplication {
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        if (vkCreateSwapchainKHR(this->_device, &createInfo, nullptr, &this->_swapChain) != VK_SUCCESS) {
+        if (auto result = vkCreateSwapchainKHR(this->_device, &createInfo, nullptr, &this->_swapChain)) {
             throw std::runtime_error("failed to create swap chain!");
         }
 
@@ -355,7 +355,7 @@ class HelloTriangleApplication {
     }
 
     void _createSurface() {
-        if (glfwCreateWindowSurface(this->_instance, this->_window, nullptr, &this->_surface) != VK_SUCCESS) {
+        if (auto result = glfwCreateWindowSurface(this->_instance, this->_window, nullptr, &this->_surface)) {
             throw std::runtime_error("failed to create window surface!");
         }
     }
@@ -478,7 +478,7 @@ class HelloTriangleApplication {
         return indices;
     }
 
-    void _createInstance() {
+        void _createInstance() {
         if (enableValidationLayers && !this->_checkValidationLayerSupport()) {
             throw std::runtime_error("validation layers requested, but not available!");
         }
@@ -531,15 +531,14 @@ class HelloTriangleApplication {
         VkDebugUtilsMessengerCreateInfoEXT createInfo;
         this->_populateDebugMessengerCreateInfo(createInfo);
 
-        if (CreateDebugUtilsMessengerEXT(this->_instance, &createInfo, nullptr, &this->_debugMessenger) != VK_SUCCESS) {
+        if (auto result = CreateDebugUtilsMessengerEXT(this->_instance, &createInfo, nullptr, &this->_debugMessenger)) {
             throw std::runtime_error("failed to set up debug messenger!");
         }
     }
 
     std::vector<const char*> _getRequiredExtensions() const {
         uint32_t glfwExtensionCount = 0;
-        const char** glfwExtensions;
-        glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+        auto glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
         std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
@@ -626,7 +625,7 @@ class HelloTriangleApplication {
             createInfo.enabledLayerCount = 0;
         }
 
-        if (vkCreateDevice(this->_physicalDevice, &createInfo, nullptr, &this->_device) != VK_SUCCESS) {
+        if (auto result = vkCreateDevice(this->_physicalDevice, &createInfo, nullptr, &this->_device)) {
             throw std::runtime_error("failed to create logical device!");
         }
 
