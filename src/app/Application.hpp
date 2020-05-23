@@ -140,7 +140,14 @@ class HelloTriangleApplication {
         this->_createLogicalDevice();
         this->_createSwapChain();
         this->_createImageViews();
+        this->_createRenderPass();
         this->_createGraphicsPipeline();
+    }
+
+    void _createRenderPass() {
+        VkAttachmentDescription colorAttachment{};
+        colorAttachment.format = this->_swapChainImageFormat;
+        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
     }
 
     void _createGraphicsPipeline() {
