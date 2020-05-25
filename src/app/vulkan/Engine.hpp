@@ -66,7 +66,8 @@ class Engine {
     // create unique instance surface
     void _createSurface(glfwm::WindowPointer &window) {
         VkSurfaceKHR surface;
-        window->createVulkanWindowSurface( VkInstance( this->_instance.get() ), nullptr, &surface);
+        auto result = window->createVulkanWindowSurface( VkInstance( this->_instance.get() ), nullptr, &surface);
+        assert(!result);
         vk::ObjectDestroy<vk::Instance, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE> deleter( this->_instance.get() );
         this->_surface = vk::UniqueSurfaceKHR( vk::SurfaceKHR( surface ), deleter );
     }
