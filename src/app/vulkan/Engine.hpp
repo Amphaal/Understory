@@ -51,7 +51,7 @@ class Engine {
 
         // create a UniqueInstance
         this->_instance = vk::createInstanceUnique(instanceCreateInfo);
-        //this->_mayUseDebugMessenger();
+        this->_mayUseDebugMessenger();
     }
 
  private:
