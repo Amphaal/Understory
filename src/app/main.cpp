@@ -17,13 +17,15 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
+#include <memory>
+
 #include "Application.hpp"
 
 int main() {
-    HelloTriangleApplication app;
+    auto app = std::make_shared<UnderStory::Application>();
 
     try {
-        app.run();
+        app->run();
     } catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
         return EXIT_FAILURE;

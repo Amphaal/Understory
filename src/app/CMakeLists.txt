@@ -16,6 +16,7 @@ set_target_properties(appExec PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")  # defin
 
 target_sources(appExec PRIVATE
     main.cpp
+    vulkan/Engine.hpp
     Application.hpp
     Utility.hpp
 )
@@ -52,18 +53,27 @@ find_package(glfw3 REQUIRED)
 
 target_link_libraries(appExec PRIVATE glfw)
 
+##################
+## Deps : GLFWM ##
+##################
+
+#fetch
+FetchContent_Declare(glfwm
+    GIT_REPOSITORY  "https://github.com/giorgiomarcias/glfwm.git"
+)
+FetchContent_MakeAvailable(glfwm)
+
+#link
+target_link_libraries(appExec PRIVATE glfwm)
+
 ###################
 ## Deps : Vulkan ##
 ###################
 
 find_package(Vulkan REQUIRED)
 
-# validation layers
-find_library(VulkanLKV VkLayer_khronos_validation)
-
 target_link_libraries(appExec PRIVATE
     ${Vulkan_LIBRARIES}
-    ${VulkanLKV}
 )
 
 target_include_directories(appExec PRIVATE

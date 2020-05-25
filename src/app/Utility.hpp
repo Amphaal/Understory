@@ -17,6 +17,7 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
+
 #pragma once
 
 #include <stb_image.h>
@@ -35,8 +36,12 @@ class Utility {
     struct RawImage {
         int x;
         int y;
-        stbi_uc * pixels;
+        stbi_uc * pixels = nullptr;
         int channels;
+
+        ~RawImage() {
+            if(pixels) delete pixels;
+        }
     };
 
     static const RawImage getIcon() {

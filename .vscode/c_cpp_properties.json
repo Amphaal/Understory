@@ -32,7 +32,8 @@
             "name": "Mac",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/usr/local/Cellar/miniupnpc/2.1/include"
+                "/usr/local/Cellar/miniupnpc/2.1/include",
+                "${workspaceFolder}/_gen/_deps/glfwm-src/include"
             ],
             "defines": [],
             "macFrameworkPath": [
