@@ -51,9 +51,17 @@ class Engine {
         this->_createSurface(window);
         this->_findQueuesAndCreateDevice();
         this->_createCommandBuffer();
+        this->_createQueues();
     }
 
  private:
+    vk::Queue _graphicsQueue;
+    vk::Queue _presentQueue;
+    void _createQueues() {
+        this->_graphicsQueue = this->_device->getQueue(this->_queuesIndexes.graphicsQueueFamilyIndex, 0);
+        this->_presentQueue = this->_device->getQueue(this->_queuesIndexes.presentQueueFamilyIndex, 0);
+    }
+
     vk::UniqueSurfaceKHR _surface;
     // create unique instance surface
     void _createSurface(glfwm::WindowPointer &window) {
