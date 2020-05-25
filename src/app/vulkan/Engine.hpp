@@ -24,22 +24,47 @@
 #include <utility>
 #include <vector>
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFWM/glfwm.hpp>
-
 #include <vulkan/vulkan.hpp>
 
 #include "src/base/understory.h"
 
+#include <GLFWM/glfwm.hpp>
+
 #include "src/app/vulkan/Debug.hpp"
+#include "src/app/vulkan/Utils.hpp"
+
+#if defined(_DEBUG)
+#define USENGINE_USE_VALIDATION_LAYERS 1
+#else
+#define USENGINE_USE_VALIDATION_LAYERS 0
+#endif
 
 namespace UnderStory {
 
 namespace Vulkan {
 
 class Engine {
- public:
-    explicit Engine(bool withValidationLayers = true) : _withValidationLayers(withValidationLayers) {
+ protected:
+    void bindEngineToWindow(glfwm::WindowPointer &window) {
+        this->_createInstance();
+        this->_pickPhysicalDevice();
+        this->_createSurface(window);
+        this->_findQueuesAndCreateDevice();
+        this->_createCommandBuffer();
+    }
+
+ private:
+    vk::UniqueSurfaceKHR _surface;
+    // create unique instance surface
+    void _createSurface(glfwm::WindowPointer &window) {
+        VkSurfaceKHR surface;
+        window->createVulkanWindowSurface( VkInstance( this->_instance.get() ), nullptr, &surface);
+        vk::ObjectDestroy<vk::Instance, VULKAN_HPP_DEFAULT_DISPATCHER_TYPE> deleter( this->_instance.get() );
+        this->_surface = vk::UniqueSurfaceKHR( vk::SurfaceKHR( surface ), deleter );
+    }
+
+    vk::UniqueInstance _instance;
+    void _createInstance() {
         // initialize the vk::ApplicationInfo structure
         auto appVersion = VK_MAKE_VERSION(APP_MAJOR_VERSION, APP_MINOR_VERSION, APP_PATCH_VERSION);
         vk::ApplicationInfo applicationInfo( APP_FULL_DENOM, appVersion, APP_ENGINE_NAME, appVersion, VK_API_VERSION_1_2 );
@@ -54,9 +79,38 @@ class Engine {
         this->_mayUseDebugMessenger();
     }
 
- private:
-    bool _withValidationLayers;
-    vk::UniqueInstance _instance;
+    vk::UniqueCommandBuffer _commandBuffer;
+    vk::UniqueCommandPool _commandPool;
+    void _createCommandBuffer() {
+        // create a UniqueCommandPool to allocate a CommandBuffer from
+        this->_commandPool = this->_device->createCommandPoolUnique(
+            vk::CommandPoolCreateInfo({}, this->_queuesIndexes.graphicsQueueFamilyIndex)
+        );
+
+        // allocate a CommandBuffer from the CommandPool
+        vk::CommandBufferAllocateInfo cbai(this->_commandPool.get(), vk::CommandBufferLevel::ePrimary, 1 );
+        this->_commandBuffer = std::move(this->_device->allocateCommandBuffersUnique(cbai).front());
+    }
+
+    vk::UniqueDevice _device;
+    Utils::QueueIndexes _queuesIndexes;
+    void _findQueuesAndCreateDevice() {
+        // queues indexes
+        this->_queuesIndexes = Utils::findGraphicsAndPresentQueueFamilyIndex(this->_physicalDevice, this->_surface.get());
+
+        // create a UniqueDevice
+        auto queuePriority = 0.0f;
+        vk::DeviceQueueCreateInfo deviceQueueCreateInfo({}, this->_queuesIndexes.graphicsQueueFamilyIndex, 1, &queuePriority);
+        vk::DeviceCreateInfo deviceCreateInfo({}, 1, &deviceQueueCreateInfo);
+        this->_device = this->_physicalDevice.createDeviceUnique(deviceCreateInfo);
+    }
+
+    vk::PhysicalDevice _physicalDevice;
+    // TODO(amphaal) pick best device
+    void _pickPhysicalDevice() {
+        auto physicalDevices = this->_instance->enumeratePhysicalDevices();
+        this->_physicalDevice = physicalDevices.front();
+    }
 
     std::vector<const char*> _extensions;
     void _setRequiredExtensions(vk::InstanceCreateInfo &ici) {
@@ -69,7 +123,9 @@ class Engine {
         this->_extensions = std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
         // push ext utils if validation layer is required
-        if(this->_withValidationLayers) this->_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        if(USENGINE_USE_VALIDATION_LAYERS) {
+            this->_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        }
 
         // update struct
         ici.enabledExtensionCount = this->_extensions.size();
@@ -84,7 +140,7 @@ class Engine {
 
     static inline std::vector<const char *> _instanceValidationLayerNames { "VK_LAYER_KHRONOS_validation" };
     void _mayIncludeValidationLayers(vk::InstanceCreateInfo &ici) {
-        if(!this->_withValidationLayers) return;
+        if(!USENGINE_USE_VALIDATION_LAYERS) return;
 
         // check layer handling
         auto instanceLayerProperties = vk::enumerateInstanceLayerProperties();
@@ -111,7 +167,7 @@ class Engine {
     }
 
     void _mayUseDebugMessenger() {
-        if(!this->_withValidationLayers) return;
+        if(!USENGINE_USE_VALIDATION_LAYERS) return;
 
         pfnVkCreateDebugUtilsMessengerEXT = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
             this->_instance->getProcAddr( "vkCreateDebugUtilsMessengerEXT" )

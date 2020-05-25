@@ -41,11 +41,13 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
         this->_window = glfwm::WindowManager::createWindow(800, 600, APP_FULL_DENOM, this->getHandledEventTypes());
 
+        this->bindEngineToWindow(this->_window);
+
         #ifndef __APPLE__  // no window icon for OSX
             // define icon
             auto iconImage = Utility::getIcon();
             GLFWimage wIcon { iconImage.x, iconImage.y, iconImage.pixels };
-            this->_window.get()->setIcon(1, &wIcon);
+            this->_window->setIcon(1, &wIcon);
         #endif
     }
 

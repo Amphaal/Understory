@@ -54,19 +54,6 @@ find_package(glfw3 REQUIRED)
 
 target_link_libraries(appExec PRIVATE glfw)
 
-##################
-## Deps : GLFWM ##
-##################
-
-#fetch
-FetchContent_Declare(glfwm
-    GIT_REPOSITORY  "https://github.com/giorgiomarcias/glfwm.git"
-)
-FetchContent_MakeAvailable(glfwm)
-
-#link
-target_link_libraries(appExec PRIVATE glfwm)
-
 ###################
 ## Deps : Vulkan ##
 ###################
@@ -103,11 +90,27 @@ function(compile_to_spirv)
     endforeach()
 endfunction()
 
+##################
+## Deps : GLFWM ##
+##################
+
+#fetch
+FetchContent_Declare(glfwm
+    GIT_REPOSITORY  "https://github.com/giorgiomarcias/glfwm.git"
+)
+FetchContent_MakeAvailable(glfwm)
+
+#handle vulkan integration
+target_compile_definitions(glfwm PUBLIC GLFW_INCLUDE_VULKAN)
+
+#link
+target_link_libraries(appExec PRIVATE glfwm)
+
 ##
 ## shaders compilation
 ##
 
-compile_to_spirv(
-    shaders/test.frag
-    shaders/test.vert
-)
+# compile_to_spirv(
+#     shaders/test.frag
+#     shaders/test.vert
+# )

@@ -35,7 +35,11 @@
                 "/usr/local/Cellar/miniupnpc/2.1/include",
                 "${workspaceFolder}/_gen/_deps/glfwm-src/include"
             ],
-            "defines": [],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
             "macFrameworkPath": [
                 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/System/Library/Frameworks"
             ],
