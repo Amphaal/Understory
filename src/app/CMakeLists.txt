@@ -17,6 +17,7 @@ set_target_properties(appExec PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")  # defin
 target_sources(appExec PRIVATE
     main.cpp
     vulkan/Engine.hpp
+    vulkan/Debug.hpp
     Application.hpp
     Utility.hpp
 )
@@ -72,8 +73,12 @@ target_link_libraries(appExec PRIVATE glfwm)
 
 find_package(Vulkan REQUIRED)
 
+# validation layers
+#find_library(VulkanLKV VkLayer_khronos_validation)
+
 target_link_libraries(appExec PRIVATE
     ${Vulkan_LIBRARIES}
+    #${VulkanLKV}
 )
 
 target_include_directories(appExec PRIVATE
