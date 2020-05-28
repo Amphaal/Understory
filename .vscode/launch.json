@@ -44,6 +44,7 @@
             "program": "${workspaceFolder}/_gen/bin/UnderStory",
             "MIMode": "lldb",
             "osx": {
+                "program": "${workspaceFolder}/_gen/bin/UnderStory.app/Contents/MacOS/UnderStory",
                 "environment": [],
             },
             "windows": {
