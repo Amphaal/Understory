@@ -28,11 +28,11 @@
 #include "src/base/understory.h"
 #include "Utility.hpp"
 
-#include "src/app/vulkan/Engine.hpp"
+#include <GLFWM/glfwm.hpp>
 
 namespace UnderStory {
 
-class Application : public glfwm::EventHandler, public glfwm::Drawable, public std::enable_shared_from_this<Application>, public Vulkan::Engine {
+class Application : public glfwm::EventHandler, public glfwm::Drawable, public std::enable_shared_from_this<Application> {
  public:
     Application() {
         assert(glfwm::WindowManager::init());
@@ -40,8 +40,6 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         glfwm::WindowManager::setHint(GLFW_CLIENT_API, GLFW_NO_API);  // remove OpenGL API handling
 
         this->_window = glfwm::WindowManager::createWindow(800, 600, APP_FULL_DENOM, this->getHandledEventTypes());
-
-        this->bindEngineToWindow(this->_window);
 
         #ifndef __APPLE__  // no window icon for OSX
             // define icon
