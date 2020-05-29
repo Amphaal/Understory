@@ -43,6 +43,8 @@
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
+#include <chrono>
+#include <string>
 
 #include "src/base/understory.h"
 #include "Utility.hpp"
@@ -50,6 +52,7 @@
 #include "src/app/ui/nuklear_glfw_gl3.h"
 
 #include <GLFWM/glfwm.hpp>
+#include <rxcpp/rx.hpp>
 
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 800
@@ -71,7 +74,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         #endif
 
         // create window and initial context
-        this->_window = glfwm::WindowManager::createWindow(WINDOW_WIDTH, WINDOW_HEIGHT, APP_FULL_DENOM, this->getHandledEventTypes());
+        this->_window = glfwm::WindowManager::createWindow(WINDOW_WIDTH, WINDOW_HEIGHT, _windowName, this->getHandledEventTypes());
         glfwm::WindowManager::setWaitTimeout(0);
         this->_window->makeContextCurrent();
 
@@ -85,26 +88,38 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
         // nuklear
         this->_nk_ctx = nk_glfw3_init(&this->_nk_glfw, this->_window->glfwWindow, NK_GLFW3_INSTALL_CALLBACKS);
-        nk_glfw3_font_stash_begin(&_nk_glfw, &_nk_atlas);
-        nk_glfw3_font_stash_end(&_nk_glfw);
+        nk_glfw3_font_stash_begin(&this->_nk_glfw, &this->_nk_atlas);
+        nk_glfw3_font_stash_end(&this->_nk_glfw);
 
         // ui
         this->_defineWindowIcon();
     }
 
     ~Application() {
-        nk_glfw3_shutdown(&_nk_glfw);
+        nk_glfw3_shutdown(&this->_nk_glfw);
     }
 
     void run() {
+        // bind handlers
         this->_window->bindEventHandler(this->shared_from_this(), 0);    // 0 is the rank among all event handlers bound
         this->_window->bindDrawable(this->shared_from_this(), 0);       // 0 is the rank among all drawables bound
 
+        // fps count
+        rxcpp::observable<>::interval(std::chrono::milliseconds(200))
+        .subscribe_on(rxcpp::observe_on_new_thread())
+        .subscribe([&](int) {
+            this->_updateFPSCount = true;
+        });
+
+        // loop
         glfwm::WindowManager::mainLoop();
         glfwm::WindowManager::terminate();
     }
 
  private:
+    static inline char const *_windowName = APP_FULL_DENOM;
+    static inline double _updateFPSCountEveryMs = 333;
+
     glfwm::WindowPointer _window;
 
     nk_font_atlas* _nk_atlas;
@@ -114,14 +129,9 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     int _winWidth;
     int _winHeight;
 
-    void _defineWindowIcon() {
-        #ifndef __APPLE__  // no window icon for OSX
-            // define icon
-            auto iconImage = Utility::getIcon();
-            GLFWimage wIcon { iconImage.x, iconImage.y, iconImage.pixels };
-            this->_window->setIcon(1, &wIcon);
-        #endif
-    }
+    bool _updateFPSCount = false;
+    double _frameRenderDur_Ms;
+    int _fpsEstimated;
 
     glfwm::EventBaseType getHandledEventTypes() const override {
         return static_cast<glfwm::EventBaseType>(glfwm::EventType::MOUSE_BUTTON);
@@ -132,59 +142,85 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
             // TODO(amphaal) handle mouse
             return true;
         }
-        return true;
+        return false;
     }
 
-    void draw(const glfwm::WindowID id) override  {
-        nk_glfw3_new_frame(&_nk_glfw);
-        if (nk_begin(_nk_ctx, "Demo", nk_rect(0, 0, 230, 250),
+    void draw(const glfwm::WindowID id) override {
+        auto start = std::chrono::steady_clock::now();
+
+            this->_drawUI();
+
+        auto end = std::chrono::steady_clock::now();
+        this->_frameRenderDur_Ms = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()) / 1000;
+        this->_fpsEstimated = 1000 / this->_frameRenderDur_Ms;
+
+        this->_mayUpdateFPSDisplay();
+    }
+
+    void _drawUI() {
+        nk_glfw3_new_frame(&this->_nk_glfw);
+        if (nk_begin(this->_nk_ctx, "Demo", nk_rect(0, 0, 230, 250),
             NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
             NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE)) {
             enum {EASY, HARD};
             static int op = EASY;
             static int property = 20;
-            nk_layout_row_static(_nk_ctx, 30, 80, 1);
-            if (nk_button_label(_nk_ctx, "button"))
+            nk_layout_row_static(this->_nk_ctx, 30, 80, 1);
+            if (nk_button_label(this->_nk_ctx, "button"))
                 fprintf(stdout, "button pressed\n");
 
-            nk_layout_row_dynamic(_nk_ctx, 30, 2);
-            if (nk_option_label(_nk_ctx, "easy", op == EASY)) op = EASY;
-            if (nk_option_label(_nk_ctx, "hard", op == HARD)) op = HARD;
+            nk_layout_row_dynamic(this->_nk_ctx, 30, 2);
+            if (nk_option_label(this->_nk_ctx, "easy", op == EASY)) op = EASY;
+            if (nk_option_label(this->_nk_ctx, "hard", op == HARD)) op = HARD;
 
-            nk_layout_row_dynamic(_nk_ctx, 25, 1);
-            nk_property_int(_nk_ctx, "Compression:", 0, &property, 100, 10, 1);
+            nk_layout_row_dynamic(this->_nk_ctx, 25, 1);
+            nk_property_int(this->_nk_ctx, "Compression:", 0, &property, 100, 10, 1);
 
-            nk_layout_row_dynamic(_nk_ctx, 20, 1);
-            nk_label(_nk_ctx, "background:", NK_TEXT_LEFT);
-            nk_layout_row_dynamic(_nk_ctx, 25, 1);
-            if (nk_combo_begin_color(_nk_ctx, nk_rgb_cf(_nk_bg), nk_vec2(nk_widget_width(_nk_ctx), 400))) {
-                nk_layout_row_dynamic(_nk_ctx, 120, 1);
-                _nk_bg = nk_color_picker(_nk_ctx, _nk_bg, NK_RGBA);
-                nk_layout_row_dynamic(_nk_ctx, 25, 1);
-                _nk_bg.r = nk_propertyf(_nk_ctx, "#R:", 0, _nk_bg.r, 1.0f, 0.01f, 0.005f);
-                _nk_bg.g = nk_propertyf(_nk_ctx, "#G:", 0, _nk_bg.g, 1.0f, 0.01f, 0.005f);
-                _nk_bg.b = nk_propertyf(_nk_ctx, "#B:", 0, _nk_bg.b, 1.0f, 0.01f, 0.005f);
-                _nk_bg.a = nk_propertyf(_nk_ctx, "#A:", 0, _nk_bg.a, 1.0f, 0.01f, 0.005f);
-                nk_combo_end(_nk_ctx);
+            nk_layout_row_dynamic(this->_nk_ctx, 20, 1);
+            nk_label(this->_nk_ctx, "background:", NK_TEXT_LEFT);
+            nk_layout_row_dynamic(this->_nk_ctx, 25, 1);
+            if (nk_combo_begin_color(this->_nk_ctx, nk_rgb_cf(this->_nk_bg), nk_vec2(nk_widget_width(this->_nk_ctx), 400))) {
+                nk_layout_row_dynamic(this->_nk_ctx, 120, 1);
+                this->_nk_bg = nk_color_picker(this->_nk_ctx, this->_nk_bg, NK_RGBA);
+                nk_layout_row_dynamic(this->_nk_ctx, 25, 1);
+                this->_nk_bg.r = nk_propertyf(this->_nk_ctx, "#R:", 0, this->_nk_bg.r, 1.0f, 0.01f, 0.005f);
+                this->_nk_bg.g = nk_propertyf(this->_nk_ctx, "#G:", 0, this->_nk_bg.g, 1.0f, 0.01f, 0.005f);
+                this->_nk_bg.b = nk_propertyf(this->_nk_ctx, "#B:", 0, this->_nk_bg.b, 1.0f, 0.01f, 0.005f);
+                this->_nk_bg.a = nk_propertyf(this->_nk_ctx, "#A:", 0, this->_nk_bg.a, 1.0f, 0.01f, 0.005f);
+                nk_combo_end(this->_nk_ctx);
             }
         }
-        nk_end(_nk_ctx);
+        nk_end(this->_nk_ctx);
 
         this->_updateViewportAndClear();
 
-        /* IMPORTANT: `nk_glfw_render` modifies some global OpenGL state
-        * with blending, scissor, face culling, depth test and viewport and
-        * defaults everything back into a default state.
-        * Make sure to either a.) save and restore or b.) reset your own state after
-        * rendering the UI. */
-        nk_glfw3_render(&_nk_glfw, NK_ANTI_ALIASING_ON, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+        nk_glfw3_render(&this->_nk_glfw, NK_ANTI_ALIASING_ON, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+    }
+
+    void _mayUpdateFPSDisplay() {
+        if(!this->_updateFPSCount) return;
+
+        std::string title(_windowName);
+        title += " - " + std::to_string(this->_fpsEstimated) + " FPS";
+        this->_window->setTitle(title);
+
+        this->_updateFPSCount = false;
+    }
+
+    void _defineWindowIcon() {
+        #ifndef __APPLE__  // no window icon for OSX
+            // define icon
+            auto iconImage = Utility::getIcon();
+            GLFWimage wIcon { iconImage.x, iconImage.y, iconImage.pixels };
+            this->_window->setIcon(1, &wIcon);
+        #endif
     }
 
     void _updateViewportAndClear() {
         this->_window->getSize(_winWidth, _winHeight);
         glViewport(0, 0, _winWidth, _winHeight);
         glClear(GL_COLOR_BUFFER_BIT);
-        glClearColor(_nk_bg.r, _nk_bg.g, _nk_bg.b, _nk_bg.a);
+        glClearColor(this->_nk_bg.r, this->_nk_bg.g, this->_nk_bg.b, this->_nk_bg.a);
     }
 };
 

@@ -98,6 +98,19 @@ FetchContent_MakeAvailable(glfwm)
 #link
 target_link_libraries(appExec PRIVATE glfwm)
 
+##################
+## Deps : RxCpp ##
+##################
+
+#fetch
+FetchContent_Declare(rxcpp
+    GIT_REPOSITORY  "https://github.com/ReactiveX/RxCpp.git"
+)
+FetchContent_Populate(rxcpp)
+
+#link
+target_include_directories(appExec PRIVATE ${rxcpp_SOURCE_DIR}/Rx/v2/src)
+
 ####################
 ## Deps : Nuklear ##
 ####################
