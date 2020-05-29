@@ -17,8 +17,12 @@ include(IconGenerator)
 generateIcon("resources/logo.png" "package" "app")
 
 # resource packaging
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")  
-    target_sources(appExec PRIVATE "package/resources.rc") #add Windows ressources (icons)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    #add Windows ressources (icons)    
+    target_sources(appExec PRIVATE 
+        "package/app.ico"
+        "package/resources.rc"
+    )
 elseif(APPLE)   
     target_sources(appExec PRIVATE "package/app.icns") #add MacOS icons in output package
     set_source_files_properties("package/app.icns"
@@ -87,7 +91,7 @@ target_link_libraries(appExec PRIVATE GLEW::GLEW)
 
 #fetch
 FetchContent_Declare(glfwm
-    GIT_REPOSITORY  "https://github.com/giorgiomarcias/glfwm.git"
+    GIT_REPOSITORY  "https://github.com/Amphaal/glfwm.git"
 )
 FetchContent_MakeAvailable(glfwm)
 
@@ -106,7 +110,7 @@ FetchContent_Populate(nuklear)
 
 #define as target
 add_library(nuklear INTERFACE)
-target_include_directories(stb INTERFACE ${nuklear_SOURCE_DIR} ${nuklear_SOURCE_DIR}/demo/glfw_opengl3)
+target_include_directories(stb INTERFACE ${nuklear_SOURCE_DIR})
 
 #link
 target_link_libraries(appExec PRIVATE nuklear)

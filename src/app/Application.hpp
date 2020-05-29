@@ -36,7 +36,6 @@
 #define NK_KEYSTATE_BASED_INPUT
 
 #include <nuklear.h>
-#include <nuklear_glfw_gl3.h>
 
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
@@ -47,6 +46,8 @@
 
 #include "src/base/understory.h"
 #include "Utility.hpp"
+
+#include "src/app/ui/nuklear_glfw_gl3.h"
 
 #include <GLFWM/glfwm.hpp>
 

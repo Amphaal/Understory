@@ -7,9 +7,8 @@ elseif(APPLE)
     SET(IconGenerator_SUFFIX ".icns")
 endif()
 
-
 function(generateIcon fromPNG toFolder iconName)
-    SET(IconGenerator_OUTPUT_ICON ${CMAKE_CURRENT_BINARY_DIR}/${toFolder}/${iconName}${IconGenerator_SUFFIX})
+    SET(IconGenerator_OUTPUT_ICON ${CMAKE_CURRENT_SOURCE_DIR}/${toFolder}/${iconName}${IconGenerator_SUFFIX})
     
     SET(fromPNG ${CMAKE_CURRENT_SOURCE_DIR}/${fromPNG})
     if(APPLE)
@@ -17,8 +16,11 @@ function(generateIcon fromPNG toFolder iconName)
     endif()
     
     if(WIN32)
-        # https://imagemagick.org/discourse-server/viewtopic.php?t=14080
-        message(FATAL_ERROR "Unimplemented !")
+        add_custom_command(OUTPUT ${IconGenerator_OUTPUT_ICON}
+            COMMAND ${convert} -background transparent ${fromPNG} 
+                               -define icon:auto-resize=16,32,128,256 
+                               ${IconGenerator_OUTPUT_ICON}
+        )
     elseif(APPLE)
         add_custom_command(OUTPUT ${IconGenerator_OUTPUT_ICON}
             COMMAND mkdir ${toFolder}
