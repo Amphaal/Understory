@@ -71,6 +71,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
         // create window and initial context
         this->_window = glfwm::WindowManager::createWindow(WINDOW_WIDTH, WINDOW_HEIGHT, APP_FULL_DENOM, this->getHandledEventTypes());
+        glfwm::WindowManager::setWaitTimeout(0);
         this->_window->makeContextCurrent();
 
         // setup glew and opengl
@@ -122,7 +123,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     }
 
     glfwm::EventBaseType getHandledEventTypes() const override {
-        return static_cast<glfwm::EventBaseType>(glfwm::EventType::MOUSE_BUTTON | glfwm::EventType::CURSOR_POSITION);
+        return static_cast<glfwm::EventBaseType>(glfwm::EventType::MOUSE_BUTTON);
     }
 
     bool handle(const glfwm::EventPointer &e) override {
