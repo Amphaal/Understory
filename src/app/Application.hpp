@@ -86,7 +86,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
             exit(1);
         }
 
-        // nuklear
+        // init nuklear
         this->_nk_ctx = nk_glfw3_init(&this->_nk_glfw, this->_window->glfwWindow, NK_GLFW3_INSTALL_CALLBACKS);
         nk_glfw3_font_stash_begin(&this->_nk_glfw, &this->_nk_atlas);
         nk_glfw3_font_stash_end(&this->_nk_glfw);
@@ -96,6 +96,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     }
 
     ~Application() {
+        // shutdown nuklear
         nk_glfw3_shutdown(&this->_nk_glfw);
     }
 
@@ -134,15 +135,23 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     int _fpsEstimated;
 
     glfwm::EventBaseType getHandledEventTypes() const override {
-        return static_cast<glfwm::EventBaseType>(glfwm::EventType::MOUSE_BUTTON);
+        return static_cast<glfwm::EventBaseType>(glfwm::EventType::FRAMEBUFFERSIZE);
     }
 
     bool handle(const glfwm::EventPointer &e) override {
-        if (e->getEventType() == glfwm::EventType::MOUSE_BUTTON) {
-            // TODO(amphaal) handle mouse
-            return true;
+        switch(e->getEventType()) {
+            case glfwm::EventType::FRAMEBUFFERSIZE : {
+                this->draw(this->_window->getID());
+                this->_window->swapBuffers();
+                return true;
+            }
+            break;
+
+            default : {
+                return false;
+            }
+            break;
         }
-        return false;
     }
 
     void draw(const glfwm::WindowID id) override {

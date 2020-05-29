@@ -20,6 +20,7 @@ function(generateIcon fromPNG toFolder iconName)
             COMMAND ${convert} -background transparent ${fromPNG} 
                                -define icon:auto-resize=16,32,128,256 
                                ${IconGenerator_OUTPUT_ICON}
+            COMMENT "Generate app icon"
         )
     elseif(APPLE)
         add_custom_command(OUTPUT ${IconGenerator_OUTPUT_ICON}
@@ -35,6 +36,7 @@ function(generateIcon fromPNG toFolder iconName)
             COMMAND ${sips} -z 512 512   ${fromPNG} --out ${toFolder}/icon_512x512.png
             COMMAND ${iconutil} -c icns ${toFolder}
             COMMAND rm -R ${toFolder}
+            COMMENT "Generate app icon"
         )
     endif()
 endfunction()
