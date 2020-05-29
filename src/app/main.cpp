@@ -22,6 +22,8 @@
 #include "Application.hpp"
 
 int main() {
+    spdlog::set_level(spdlog::level::debug);
+
     auto app = std::make_shared<UnderStory::Application>();
 
     try {

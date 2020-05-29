@@ -73,6 +73,14 @@ find_package(glfw3 REQUIRED)
 
 target_link_libraries(appExec PRIVATE glfw)
 
+#################
+## Deps : GLEW ##
+#################
+
+find_package(GLEW REQUIRED)
+
+target_link_libraries(appExec PRIVATE GLEW::GLEW)
+
 ##################
 ## Deps : GLFWM ##
 ##################
@@ -98,8 +106,7 @@ FetchContent_Populate(nuklear)
 
 #define as target
 add_library(nuklear INTERFACE)
-target_include_directories(stb INTERFACE ${nuklear_SOURCE_DIR})
-target_compile_definitions(nuklear INTERFACE NK_IMPLEMENTATION)
+target_include_directories(stb INTERFACE ${nuklear_SOURCE_DIR} ${nuklear_SOURCE_DIR}/demo/glfw_opengl3)
 
 #link
 target_link_libraries(appExec PRIVATE nuklear)

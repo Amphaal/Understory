@@ -10,8 +10,11 @@ endif()
 
 function(generateIcon fromPNG toFolder iconName)
     SET(IconGenerator_OUTPUT_ICON ${CMAKE_CURRENT_BINARY_DIR}/${toFolder}/${iconName}${IconGenerator_SUFFIX})
+    
     SET(fromPNG ${CMAKE_CURRENT_SOURCE_DIR}/${fromPNG})
-    SET(toFolder ${CMAKE_CURRENT_SOURCE_DIR}/${toFolder}/${iconName}.iconset)
+    if(APPLE)
+        SET(toFolder ${CMAKE_CURRENT_SOURCE_DIR}/${toFolder}/${iconName}.iconset)
+    endif()
     
     if(WIN32)
         # https://imagemagick.org/discourse-server/viewtopic.php?t=14080

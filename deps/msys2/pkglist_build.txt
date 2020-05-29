@@ -7,3 +7,4 @@ mingw64/mingw-w64-x86_64-catch
 mingw64/mingw-w64-x86_64-gettext
 mingw64/mingw-w64-x86_64-miniupnpc
 mingw64/mingw-w64-x86_64-glfw
+mingw64/mingw-w64-x86_64-glew
