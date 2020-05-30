@@ -104,8 +104,14 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     }
 
     ~Application() {
+        // desallocate ressources from engine
+        USEngine::end();
+
         // shutdown nuklear
         nk_glfw3_shutdown(&this->_nk_glfw);
+
+        // terminate window
+        glfwm::WindowManager::terminate();
     }
 
     void run() {
@@ -122,7 +128,6 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
         // loop
         glfwm::WindowManager::mainLoop();
-        glfwm::WindowManager::terminate();
     }
 
  private:
@@ -177,28 +182,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     }
 
     void _test() {
-        // glMatrixMode( GL_PROJECTION );
-        // glLoadIdentity();
-        // double w = _winWidth;
-        // double h = _winHeight;
-        // glOrtho( 0, w, 0, h, -1, 1);
-
-        // glMatrixMode( GL_MODELVIEW );
-        // glLoadIdentity();
-
-        // // important
-        // glTranslatef( 0.5, 0.5, 0 );
-
-        // float offset = 40;
-        // glColor3ub( 255, 0, 0 );
-        // glBegin(GL_LINE_LOOP);
-        //     glVertex2f( 0+offset, 0+offset );
-        //     glVertex2f( 0+offset, h-offset );
-        //     glVertex2f( w-offset, h-offset );
-        //     glVertex2f( w-offset, 0+offset );
-        // glEnd();
-
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
 
     void _drawUI() {
@@ -254,7 +238,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         #ifndef __APPLE__  // no window icon for OSX
             // define icon
             auto iconImage = Utility::getIcon();
-            GLFWimage wIcon { iconImage.x, iconImage.y, iconImage.pixels };
+            GLFWimage wIcon { iconImage.width, iconImage.height, iconImage.pixels };
             this->_window->setIcon(1, &wIcon);
         #endif
     }

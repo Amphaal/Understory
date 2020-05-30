@@ -34,8 +34,8 @@ namespace UnderStory {
 class Utility {
  public:
     struct RawImage {
-        int x;
-        int y;
+        int width;
+        int height;
         stbi_uc * pixels = nullptr;
         int channels;
 
@@ -48,19 +48,19 @@ class Utility {
         auto iconF = cmrc::appResources::get_filesystem().open("logo.png");
         std::vector<unsigned char> icon{iconF.begin(), iconF.end()};
 
-        int x, y, channels;
+        int width, height, channels;
         auto logoAsBMP = stbi_load_from_memory(
             icon.data(),
             icon.size(),
-            &x,
-            &y,
+            &width,
+            &height,
             &channels,
             0
         );
 
         return {
-            x,
-            y,
+            width,
+            height,
             logoAsBMP,
             channels
         };

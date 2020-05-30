@@ -23,53 +23,66 @@
 
 #include <iostream>
 #include <string>
+#include <vector>
+
+#include "src/app/Utility.hpp"
 
 class USEngine {
  public:
+    static inline GLuint programId;
+
+    static void end() {
+        glDeleteVertexArrays(_vertexArraysIndexes.size(), _vertexArraysIndexes.data());
+        glDeleteBuffers(_buffersIndexes.size(), _buffersIndexes.data());
+        glDeleteTextures(_texturesIndexes.size(), _texturesIndexes.data());
+    }
+
     static void init() {
-        GLuint vboId = _loadDataInBuffers();
+        _loadDataInBuffers();
 
         GLuint vShaderId = _compileShaders(vertexShader, GL_VERTEX_SHADER);
         GLuint fShaderId = _compileShaders(fragmentShader, GL_FRAGMENT_SHADER);
 
-        GLuint programId = _linkProgram(vShaderId, fShaderId);
+        programId = _linkProgram(vShaderId, fShaderId);
 
-        // Get the 'pos' variable location inside this program
-        GLuint posAttributePosition = glGetAttribLocation(programId, "pos");
-
-        GLuint vaoId;
-        glGenVertexArrays(1, &vaoId);  // Generate VAO  (Vertex Array Object)
-
-        // Bind it so that rest of vao operations affect this vao
-        glBindVertexArray(vaoId);
-
-        // buffer from which 'pos' will receive its data and the format of that data
-        glBindBuffer(GL_ARRAY_BUFFER, vboId);
-        glVertexAttribPointer(posAttributePosition, 3, GL_FLOAT, false, 0, 0);
-
-        // Enable this attribute array linked to 'pos'
-        glEnableVertexAttribArray(posAttributePosition);
-
-        // Use this program for rendering.
+        // render container
         glUseProgram(programId);
     }
 
  private:
+    static inline std::vector<GLuint> _vertexArraysIndexes;
+    static inline std::vector<GLuint> _buffersIndexes;
+    static inline std::vector<GLuint> _texturesIndexes;
+
     static inline std::string vertexShader = R"(
-        #version 410
-        in vec3 pos;
+        #version 410 core
+        layout (location = 0) in vec3 aPos;
+        layout (location = 1) in vec3 aColor;
+        layout (location = 2) in vec2 aTexCoord;
+
+        out vec3 ourColor;
+        out vec2 TexCoord;
+
         void main()
         {
-            gl_Position = vec4(pos, 1);
+            gl_Position = vec4(aPos, 1.0);
+            ourColor = aColor;
+            TexCoord = aTexCoord;
         }
     )";
 
     static inline std::string fragmentShader = R"(
-        #version 410
-        layout(location = 0) out vec4 frag_color;
-        void main() 
+        #version 410 core
+        out vec4 FragColor;
+        
+        in vec3 ourColor;
+        in vec2 TexCoord;
+
+        uniform sampler2D ourTexture;
+
+        void main()
         {
-            frag_color = vec4(1, .5, .5, 1); // white color
+            FragColor = texture(ourTexture, TexCoord);
         }
     )";
 
@@ -142,23 +155,66 @@ class USEngine {
         return programId;
     }
 
-    // Load data in VBO (Vertex Buffer Object) and return the vbo's id
-    static GLuint _loadDataInBuffers() {
-        GLfloat vertices[] = {  // triangle vertex coordinates
-                            -0.5, -0.5, 0,
-                            0.5, -0.5, 0,
-                            0, 0.5, 0 };
+    static void _loadDataInBuffers() {
+        GLfloat vertices[] = {
+            // positions            // colors           // texture coords
+            0.5f,  0.5f, 0.0f,      1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+            0.5f, -0.5f, 0.0f,      0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+            -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+            -0.5f,  0.5f, 0.0f,     1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+        };
 
-        GLuint vboId;
+        GLuint indices[] = {
+            0, 1, 3,  // first triangle
+            1, 2, 3   // second triangle
+        };
+        GLuint VBO, VAO, EBO;
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+        glGenBuffers(1, &EBO);
 
-        // allocate buffer sapce and pass data to it
-        glGenBuffers(1, &vboId);
-        glBindBuffer(GL_ARRAY_BUFFER, vboId);
+        _vertexArraysIndexes.push_back(VAO);
+        _buffersIndexes.push_back(VBO);
+        _buffersIndexes.push_back(EBO);
+
+        glBindVertexArray(VAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-        // unbind the active buffer
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-        return vboId;
+        // position attribute
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(0);
+        // color attribute
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+        glEnableVertexAttribArray(1);
+        // texture coord attribute
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+        glEnableVertexAttribArray(2);
+
+        // load and create a texture
+        // -------------------------
+        GLuint texture;
+        glGenTextures(1, &texture);
+        _texturesIndexes.push_back(texture);
+
+        glBindTexture(GL_TEXTURE_2D, texture);  // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+        // set the texture wrapping parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);  // set texture wrapping to GL_REPEAT (default wrapping method)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        // set texture filtering parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        auto iconImage = UnderStory::Utility::getIcon();
+        if (iconImage.pixels) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, iconImage.width, iconImage.height, 0, GL_RGB, GL_UNSIGNED_BYTE, iconImage.pixels);
+            glGenerateMipmap(GL_TEXTURE_2D);
+        } else {
+            std::cout << "Failed to load texture" << std::endl;
+        }
     }
 };
