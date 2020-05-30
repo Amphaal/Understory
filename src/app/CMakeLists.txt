@@ -106,7 +106,7 @@ target_link_libraries(appExec PRIVATE glfwm)
 find_package(glm REQUIRED)
 
 #link
-target_link_libraries(appExec PRIVATE glm)
+target_link_libraries(appExec PRIVATE glm::glm)
 
 ##################
 ## Deps : RxCpp ##

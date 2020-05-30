@@ -70,8 +70,8 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         assert(glfwm::WindowManager::init());
 
         // define window flags
-        glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MINOR, 1);
         glfwm::WindowManager::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwm::WindowManager::setHint(GLFW_SAMPLES, 16);  // set antialiasing
         #ifdef __APPLE__
@@ -177,6 +177,27 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     }
 
     void _test() {
+        // glMatrixMode( GL_PROJECTION );
+        // glLoadIdentity();
+        // double w = _winWidth;
+        // double h = _winHeight;
+        // glOrtho( 0, w, 0, h, -1, 1);
+
+        // glMatrixMode( GL_MODELVIEW );
+        // glLoadIdentity();
+
+        // // important
+        // glTranslatef( 0.5, 0.5, 0 );
+
+        // float offset = 40;
+        // glColor3ub( 255, 0, 0 );
+        // glBegin(GL_LINE_LOOP);
+        //     glVertex2f( 0+offset, 0+offset );
+        //     glVertex2f( 0+offset, h-offset );
+        //     glVertex2f( w-offset, h-offset );
+        //     glVertex2f( w-offset, 0+offset );
+        // glEnd();
+
         glDrawArrays(GL_TRIANGLES, 0, 3);
     }
 
@@ -239,7 +260,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     }
 
     void _updateViewportAndClear() {
-        this->_window->getSize(_winWidth, _winHeight);
+        this->_window->getFramebufferSize(_winWidth, _winHeight);  // handles high DPI screen
         glViewport(0, 0, _winWidth, _winHeight);
         glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(this->_nk_bg.r, this->_nk_bg.g, this->_nk_bg.b, this->_nk_bg.a);

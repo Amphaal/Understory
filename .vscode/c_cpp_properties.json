@@ -36,7 +36,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/usr/local/Cellar/miniupnpc/2.1/include",
-                "${workspaceFolder}/_gen/_deps/glfwm-src/include"
+                "${workspaceFolder}/_gen/_deps/glfwm-src/include",
+                "/usr/local/Cellar/glm/0.9.9.8/include"
             ],
             "defines": [
                 "_DEBUG",

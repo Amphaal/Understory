@@ -20,10 +20,6 @@
 #pragma once
 
 #include <GL/glew.h>
-#include <GL/glut.h>
-#include <GL/gl.h>
-#include <GL/glu.h>
-#include <GL/glext.h>
 
 #include <iostream>
 #include <string>
@@ -60,7 +56,7 @@ class USEngine {
 
  private:
     static inline std::string vertexShader = R"(
-        #version 330
+        #version 410
         in vec3 pos;
         void main()
         {
@@ -69,10 +65,11 @@ class USEngine {
     )";
 
     static inline std::string fragmentShader = R"(
-        #version 330
+        #version 410
+        layout(location = 0) out vec4 frag_color;
         void main() 
         {
-            gl_FragColor = vec4(1, 1, .5, 1); // white color
+            frag_color = vec4(1, .5, .5, 1); // white color
         }
     )";
 
