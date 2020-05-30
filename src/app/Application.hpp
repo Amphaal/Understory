@@ -46,13 +46,17 @@
 #include <chrono>
 #include <string>
 
-#include "src/base/understory.h"
-#include "Utility.hpp"
-
-#include "src/app/ui/nuklear_glfw_gl3.h"
+#include <glm/glm.hpp>
 
 #include <GLFWM/glfwm.hpp>
 #include <rxcpp/rx.hpp>
+
+#include "src/app/ui/nuklear_glfw_gl3.h"
+#include "src/app/ui/us_gl3.hpp"
+
+#include "src/base/understory.h"
+#include "Utility.hpp"
+
 
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 800
@@ -69,6 +73,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwm::WindowManager::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwm::WindowManager::setHint(GLFW_SAMPLES, 16);  // set antialiasing
         #ifdef __APPLE__
             glfwm::WindowManager::setHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         #endif
@@ -90,6 +95,9 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         this->_nk_ctx = nk_glfw3_init(&this->_nk_glfw, this->_window->glfwWindow, NK_GLFW3_INSTALL_CALLBACKS);
         nk_glfw3_font_stash_begin(&this->_nk_glfw, &this->_nk_atlas);
         nk_glfw3_font_stash_end(&this->_nk_glfw);
+
+        // init engine
+        USEngine::init();
 
         // ui
         this->_defineWindowIcon();
@@ -158,13 +166,18 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         auto start = std::chrono::steady_clock::now();
 
             this->_updateViewportAndClear();
-            this->_drawUI();
+            // this->_drawUI();
+            this->_test();
 
         auto end = std::chrono::steady_clock::now();
         this->_frameRenderDur_Ms = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()) / 1000;
         this->_fpsEstimated = 1000 / this->_frameRenderDur_Ms;
 
         this->_mayUpdateFPSDisplay();
+    }
+
+    void _test() {
+        glDrawArrays(GL_TRIANGLES, 0, 3);
     }
 
     void _drawUI() {

@@ -98,6 +98,16 @@ FetchContent_MakeAvailable(glfwm)
 #link
 target_link_libraries(appExec PRIVATE glfwm)
 
+################
+## Deps : GLM ##
+################
+
+#find
+find_package(glm REQUIRED)
+
+#link
+target_link_libraries(appExec PRIVATE glm)
+
 ##################
 ## Deps : RxCpp ##
 ##################
