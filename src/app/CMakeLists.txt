@@ -105,8 +105,14 @@ target_link_libraries(appExec PRIVATE glfwm)
 #find
 find_package(glm REQUIRED)
 
+if(WIN32)
+    SET(GML_TARGET "glm")
+else()
+    SET(GML_TARGET "glm::glm")
+endif()
+
 #link
-target_link_libraries(appExec PRIVATE glm::glm)
+target_link_libraries(appExec PRIVATE ${GML_TARGET})
 
 ##################
 ## Deps : RxCpp ##
