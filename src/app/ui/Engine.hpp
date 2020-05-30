@@ -27,32 +27,41 @@
 
 #include "src/app/Utility.hpp"
 
-class USEngine {
- public:
-    static inline GLuint programId;
+namespace UnderStory {
 
-    static void end() {
+class Engine {
+ public:
+    Engine() {}
+
+    void destroy() {
         glDeleteVertexArrays(_vertexArraysIndexes.size(), _vertexArraysIndexes.data());
         glDeleteBuffers(_buffersIndexes.size(), _buffersIndexes.data());
         glDeleteTextures(_texturesIndexes.size(), _texturesIndexes.data());
     }
 
-    static void init() {
-        _loadDataInBuffers();
+    void init() {
+        this->_loadDataInBuffers();
 
         GLuint vShaderId = _compileShaders(vertexShader, GL_VERTEX_SHADER);
         GLuint fShaderId = _compileShaders(fragmentShader, GL_FRAGMENT_SHADER);
 
-        programId = _linkProgram(vShaderId, fShaderId);
+        this->_programId = _linkProgram(vShaderId, fShaderId);
+    }
 
-        // render container
-        glUseProgram(programId);
+    void start() {
+        glActiveTexture(GL_TEXTURE0);
+        glBindTextures(GL_TEXTURE_2D, texture1);
+
+        glUseProgram(_programId);
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
 
  private:
-    static inline std::vector<GLuint> _vertexArraysIndexes;
-    static inline std::vector<GLuint> _buffersIndexes;
-    static inline std::vector<GLuint> _texturesIndexes;
+    GLuint _programId;
+    std::vector<GLuint> _vertexArraysIndexes;
+    std::vector<GLuint> _buffersIndexes;
+    std::vector<GLuint> _texturesIndexes;
 
     static inline std::string vertexShader = R"(
         #version 410 core
@@ -124,38 +133,38 @@ class USEngine {
     // Creates a program containing vertex and fragment shader
     // links it and returns its ID
     static GLuint _linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId) {
-        GLuint programId = glCreateProgram();  // crate a program
+        GLuint _programId = glCreateProgram();  // crate a program
 
-        if (programId == 0) {
+        if (_programId == 0) {
             std::cout << "Error Creating Shader Program";
             return 0;
         }
 
         // Attach both the shaders to it
-        glAttachShader(programId, vertexShaderId);
-        glAttachShader(programId, fragmentShaderId);
+        glAttachShader(_programId, vertexShaderId);
+        glAttachShader(_programId, fragmentShaderId);
 
         // Create executable of this program
-        glLinkProgram(programId);
+        glLinkProgram(_programId);
 
         GLint linkStatus;
 
         // Get the link status for this program
-        glGetProgramiv(programId, GL_LINK_STATUS, &linkStatus);
+        glGetProgramiv(_programId, GL_LINK_STATUS, &linkStatus);
 
         if (!linkStatus) {  // If the linking failed
             std::cout << "Error Linking program";
-            glDetachShader(programId, vertexShaderId);
-            glDetachShader(programId, fragmentShaderId);
-            glDeleteProgram(programId);
+            glDetachShader(_programId, vertexShaderId);
+            glDetachShader(_programId, fragmentShaderId);
+            glDeleteProgram(_programId);
 
             return 0;
         }
 
-        return programId;
+        return _programId;
     }
 
-    static void _loadDataInBuffers() {
+    void _loadDataInBuffers() {
         GLfloat vertices[] = {
             // positions            // colors           // texture coords
             0.5f,  0.5f, 0.0f,      1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
@@ -209,12 +218,14 @@ class USEngine {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        auto iconImage = UnderStory::Utility::getIcon();
+        auto iconImage = UnderStory::Utility::getRawImage("logo.png", true);
         if (iconImage.pixels) {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, iconImage.width, iconImage.height, 0, GL_RGB, GL_UNSIGNED_BYTE, iconImage.pixels);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, iconImage.width, iconImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, iconImage.pixels);
             glGenerateMipmap(GL_TEXTURE_2D);
         } else {
             std::cout << "Failed to load texture" << std::endl;
         }
     }
 };
+
+}  // namespace UnderStory

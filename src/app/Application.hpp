@@ -52,11 +52,10 @@
 #include <rxcpp/rx.hpp>
 
 #include "src/app/ui/nuklear_glfw_gl3.h"
-#include "src/app/ui/us_gl3.hpp"
+#include "src/app/ui/Engine.hpp"
 
 #include "src/base/understory.h"
 #include "Utility.hpp"
-
 
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 800
@@ -72,8 +71,9 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         // define window flags
         glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-        glfwm::WindowManager::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        glfwm::WindowManager::setHint(GLFW_SAMPLES, 16);  // set antialiasing
+        glfwm::WindowManager::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // force core
+        glfwm::WindowManager::setHint(GLFW_SAMPLES, 4);  // set antialiasing
+        glfwm::WindowManager::setHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
         #ifdef __APPLE__
             glfwm::WindowManager::setHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         #endif
@@ -97,7 +97,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         nk_glfw3_font_stash_end(&this->_nk_glfw);
 
         // init engine
-        USEngine::init();
+        this->_engine.init();
 
         // ui
         this->_defineWindowIcon();
@@ -105,7 +105,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
     ~Application() {
         // desallocate ressources from engine
-        USEngine::end();
+        this->_engine.destroy();
 
         // shutdown nuklear
         nk_glfw3_shutdown(&this->_nk_glfw);
@@ -139,13 +139,15 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     nk_font_atlas* _nk_atlas;
     nk_glfw _nk_glfw = {0};
     nk_context* _nk_ctx;
-    nk_colorf _nk_bg {0.10f, 0.18f, 0.24f, 1.0f};
+    nk_colorf _nk_bg {0.10f, 0.18f, 0.24f, .5f};
     int _winWidth;
     int _winHeight;
 
     bool _updateFPSCount = false;
     double _frameRenderDur_Ms;
     int _fpsEstimated;
+
+    Engine _engine;
 
     glfwm::EventBaseType getHandledEventTypes() const override {
         return static_cast<glfwm::EventBaseType>(glfwm::EventType::FRAMEBUFFERSIZE);
@@ -171,8 +173,8 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         auto start = std::chrono::steady_clock::now();
 
             this->_updateViewportAndClear();
-            // this->_drawUI();
-            this->_test();
+            this->_drawUI();
+            this->_drawEngine();
 
         auto end = std::chrono::steady_clock::now();
         this->_frameRenderDur_Ms = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()) / 1000;
@@ -181,8 +183,8 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         this->_mayUpdateFPSDisplay();
     }
 
-    void _test() {
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    void _drawEngine() {
+        this->_engine.start();
     }
 
     void _drawUI() {

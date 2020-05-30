@@ -45,10 +45,15 @@ class Utility {
     };
 
     static const RawImage getIcon() {
-        auto iconF = cmrc::appResources::get_filesystem().open("logo.png");
+        return getRawImage("logo.png");
+    }
+
+    static const RawImage getRawImage(const std::string &path, bool flip = false) {
+        auto iconF = cmrc::appResources::get_filesystem().open(path);
         std::vector<unsigned char> icon{iconF.begin(), iconF.end()};
 
         int width, height, channels;
+        stbi_set_flip_vertically_on_load(flip);
         auto logoAsBMP = stbi_load_from_memory(
             icon.data(),
             icon.size(),
