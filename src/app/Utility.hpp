@@ -33,9 +33,13 @@ namespace UnderStory {
 
 class Utility {
  public:
-    struct RawImage {
+    struct Size {
         int width;
         int height;
+    };
+
+    struct RawImage {
+        Size s;
         stbi_uc * pixels = nullptr;
         int channels;
 

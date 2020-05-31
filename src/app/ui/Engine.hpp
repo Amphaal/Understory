@@ -47,11 +47,10 @@ class Texture {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rawImage.width, rawImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawImage.pixels);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rawImage.s.width, rawImage.s.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawImage.pixels);
         glGenerateMipmap(GL_TEXTURE_2D);
 
-        _height = rawImage.height;
-        _width = rawImage.width;
+        _size = rawImage.s;
     }
 
     void use() const {
@@ -62,13 +61,11 @@ class Texture {
         glDeleteTextures(1, &_texture);
     }
 
-    int height() const { return _height; }
-    int width() const { return _width; }
+    Utility::Size size() const { return _size; }
 
  private:
     GLuint _texture;
-    int _height;
-    int _width;
+    Utility::Size _size;
 };
 
 class Engine {
@@ -88,17 +85,13 @@ class Engine {
         this->_programId = _linkProgram(vShaderId, fShaderId);
     }
 
-    Texture& useAsTexture(const std::string &path) {
-        auto rawImg = UnderStory::Utility::getRawImage(path, true);
-        return _textures.emplace_back(rawImg);
-    }
-
-    void draw() {
+    void draw(const Utility::Size &framebufferSize) {
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         glActiveTexture(GL_TEXTURE0);
-        _textures[0].use();
+        auto &logoTexture = _textures[0];
+        logoTexture.use();
 
         glBindVertexArray(_VAO);
         glBindBuffer(GL_ARRAY_BUFFER, _VBO);
@@ -106,6 +99,7 @@ class Engine {
 
         glUseProgram(_programId);
 
+        glViewport(0, 0, logoTexture.size().width, logoTexture.size().height);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
 
@@ -258,7 +252,12 @@ class Engine {
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * fSize, reinterpret_cast<void*>(6 * fSize));
         glEnableVertexAttribArray(2);
 
-        useAsTexture("logo.png");
+        _useAsTexture("logo.png");
+    }
+
+    Texture& _useAsTexture(const std::string &path) {
+        auto rawImg = UnderStory::Utility::getRawImage(path, true);
+        return _textures.emplace_back(rawImg);
     }
 };
 

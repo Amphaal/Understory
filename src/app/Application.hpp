@@ -59,7 +59,12 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         #endif
 
         // create window and initial context
-        this->_window = glfwm::WindowManager::createWindow(WINDOW_WIDTH, WINDOW_HEIGHT, _windowName, this->getHandledEventTypes());
+        this->_window = glfwm::WindowManager::createWindow(
+            WINDOW_WIDTH,
+            WINDOW_HEIGHT,
+            this->_windowName,
+            this->getHandledEventTypes()
+        );
         glfwm::WindowManager::setWaitTimeout(0);
         this->_window->makeContextCurrent();
 
@@ -72,7 +77,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         }
 
         // init nuklear
-        this->_nuklear.init(this->_window->glfwWindow, &_backgroundColor);
+        this->_nuklear.init(this->_window->glfwWindow, &this->_backgroundColor);
 
         // init engine
         this->_engine.init();
@@ -106,10 +111,8 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     static inline char const *_windowName = APP_FULL_DENOM;
 
     glfwm::WindowPointer _window;
-
+    Utility::Size _framebufferSize;
     nk_colorf _backgroundColor {0.10f, 0.18f, 0.24f, .5f};
-    int _winWidth;
-    int _winHeight;
 
     UI::Engine _engine;
     UI::Nuklear _nuklear;
@@ -140,7 +143,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
             this->_updateViewportAndClear();
             this->_nuklear.draw();
-            this->_engine.draw();
+            this->_engine.draw(this->_framebufferSize);
 
         this->_fpsTracker.endRecord();
     }
@@ -155,10 +158,10 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     }
 
     void _updateViewportAndClear() {
-        this->_window->getFramebufferSize(_winWidth, _winHeight);  // handles high DPI screen
-        glViewport(0, 0, _winWidth, _winHeight);
-        glClear(GL_COLOR_BUFFER_BIT);
-        glClearColor(this->_backgroundColor.r, this->_backgroundColor.g, this->_backgroundColor.b, this->_backgroundColor.a);
+        this->_window->getFramebufferSize(_framebufferSize.width, _framebufferSize.height);  // use "getFramebufferSize" to handle high DPI screen
+        glViewport(0, 0, _framebufferSize.width, _framebufferSize.height);  // reset viewport to default
+        glClear(GL_COLOR_BUFFER_BIT);   // clear frame
+        glClearColor(this->_backgroundColor.r, this->_backgroundColor.g, this->_backgroundColor.b, this->_backgroundColor.a);  // define clear color
     }
 };
 

@@ -48,13 +48,13 @@ class Nuklear {
         nk_glfw3_shutdown(&this->_nk_glfw);
     }
 
-    void init(GLFWwindow* window, nk_colorf * bg) {
+    void init(GLFWwindow* window, nk_colorf * modifiableBgColor) {
         this->_nk_ctx = nk_glfw3_init(&this->_nk_glfw, window, NK_GLFW3_INSTALL_CALLBACKS);
 
         nk_glfw3_font_stash_begin(&this->_nk_glfw, &this->_nk_atlas);
         nk_glfw3_font_stash_end(&this->_nk_glfw);
 
-        _nk_bg = bg;
+        _nk_bg = modifiableBgColor;
     }
 
     void draw() {
