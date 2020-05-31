@@ -22,6 +22,7 @@
 #include <spdlog/spdlog.h>
 
 #include <GL/glew.h>
+#include <GL/wglext.h>
 #include <GLFW/glfw3.h>
 
 #include <iostream>
@@ -68,13 +69,8 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         glfwm::WindowManager::setWaitTimeout(0);
         this->_window->makeContextCurrent();
 
-        // setup glew and opengl
-        this->_updateViewportAndClear();
-        glewExperimental = 1;
-        if (glewInit() != GLEW_OK) {
-            fprintf(stderr, "Failed to setup GLEW\n");
-            exit(1);
-        }
+        // setup glew and ext
+        this->_glewSetup();
 
         // init nuklear
         this->_nuklear.init(this->_window->glfwWindow, &this->_backgroundColor);
@@ -152,16 +148,58 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         #ifndef __APPLE__  // no window icon for OSX
             // define icon
             auto iconImage = Utility::getIcon();
-            GLFWimage wIcon { iconImage.width, iconImage.height, iconImage.pixels };
+            GLFWimage wIcon { iconImage.s.width, iconImage.s.height, iconImage.pixels };
             this->_window->setIcon(1, &wIcon);
         #endif
     }
 
     void _updateViewportAndClear() {
-        this->_window->getFramebufferSize(_framebufferSize.width, _framebufferSize.height);  // use "getFramebufferSize" to handle high DPI screen
-        glViewport(0, 0, _framebufferSize.width, _framebufferSize.height);  // reset viewport to default
-        glClear(GL_COLOR_BUFFER_BIT);   // clear frame
-        glClearColor(this->_backgroundColor.r, this->_backgroundColor.g, this->_backgroundColor.b, this->_backgroundColor.a);  // define clear color
+        // use "getFramebufferSize" to handle high DPI screen
+        this->_window->getFramebufferSize(_framebufferSize.width, _framebufferSize.height);
+
+        // reset viewport to default
+        glViewport(0, 0, _framebufferSize.width, _framebufferSize.height);
+
+        // clear frame
+        glClear(GL_COLOR_BUFFER_BIT);
+        // define clear color
+        glClearColor(
+            this->_backgroundColor.r,
+            this->_backgroundColor.g,
+            this->_backgroundColor.b,
+            this->_backgroundColor.a
+        );
+    }
+
+    void _glewSetup() {
+        // must be called before GLEW inst
+        this->_updateViewportAndClear();
+
+        // hard define exp flag
+        glewExperimental = 1;
+
+        // init
+        if (glewInit() != GLEW_OK) {
+            fprintf(stderr, "Failed to setup GLEW\n");
+            exit(1);
+        }
+
+        // ext based
+        this->setVSync();
+    }
+
+    void setVSync() {
+        // TODO(amphaal) vsync for macos / linux
+
+        typedef BOOL(APIENTRY *PFNWGLSWAPINTERVALPROC)(int);
+        PFNWGLSWAPINTERVALPROC wglSwapIntervalEXT = 0;
+
+        auto extensions = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
+
+        wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)wglGetProcAddress("wglSwapIntervalEXT");
+
+        if (wglSwapIntervalEXT)
+            wglSwapIntervalEXT(1);
     }
 };
 

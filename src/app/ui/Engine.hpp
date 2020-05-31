@@ -72,6 +72,8 @@ class Engine {
  public:
     Engine() {}
     ~Engine() {
+        if(!_initd) return;
+
         glDeleteVertexArrays(_vertexArraysIndexes.size(), _vertexArraysIndexes.data());
         glDeleteBuffers(_buffersIndexes.size(), _buffersIndexes.data());
     }
@@ -83,6 +85,8 @@ class Engine {
         GLuint fShaderId = _compileShaders(fragmentShader, GL_FRAGMENT_SHADER);
 
         this->_programId = _linkProgram(vShaderId, fShaderId);
+
+        _initd = true;
     }
 
     void draw(const Utility::Size &framebufferSize) {
@@ -99,11 +103,14 @@ class Engine {
 
         glUseProgram(_programId);
 
-        glViewport(0, 0, logoTexture.size().width, logoTexture.size().height);
+        auto animateX = ((sin(glfwGetTime()) + 1) / 2) * logoTexture.size().width;
+        animateX = animateX - logoTexture.size().width;
+        glViewport(animateX, 0, logoTexture.size().width, logoTexture.size().height);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
 
  private:
+    bool _initd = false;
     GLuint _programId;
     std::vector<GLuint> _vertexArraysIndexes;
     std::vector<GLuint> _buffersIndexes;

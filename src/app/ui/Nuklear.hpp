@@ -35,6 +35,8 @@
 #define MAX_VERTEX_BUFFER 512 * 1024
 #define MAX_ELEMENT_BUFFER 128 * 1024
 
+#include <string>
+
 #include "src/app/ui/base/nuklear_glfw_gl3.h"
 
 namespace UnderStory {
@@ -45,6 +47,8 @@ class Nuklear {
  public:
     Nuklear() {}
     ~Nuklear() {
+        if(!_initd) return;
+
         nk_glfw3_shutdown(&this->_nk_glfw);
     }
 
@@ -55,14 +59,16 @@ class Nuklear {
         nk_glfw3_font_stash_end(&this->_nk_glfw);
 
         _nk_bg = modifiableBgColor;
+
+        _initd = true;
     }
 
     void draw() {
         nk_glfw3_new_frame(&this->_nk_glfw);
 
-            if (nk_begin(this->_nk_ctx, "Demo", nk_rect(0, 0, 230, 250),
-                NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
-                NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE)) {
+            nk_flags flags = NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE;
+
+            if (nk_begin(this->_nk_ctx, "Demo", nk_rect(0, 0, 230, 250), flags)) {
                 enum {EASY, HARD};
                 static int op = EASY;
                 static int property = 20;
@@ -90,6 +96,11 @@ class Nuklear {
                     this->_nk_bg->a = nk_propertyf(this->_nk_ctx, "#A:", 0, this->_nk_bg->a, 1.0f, 0.01f, 0.005f);
                     nk_combo_end(this->_nk_ctx);
                 }
+
+                //
+                auto sint = (sin(glfwGetTime()) + 1) / 2;
+                auto sint_str = std::string("sin/t: ") + std::to_string(sint);
+                nk_label(this->_nk_ctx, sint_str.c_str(), NK_TEXT_LEFT);
             }
             nk_end(this->_nk_ctx);
 
@@ -97,6 +108,7 @@ class Nuklear {
     }
 
  private:
+    bool _initd = false;
     nk_font_atlas* _nk_atlas;
     nk_glfw _nk_glfw = {0};
     nk_context* _nk_ctx;
