@@ -63,6 +63,10 @@ class Utility {
             0
         );
 
+        if(!channels || !logoAsBMP) {
+            throw std::exception();
+        }
+
         return {
             width,
             height,

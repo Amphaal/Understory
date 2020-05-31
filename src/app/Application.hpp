@@ -24,34 +24,14 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-#define NK_INCLUDE_FIXED_TYPES
-#define NK_INCLUDE_STANDARD_IO
-#define NK_INCLUDE_STANDARD_VARARGS
-#define NK_INCLUDE_DEFAULT_ALLOCATOR
-#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
-#define NK_INCLUDE_FONT_BAKING
-#define NK_INCLUDE_DEFAULT_FONT
-#define NK_IMPLEMENTATION
-#define NK_GLFW_GL3_IMPLEMENTATION
-#define NK_KEYSTATE_BASED_INPUT
-
-#include <nuklear.h>
-
-#define MAX_VERTEX_BUFFER 512 * 1024
-#define MAX_ELEMENT_BUFFER 128 * 1024
-
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
 #include <chrono>
 #include <string>
 
-#include <glm/glm.hpp>
-
-#include <GLFWM/glfwm.hpp>
-#include <rxcpp/rx.hpp>
-
-#include "src/app/ui/nuklear_glfw_gl3.h"
+#include "src/app/ui/debug/FrameTracker.hpp"
+#include "src/app/ui/Nuklear.hpp"
 #include "src/app/ui/Engine.hpp"
 
 #include "src/base/understory.h"
@@ -92,9 +72,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         }
 
         // init nuklear
-        this->_nk_ctx = nk_glfw3_init(&this->_nk_glfw, this->_window->glfwWindow, NK_GLFW3_INSTALL_CALLBACKS);
-        nk_glfw3_font_stash_begin(&this->_nk_glfw, &this->_nk_atlas);
-        nk_glfw3_font_stash_end(&this->_nk_glfw);
+        this->_nuklear.init(this->_window->glfwWindow, &_backgroundColor);
 
         // init engine
         this->_engine.init();
@@ -104,12 +82,6 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     }
 
     ~Application() {
-        // desallocate ressources from engine
-        this->_engine.destroy();
-
-        // shutdown nuklear
-        nk_glfw3_shutdown(&this->_nk_glfw);
-
         // terminate window
         glfwm::WindowManager::terminate();
     }
@@ -120,10 +92,10 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         this->_window->bindDrawable(this->shared_from_this(), 0);       // 0 is the rank among all drawables bound
 
         // fps count
-        rxcpp::observable<>::interval(std::chrono::milliseconds(200))
-        .subscribe_on(rxcpp::observe_on_new_thread())
-        .subscribe([&](int) {
-            this->_updateFPSCount = true;
+        this->_fpsTracker.start([&](int fpsEstimated){
+            std::string title(_windowName);
+            title += " - " + std::to_string(fpsEstimated) + " FPS";
+            this->_window->setTitle(title);
         });
 
         // loop
@@ -132,22 +104,16 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
  private:
     static inline char const *_windowName = APP_FULL_DENOM;
-    static inline double _updateFPSCountEveryMs = 333;
 
     glfwm::WindowPointer _window;
 
-    nk_font_atlas* _nk_atlas;
-    nk_glfw _nk_glfw = {0};
-    nk_context* _nk_ctx;
-    nk_colorf _nk_bg {0.10f, 0.18f, 0.24f, .5f};
+    nk_colorf _backgroundColor {0.10f, 0.18f, 0.24f, .5f};
     int _winWidth;
     int _winHeight;
 
-    bool _updateFPSCount = false;
-    double _frameRenderDur_Ms;
-    int _fpsEstimated;
-
-    Engine _engine;
+    UI::Engine _engine;
+    UI::Nuklear _nuklear;
+    UI::FrameTracker _fpsTracker;
 
     glfwm::EventBaseType getHandledEventTypes() const override {
         return static_cast<glfwm::EventBaseType>(glfwm::EventType::FRAMEBUFFERSIZE);
@@ -170,70 +136,13 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     }
 
     void draw(const glfwm::WindowID id) override {
-        auto start = std::chrono::steady_clock::now();
+        this->_fpsTracker.recordFrame();
 
             this->_updateViewportAndClear();
-            this->_drawUI();
-            this->_drawEngine();
+            this->_nuklear.draw();
+            this->_engine.draw();
 
-        auto end = std::chrono::steady_clock::now();
-        this->_frameRenderDur_Ms = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()) / 1000;
-        this->_fpsEstimated = 1000 / this->_frameRenderDur_Ms;
-
-        this->_mayUpdateFPSDisplay();
-    }
-
-    void _drawEngine() {
-        this->_engine.start();
-    }
-
-    void _drawUI() {
-        nk_glfw3_new_frame(&this->_nk_glfw);
-
-            if (nk_begin(this->_nk_ctx, "Demo", nk_rect(0, 0, 230, 250),
-                NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
-                NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE)) {
-                enum {EASY, HARD};
-                static int op = EASY;
-                static int property = 20;
-                nk_layout_row_static(this->_nk_ctx, 30, 80, 1);
-                if (nk_button_label(this->_nk_ctx, "button"))
-                    fprintf(stdout, "button pressed\n");
-
-                nk_layout_row_dynamic(this->_nk_ctx, 30, 2);
-                if (nk_option_label(this->_nk_ctx, "easy", op == EASY)) op = EASY;
-                if (nk_option_label(this->_nk_ctx, "hard", op == HARD)) op = HARD;
-
-                nk_layout_row_dynamic(this->_nk_ctx, 25, 1);
-                nk_property_int(this->_nk_ctx, "Compression:", 0, &property, 100, 10, 1);
-
-                nk_layout_row_dynamic(this->_nk_ctx, 20, 1);
-                nk_label(this->_nk_ctx, "background:", NK_TEXT_LEFT);
-                nk_layout_row_dynamic(this->_nk_ctx, 25, 1);
-                if (nk_combo_begin_color(this->_nk_ctx, nk_rgb_cf(this->_nk_bg), nk_vec2(nk_widget_width(this->_nk_ctx), 400))) {
-                    nk_layout_row_dynamic(this->_nk_ctx, 120, 1);
-                    this->_nk_bg = nk_color_picker(this->_nk_ctx, this->_nk_bg, NK_RGBA);
-                    nk_layout_row_dynamic(this->_nk_ctx, 25, 1);
-                    this->_nk_bg.r = nk_propertyf(this->_nk_ctx, "#R:", 0, this->_nk_bg.r, 1.0f, 0.01f, 0.005f);
-                    this->_nk_bg.g = nk_propertyf(this->_nk_ctx, "#G:", 0, this->_nk_bg.g, 1.0f, 0.01f, 0.005f);
-                    this->_nk_bg.b = nk_propertyf(this->_nk_ctx, "#B:", 0, this->_nk_bg.b, 1.0f, 0.01f, 0.005f);
-                    this->_nk_bg.a = nk_propertyf(this->_nk_ctx, "#A:", 0, this->_nk_bg.a, 1.0f, 0.01f, 0.005f);
-                    nk_combo_end(this->_nk_ctx);
-                }
-            }
-            nk_end(this->_nk_ctx);
-
-        nk_glfw3_render(&this->_nk_glfw, NK_ANTI_ALIASING_ON, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
-    }
-
-    void _mayUpdateFPSDisplay() {
-        if(!this->_updateFPSCount) return;
-
-        std::string title(_windowName);
-        title += " - " + std::to_string(this->_fpsEstimated) + " FPS";
-        this->_window->setTitle(title);
-
-        this->_updateFPSCount = false;
+        this->_fpsTracker.endRecord();
     }
 
     void _defineWindowIcon() {
@@ -249,7 +158,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         this->_window->getFramebufferSize(_winWidth, _winHeight);  // handles high DPI screen
         glViewport(0, 0, _winWidth, _winHeight);
         glClear(GL_COLOR_BUFFER_BIT);
-        glClearColor(this->_nk_bg.r, this->_nk_bg.g, this->_nk_bg.b, this->_nk_bg.a);
+        glClearColor(this->_backgroundColor.r, this->_backgroundColor.g, this->_backgroundColor.b, this->_backgroundColor.a);
     }
 };
 

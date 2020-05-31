@@ -24,19 +24,59 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include "src/app/Utility.hpp"
 
 namespace UnderStory {
 
+namespace UI {
+
+class Texture {
+ public:
+    explicit Texture(const Utility::RawImage &rawImage) {
+        // load and create a texture
+        // -------------------------
+        glGenTextures(1, &_texture);
+
+        glBindTexture(GL_TEXTURE_2D, _texture);  // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
+        // set the texture wrapping parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);  // set texture wrapping to GL_REPEAT (default wrapping method)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        // set texture filtering parameters
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rawImage.width, rawImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawImage.pixels);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        _height = rawImage.height;
+        _width = rawImage.width;
+    }
+
+    void use() const {
+        glBindTexture(GL_TEXTURE_2D, _texture);
+    }
+
+    ~Texture() {
+        glDeleteTextures(1, &_texture);
+    }
+
+    int height() const { return _height; }
+    int width() const { return _width; }
+
+ private:
+    GLuint _texture;
+    int _height;
+    int _width;
+};
+
 class Engine {
  public:
     Engine() {}
-
-    void destroy() {
+    ~Engine() {
         glDeleteVertexArrays(_vertexArraysIndexes.size(), _vertexArraysIndexes.data());
         glDeleteBuffers(_buffersIndexes.size(), _buffersIndexes.data());
-        glDeleteTextures(_texturesIndexes.size(), _texturesIndexes.data());
     }
 
     void init() {
@@ -48,9 +88,21 @@ class Engine {
         this->_programId = _linkProgram(vShaderId, fShaderId);
     }
 
-    void start() {
+    Texture& useAsTexture(const std::string &path) {
+        auto rawImg = UnderStory::Utility::getRawImage(path, true);
+        return _textures.emplace_back(rawImg);
+    }
+
+    void draw() {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         glActiveTexture(GL_TEXTURE0);
-        glBindTextures(GL_TEXTURE_2D, texture1);
+        _textures[0].use();
+
+        glBindVertexArray(_VAO);
+        glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
 
         glUseProgram(_programId);
 
@@ -61,7 +113,9 @@ class Engine {
     GLuint _programId;
     std::vector<GLuint> _vertexArraysIndexes;
     std::vector<GLuint> _buffersIndexes;
-    std::vector<GLuint> _texturesIndexes;
+    std::vector<Texture> _textures;
+
+    GLuint _VBO, _VAO, _EBO;
 
     static inline std::string vertexShader = R"(
         #version 410 core
@@ -167,65 +221,47 @@ class Engine {
     void _loadDataInBuffers() {
         GLfloat vertices[] = {
             // positions            // colors           // texture coords
-            0.5f,  0.5f, 0.0f,      1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-            0.5f, -0.5f, 0.0f,      0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-            -0.5f, -0.5f, 0.0f,     0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-            -0.5f,  0.5f, 0.0f,     1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+            1.0f,  1.0f, 0.0f,      1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+            1.0f, -1.0f, 0.0f,      0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+            -1.0f, -1.0f, 0.0f,     0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+            -1.0f,  1.0f, 0.0f,     1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
         };
 
         GLuint indices[] = {
             0, 1, 3,  // first triangle
             1, 2, 3   // second triangle
         };
-        GLuint VBO, VAO, EBO;
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &EBO);
+        glGenVertexArrays(1, &_VAO);
+        glGenBuffers(1, &_VBO);
+        glGenBuffers(1, &_EBO);
 
-        _vertexArraysIndexes.push_back(VAO);
-        _buffersIndexes.push_back(VBO);
-        _buffersIndexes.push_back(EBO);
+        _vertexArraysIndexes.push_back(_VAO);
+        _buffersIndexes.push_back(_VBO);
+        _buffersIndexes.push_back(_EBO);
 
-        glBindVertexArray(VAO);
+        glBindVertexArray(_VAO);
 
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBindBuffer(GL_ARRAY_BUFFER, _VBO);
         glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
         // position attribute
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+        auto fSize = sizeof(float);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * fSize, reinterpret_cast<void*>(0));
         glEnableVertexAttribArray(0);
         // color attribute
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * fSize, reinterpret_cast<void*>(3 * fSize));
         glEnableVertexAttribArray(1);
         // texture coord attribute
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * fSize, reinterpret_cast<void*>(6 * fSize));
         glEnableVertexAttribArray(2);
 
-        // load and create a texture
-        // -------------------------
-        GLuint texture;
-        glGenTextures(1, &texture);
-        _texturesIndexes.push_back(texture);
-
-        glBindTexture(GL_TEXTURE_2D, texture);  // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-        // set the texture wrapping parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);  // set texture wrapping to GL_REPEAT (default wrapping method)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        // set texture filtering parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        auto iconImage = UnderStory::Utility::getRawImage("logo.png", true);
-        if (iconImage.pixels) {
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, iconImage.width, iconImage.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, iconImage.pixels);
-            glGenerateMipmap(GL_TEXTURE_2D);
-        } else {
-            std::cout << "Failed to load texture" << std::endl;
-        }
+        useAsTexture("logo.png");
     }
 };
+
+}  // namespace UI
 
 }  // namespace UnderStory
