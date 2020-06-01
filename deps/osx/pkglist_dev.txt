@@ -1,1 +1,1 @@
-git cmake ninja ccache
+git cmake ninja ccache catch2

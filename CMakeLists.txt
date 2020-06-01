@@ -19,7 +19,7 @@ message(STATUS "Using toolchain file: [${CMAKE_TOOLCHAIN_FILE}].")
 project(UnderStory
     VERSION 0.0.1
     DESCRIPTION "An intuitive Pen & Paper experience"
-    HOMEPAGE_URL "https://github.com/Amphaal/Understory"
+    HOMEPAGE_URL "https://github.com/Amphaal/understory"
     LANGUAGES C CXX
 )
 

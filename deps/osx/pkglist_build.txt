@@ -1,1 +1,1 @@
-catch2 gettext protobuf gstreamer gst-plugins-good gst-plugins-base miniupnpc asio glfw glew glm
+gettext protobuf miniupnpc asio glfw glew glm
