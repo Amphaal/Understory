@@ -1,4 +1,3 @@
-mingw64/mingw-w64-x86_64-qt-installer-framework
 mingw64/mingw-w64-x86_64-gstreamer
 mingw64/mingw-w64-x86_64-gst-plugins-good
 mingw64/mingw-w64-x86_64-protobuf

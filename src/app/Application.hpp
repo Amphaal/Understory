@@ -104,7 +104,11 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     }
 
  private:
-    static inline char const *_windowName = APP_FULL_DENOM;
+    #ifdef _DEBUG
+        static inline std::string _windowName = APP_FULL_DENOM + std::string(" - DEBUG");
+    #else
+        static inline std::string _windowName = APP_FULL_DENOM;
+    #endif
 
     glfwm::WindowPointer _window;
     Utility::Size _framebufferSize;
