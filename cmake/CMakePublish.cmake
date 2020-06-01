@@ -11,6 +11,8 @@ endif()
 set(SETUP_NAME          "${PROJECT_NAME}-setup")
 set(SETUP_NAME_WITH_EXT "${SETUP_NAME}${CPACK_PACKAGE_FILE_EXTENSION}")
 
+SET(CPACK_INSTALLER_PROGRAM "${CMAKE_SOURCE_DIR}/cmake/wrappers/xmakensis.sh")
+
 #########
 # CPack #
 #########
