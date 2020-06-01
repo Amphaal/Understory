@@ -47,7 +47,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
  public:
     Application() {
         // init GLFW
-        assert(glfwm::WindowManager::init());
+        if(!glfwm::WindowManager::init()) throw std::exception();
 
         // define window flags
         glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -66,6 +66,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
             this->_windowName,
             this->getHandledEventTypes()
         );
+
         glfwm::WindowManager::setWaitTimeout(0);
         this->_window->makeContextCurrent();
 

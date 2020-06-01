@@ -36,7 +36,7 @@ namespace UnderStory {
 class FileIntegrator {
  public:
     static File* createFile(const fs::path &filePath) {
-        assert(fs::exists(filePath));
+        if(!fs::exists(filePath)) throw std::exception();
 
         // read file content
         std::ifstream fileStream(filePath.c_str(), std::ifstream::in | std::ios::binary);

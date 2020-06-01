@@ -114,7 +114,7 @@ class AssetContext : public ContextImplementation {
     void _saveState() override {
         std::string json;
         auto result = google::protobuf::util::MessageToJsonString(this->_database, &json);
-        assert(result == google::protobuf::util::Status::OK);
+        if(result != google::protobuf::util::Status::OK) throw std::exception();
 
         auto fs = this->_createWriteFS(resourcesDbFile);
         fs << json;

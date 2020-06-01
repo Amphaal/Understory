@@ -70,7 +70,7 @@ class Context {
     fs::path _pathToContext;
 
     Context(const PredefinedEnvironement& env, const fs::path &pathToContext) : _env(env), _pathToContext(pathToContext) {
-        assert(_directoryExists(pathToContext));
+        if(!_directoryExists(pathToContext)) throw std::exception();
         spdlog::debug("Using app context [{}]", pathToContext.string());
     }
 
@@ -132,7 +132,7 @@ class ContextImplementation {
         for(auto &subfolder : linkedSubfolders) {
             auto concat = context.path() / "resources";
             fs::create_directories(concat);
-            assert(fs::exists(concat));
+            if(!fs::exists(concat)) throw std::exception();
         }
     }
 

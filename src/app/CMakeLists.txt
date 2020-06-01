@@ -49,7 +49,7 @@ endif()
 ###########
 
 #pe-util is required to find all .dll dependencies
-IF(MINGW)
+IF(MINGW AND CMAKE_CROSSCOMPILING)
     include(ExternalProject)
     ExternalProject_Add(peldd
         GIT_REPOSITORY  "https://github.com/Amphaal/pe-util.git"
@@ -88,7 +88,6 @@ IF(MINGW)
         DEPENDS 
             lib_requirements.txt
     )
-
 endif()
 
 #############
