@@ -41,14 +41,14 @@
             "name" : "Launch",
             "request": "launch",
             "cwd": "${workspaceFolder}/_gen/bin",
-            "program": "${workspaceFolder}/_gen/bin/UnderStory",
+            "program": "${workspaceFolder}/_gen/bin/understory",
             "MIMode": "lldb",
             "osx": {
-                "program": "${workspaceFolder}/_gen/bin/UnderStory.app/Contents/MacOS/UnderStory",
+                "program": "${workspaceFolder}/_gen/bin/UnderStory.app/Contents/MacOS/understory",
                 "environment": [],
             },
             "windows": {
-                "program": "${workspaceFolder}/_gen/bin/UnderStory.exe",
+                "program": "${workspaceFolder}/_gen/bin/understory.exe",
                 "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe",
                 "MIMode": "gdb",
                 "environment": [],

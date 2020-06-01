@@ -10,17 +10,26 @@ endif()
 # define app executable
 add_executable(appExec ${APP_BUNDLE_TYPE})
 add_executable(UnderStory::executable ALIAS appExec)
-set_target_properties(appExec PROPERTIES OUTPUT_NAME "${PROJECT_NAME}")  # define executable name
+
+string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LC)
+set_target_properties(appExec PROPERTIES OUTPUT_NAME "${PROJECT_NAME_LC}")  # define executable name
+
+#optimise for release
+if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
+    set_target_properties(appExec PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE) #enable LTO
+endif()
 
 # generate icons from png
 include(IconGenerator)
 generateIcon("resources/logo.png" "package" "app")
+generateIcon("resources/install.png" "package" "install")
 
 # resource packaging
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     #add Windows ressources (icons)    
     target_sources(appExec PRIVATE 
         "package/app.ico"
+        "package/install.ico"
         "package/resources.rc"
     )
 elseif(APPLE)   
@@ -34,6 +43,8 @@ elseif(APPLE)
         MACOSX_BUNDLE_ICON_FILE "app.icns"
     ) 
 endif()
+
+install(TARGETS appExec)
 
 #############
 ## Sources ##

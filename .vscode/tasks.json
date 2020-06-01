@@ -7,7 +7,7 @@
     },
     "tasks": [
         {
-            "label": "2. Generate Project files",
+            "label": "1. Generate Project files",
             "group": {
                 "isDefault": true,
                 "kind": "test"
@@ -19,12 +19,18 @@
             }
         },
         {
-            "label": "3. Build",
+            "label": "2. Build",
             "type": "shell",
             "command": "ninja",
             "options": {
                 "cwd": "${workspaceRoot}/_gen"
             },
+            "problemMatcher": []
+        },
+        {
+            "label": "a. Package",
+            "type": "shell",
+            "command": "cmake -GNinja -B_pkg -H. -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/windows-ci.cmake && ninja -C_pkg package",
             "problemMatcher": []
         }
     ]
