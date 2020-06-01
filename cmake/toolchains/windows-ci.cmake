@@ -10,7 +10,11 @@ set (CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set (CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set (CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-SET(MINGW64_ROOT "/mingw64")
+if(NOT DEFINED ENV{MINGW64_ROOT})
+    SET(MINGW64_ROOT "/mingw64")
+else()
+    SET(MINGW64_ROOT $ENV{MINGW64_ROOT})
+endif()
 
 list(APPEND CMAKE_PREFIX_PATH 
     ${MINGW64_ROOT}
@@ -26,7 +30,7 @@ SET (CMAKE_RANLIB                           "llvm-ranlib")
 SET (CMAKE_NM                               "llvm-nm")
 
 SET (CMAKE_C_FLAGS                          "-fuse-ld=lld")
-SET (CMAKE_CXX_FLAGS                        ${CMAKE_C_FLAGS})
+SET (CMAKE_CXX_FLAGS                        "${CMAKE_C_FLAGS}")
 
 SET (CMAKE_C_COMPILER_TARGET                "x86_64-w64-mingw32")
 SET (CMAKE_CXX_COMPILER_TARGET              ${CMAKE_C_COMPILER_TARGET})

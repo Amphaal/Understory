@@ -7,7 +7,7 @@
         {
             "targetArchitecture": "x64",
             "type": "cppdbg",
-            "preLaunchTask": "3. Build",
+            "preLaunchTask": "2. Build",
             "name" : "Tests",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -22,7 +22,7 @@
         {
             "targetArchitecture": "x64",
             "type": "cppdbg",
-            "preLaunchTask": "3. Build",
+            "preLaunchTask": "2. Build",
             "name" : "Local Tests",
             "request": "launch",
             "cwd": "${workspaceFolder}",
@@ -37,7 +37,7 @@
         {
             "targetArchitecture": "x64",
             "type": "cppdbg",
-            "preLaunchTask": "3. Build",
+            "preLaunchTask": "2. Build",
             "name" : "Launch",
             "request": "launch",
             "cwd": "${workspaceFolder}/_gen/bin",

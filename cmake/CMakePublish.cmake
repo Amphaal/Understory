@@ -1,3 +1,7 @@
+#########
+# CPack #
+#########
+
 set(CPACK_GENERATOR NSIS)
 
 set(CPACK_PACKAGE_VENDOR              "LVWL")

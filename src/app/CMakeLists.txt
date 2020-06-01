@@ -44,8 +44,62 @@ elseif(APPLE)
     ) 
 endif()
 
-install(TARGETS appExec)
+###########
+# pe-util #
+###########
 
+#pe-util is required to find all .dll dependencies
+IF(MINGW)
+    include(ExternalProject)
+    ExternalProject_Add(peldd
+        GIT_REPOSITORY  "https://github.com/Amphaal/pe-util.git"
+        INSTALL_COMMAND ""
+    )
+
+    #define exec
+    ExternalProject_Get_Property(peldd BINARY_DIR)
+    set(PELDD_EXEC "${BINARY_DIR}/peldd")
+    
+    #make sure env var is set
+    if(NOT MINGW64_ROOT)
+        message(FATAL_ERROR "MINGW64_ROOT must be set ! Please use a toolchain file !")
+    endif()
+
+    #generate requirements
+    add_dependencies(appExec peldd)
+    add_custom_command(TARGET appExec POST_BUILD
+        COMMAND 
+            ${PELDD_EXEC} -a
+            -p ${MINGW64_ROOT}/bin
+            $<TARGET_FILE:appExec>
+            | sed -f ${CMAKE_SOURCE_DIR}/cmake/antislash-to-slash.sed
+            | tr -d '\\015' 
+            > lib_requirements.txt
+        DEPENDS 
+            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/antislash-to-slash.sed
+        BYPRODUCTS
+            lib_requirements.txt
+    )
+
+    #copy required libs
+    add_custom_command(TARGET appExec POST_BUILD
+        COMMAND 
+            cat lib_requirements.txt | xargs cp -n -t ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        DEPENDS 
+            lib_requirements.txt
+    )
+
+endif()
+
+#############
+## Install ##
+#############
+
+#install whole output directory
+install(
+    DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/"
+    TYPE BIN
+)
 #############
 ## Sources ##
 #############
