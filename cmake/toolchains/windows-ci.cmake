@@ -20,6 +20,8 @@ list(APPEND CMAKE_PREFIX_PATH
     ${MINGW64_ROOT}
 )
 
+SET(CPACK_INSTALLER_PROGRAM "${CMAKE_SOURCE_DIR}/cmake/wrappers/xmakensis.sh")
+
 #We want Release with debug infos
 SET(CMAKE_BUILD_TYPE Release)
 
