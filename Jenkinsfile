@@ -16,6 +16,7 @@ pipeline {
                         // sh 'cmake -GNinja -B_pkg -H. -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/windows-ci.cmake'
                         // sh 'ninja -C_pkg zipForDeploy'
                         dir("_pkg/CPack_Packages/win64/NSIS") {
+                            sh 'ls'
                             sh '/usr/local/bin/makensis -- -project.nsi'
                         }
                         // withCredentials([string(credentialsId: 'jenkins-bintray-api-key', variable: 'BINTRAY_API_KEY')]) {
