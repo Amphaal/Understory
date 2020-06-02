@@ -1,6 +1,6 @@
-#
-#
-#
+###########
+# Prepare #
+###########
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     set(CPACK_PACKAGE_FILE_EXTENSION ".exe")
@@ -32,9 +32,9 @@ set(CPACK_NSIS_UNINSTALL_NAME                  "Uninstall ${CPACK_PACKAGE_NAME}"
 
 include(CPack)
 
-#
-# Zipping
-#
+###########
+# Zipping #
+###########
 
 #create target to be invoked with bash
 add_custom_target(zipForDeploy DEPENDS package)
