@@ -15,7 +15,7 @@ pipeline {
                     steps {
                         // sh 'cmake -GNinja -B_pkg -H. -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/windows-ci.cmake'
                         // sh 'ninja -C_pkg zipForDeploy'
-                        sh 'cd /var/jenkins_home/workspace/understory_master/_pkg && /usr/bin/cpack --config ./CPackConfig.cmake'
+                        sh 'cd /var/jenkins_home/workspace/understory_master/_pkg && /usr/bin/cpack -V --debug --config ./CPackConfig.cmake'
                         withCredentials([string(credentialsId: 'jenkins-bintray-api-key', variable: 'BINTRAY_API_KEY')]) {
                             sh 'curl -T _pkg/installer.zip   -uamphaal:$BINTRAY_API_KEY -H "X-Bintray-Package: install-packages" -H "X-Bintray-Version: latest" -H "X-Bintray-Publish: 1" -H "X-Bintray-Override: 1" -H "X-Bintray-Explode: 1" https://api.bintray.com/content/amphaal/understory/'
                             sh 'curl -T _pkg/repository.zip  -uamphaal:$BINTRAY_API_KEY -H "X-Bintray-Package: repository"       -H "X-Bintray-Version: latest" -H "X-Bintray-Publish: 1" -H "X-Bintray-Override: 1" -H "X-Bintray-Explode: 1" https://api.bintray.com/content/amphaal/understory/repository-win64/'
