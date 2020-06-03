@@ -98,7 +98,9 @@ endif()
 install(
     DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/"
     TYPE BIN
+    COMPONENT app
 )
+
 #############
 ## Sources ##
 #############
