@@ -72,7 +72,7 @@ elseif(APPLE)
     set(CPACK_PACKAGE_FILE_EXTENSION ".dmg")
 endif()
 
-set(SETUP_NAME          "${PROJECT_NAME}-setup")
+set(SETUP_NAME          "${PROJECT_NAME}Setup")
 set(SETUP_NAME_WITH_EXT "${SETUP_NAME}${CPACK_PACKAGE_FILE_EXTENSION}")
 
 # trad
@@ -86,7 +86,7 @@ SET(APP_DESCRIPTION ${PROJECT_DESCRIPTION}
 
 set(CPACK_GENERATOR "IFW")
 
-# set(CPACK_PACKAGE_DIRECTORY           "CPack")
+set(CPACK_PACKAGE_DIRECTORY           "CPack")
 set(CPACK_PACKAGE_VENDOR              "LVWL")
 set(CPACK_PACKAGE_NAME                "${PROJECT_NAME}")
 set(CPACK_RESOURCE_FILE_LICENSE       "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
@@ -142,7 +142,7 @@ cpack_ifw_add_repository(coreRepo
 #create target to be invoked with bash
 add_custom_target(zipForDeploy DEPENDS package)
 
-SET(APP_PACKAGE_DIRECTORY ${CMAKE_BINARY_DIR})
+SET(APP_PACKAGE_DIRECTORY ${CMAKE_BINARY_DIR}/${CPACK_PACKAGE_DIRECTORY})
 SET(APP_REPOSITORY_DIRECTORY ${APP_PACKAGE_DIRECTORY}/_CPack_Packages/${CPACK_SYSTEM_NAME}/IFW/${SETUP_NAME}/repository)
 
 #installer
