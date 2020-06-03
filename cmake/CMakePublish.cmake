@@ -32,7 +32,9 @@ SET(CPACK_IFW_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/src/app/package/install.
 INCLUDE(CPack)
 
 #configure default component
-cpack_add_component(app)
+cpack_add_component(app REQUIRED
+    DISPLAY_NAME ${PROJECT_NAME}
+)
 
 ######################################
 # CPACK IFW COMPONENTS CONFIGURATION #
