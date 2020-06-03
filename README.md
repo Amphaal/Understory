@@ -1,4 +1,6 @@
 # UnderStory
+[![Download for Windows](https://api.bintray.com/packages/amphaal/understory/install-packages/images/download.svg)](https://dl.bintray.com/amphaal/understory/UnderStory-setup.exe)
+[![Build Status](http://zonme.to2x.ovh:8090/buildStatus/icon?job=understory%2Fmaster)](http://zonme.to2x.ovh:8090/job/understory/job/master/)
 
 Follow-up to https://github.com/Amphaal/rpgrpz.
 

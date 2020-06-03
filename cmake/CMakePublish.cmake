@@ -69,8 +69,9 @@ cpack_ifw_configure_component(app
 )
 
 # repository for updates
+SET(APP_REPOSITORY_URL "https://dl.bintray.com/amphaal/understory/repository")
 cpack_ifw_add_repository(coreRepo 
-    URL "https://dl.bintray.com/amphaal/understory/repository"
+    URL ${APP_REPOSITORY_URL}
 )
 
 ###########
