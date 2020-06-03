@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <spdlog/spdlog.h>
-
 #include <GL/glew.h>
 #include <GL/wglext.h>
 #include <GLFW/glfw3.h>
@@ -30,13 +28,16 @@
 #include <cstdlib>
 #include <chrono>
 #include <string>
+#include <memory>
 
 #include "src/app/ui/debug/FrameTracker.hpp"
 #include "src/app/ui/Nuklear.hpp"
 #include "src/app/ui/Engine.hpp"
 
-#include "src/base/understory.h"
+#include "src/core/UpdateChecker.hpp"
+
 #include "Utility.hpp"
+#include "Modal.hpp"
 
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 800
@@ -90,8 +91,8 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
     void run() {
         // bind handlers
-        this->_window->bindEventHandler(this->shared_from_this(), 0);    // 0 is the rank among all event handlers bound
-        this->_window->bindDrawable(this->shared_from_this(), 0);       // 0 is the rank among all drawables bound
+        this->_window->bindEventHandler(this->shared_from_this(), 0);  // 0 is the rank among all event handlers bound
+        this->_window->bindDrawable(    this->shared_from_this(), 0);  // 0 is the rank among all drawables bound
 
         // fps count
         this->_fpsTracker.start([&](int fpsEstimated){
@@ -99,6 +100,10 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
             title += " - " + std::to_string(fpsEstimated) + " FPS";
             this->_window->setTitle(title);
         });
+
+        // invoke update check
+        _autoUpdaterModal = std::make_shared<Widget::Modal>(this->_window, "test", "test");
+        _autoUpdaterModal->init();
 
         // loop
         glfwm::WindowManager::mainLoop();
@@ -118,6 +123,8 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     UI::Engine _engine;
     UI::Nuklear _nuklear;
     UI::FrameTracker _fpsTracker;
+
+    std::shared_ptr<Widget::Modal> _autoUpdaterModal;
 
     glfwm::EventBaseType getHandledEventTypes() const override {
         return static_cast<glfwm::EventBaseType>(glfwm::EventType::FRAMEBUFFERSIZE);
@@ -143,7 +150,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         this->_fpsTracker.recordFrame();
 
             this->_updateViewportAndClear();
-            this->_nuklear.draw();
+            this->_nuklear.drawTest();
             this->_engine.draw(this->_framebufferSize);
 
         this->_fpsTracker.endRecord();

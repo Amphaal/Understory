@@ -24,6 +24,7 @@
 #include <vector>
 
 #include <asio.hpp>
+#include <spdlog/spdlog.h>
 
 using asio::ip::tcp;
 

@@ -7,8 +7,7 @@ target_sources(appCore INTERFACE
 )
 add_library(UnderStory::core ALIAS appCore)
 
-target_link_libraries(appCore INTERFACE appBase)
-target_link_libraries(appCore INTERFACE appNetwork)
+target_link_libraries(appCore INTERFACE UnderStory::network)
 
 ################
 ## Deps : stb ##

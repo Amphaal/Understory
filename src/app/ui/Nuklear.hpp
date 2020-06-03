@@ -63,7 +63,50 @@ class Nuklear {
         _initd = true;
     }
 
-    void draw() {
+    void drawModal(const std::string &text) {
+        nk_glfw3_new_frame(&this->_nk_glfw);
+        nk_flags flags = NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE;
+
+        if (nk_begin(this->_nk_ctx, "Demo", nk_rect(0, 0, 230, 250), flags)) {
+            enum {EASY, HARD};
+            static int op = EASY;
+            static int property = 20;
+            nk_layout_row_static(this->_nk_ctx, 30, 80, 1);
+            if (nk_button_label(this->_nk_ctx, "button"))
+                fprintf(stdout, "button pressed\n");
+
+            nk_layout_row_dynamic(this->_nk_ctx, 30, 2);
+            if (nk_option_label(this->_nk_ctx, "easy", op == EASY)) op = EASY;
+            if (nk_option_label(this->_nk_ctx, "hard", op == HARD)) op = HARD;
+
+            nk_layout_row_dynamic(this->_nk_ctx, 25, 1);
+            nk_property_int(this->_nk_ctx, "Compression:", 0, &property, 100, 10, 1);
+
+            nk_layout_row_dynamic(this->_nk_ctx, 20, 1);
+            nk_label(this->_nk_ctx, "background:", NK_TEXT_LEFT);
+            nk_layout_row_dynamic(this->_nk_ctx, 25, 1);
+            if (nk_combo_begin_color(this->_nk_ctx, nk_rgb_cf(*this->_nk_bg), nk_vec2(nk_widget_width(this->_nk_ctx), 400))) {
+                nk_layout_row_dynamic(this->_nk_ctx, 120, 1);
+                *this->_nk_bg = nk_color_picker(this->_nk_ctx, *this->_nk_bg, NK_RGBA);
+                nk_layout_row_dynamic(this->_nk_ctx, 25, 1);
+                this->_nk_bg->r = nk_propertyf(this->_nk_ctx, "#R:", 0, this->_nk_bg->r, 1.0f, 0.01f, 0.005f);
+                this->_nk_bg->g = nk_propertyf(this->_nk_ctx, "#G:", 0, this->_nk_bg->g, 1.0f, 0.01f, 0.005f);
+                this->_nk_bg->b = nk_propertyf(this->_nk_ctx, "#B:", 0, this->_nk_bg->b, 1.0f, 0.01f, 0.005f);
+                this->_nk_bg->a = nk_propertyf(this->_nk_ctx, "#A:", 0, this->_nk_bg->a, 1.0f, 0.01f, 0.005f);
+                nk_combo_end(this->_nk_ctx);
+            }
+
+            //
+            auto sint = (sin(glfwGetTime()) + 1) / 2;
+            auto sint_str = std::string("sin/t: ") + std::to_string(sint);
+            nk_label(this->_nk_ctx, sint_str.c_str(), NK_TEXT_LEFT);
+        }
+        nk_end(this->_nk_ctx);
+
+        nk_glfw3_render(&this->_nk_glfw, NK_ANTI_ALIASING_ON, MAX_VERTEX_BUFFER, MAX_ELEMENT_BUFFER);
+    }
+
+    void drawTest() {
         nk_glfw3_new_frame(&this->_nk_glfw);
 
             nk_flags flags = NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE;

@@ -115,7 +115,7 @@ target_sources(appExec PRIVATE
     ui/debug/FrameTracker.hpp
 )
 
-target_link_libraries(appExec PRIVATE appBase)
+target_link_libraries(appExec PRIVATE UnderStory::network)
 
 #####################
 ## Deps : CMake RC ##
