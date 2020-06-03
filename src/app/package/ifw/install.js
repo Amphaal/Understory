@@ -15,7 +15,9 @@ Component.prototype.createOperations = function() {
 
     //create a shortcut on windows
     if (systemInfo.productType === "windows") {
-        component.addOperation("CreateShortcut", Component.prototype.getPathToApp() + ".exe", "@DesktopDir@/@Title@.lnk");
+        var exe_suffix = ".exe";
+        component.addOperation("CreateShortcut", Component.prototype.getPathToApp() + exe_suffix, "@DesktopDir@/@Title@.lnk");
+        component.addOperation("CreateShortcut", Component.prototype.getPathToApp() + exe_suffix, "@StartMenuDir@/@Title@.lnk");
     }
 }
 
