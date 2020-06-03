@@ -29,13 +29,6 @@ SET(CPACK_IFW_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/src/app/package/install.
 ### INSTALL ##
 ##############
 
-#install output content as is, probably overriding previous install() instructions
-install(
-DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/"
-DESTINATION .
-PATTERN "*.pdb" EXCLUDE
-)
-
 INCLUDE(CPack)
 
 #configure default component
