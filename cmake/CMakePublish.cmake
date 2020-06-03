@@ -84,17 +84,14 @@ SET(APP_REPOSITORY_DIRECTORY ${APP_PACKAGE_DIRECTORY}/_CPack_Packages/${CPACK_SY
 
 #installer
 add_custom_command(TARGET zipForDeploy
-    COMMAND ${CMAKE_COMMAND} -E tar c ${CMAKE_BINARY_DIR}/installer.zip --format=zip 
-        ${SETUP_NAME_WITH_EXT}
+    COMMAND ${CMAKE_COMMAND} -E tar c ${CMAKE_BINARY_DIR}/installer.zip --format=zip ${SETUP_NAME_WITH_EXT}
     WORKING_DIRECTORY ${APP_PACKAGE_DIRECTORY}
     COMMENT "Ziping installer..."
 )
 
 #repository
 add_custom_command(TARGET zipForDeploy
-    COMMAND ${CMAKE_COMMAND} -E tar c ${CMAKE_BINARY_DIR}/repository.zip --format=zip
-        Updates.xml
-        app
+    COMMAND ${CMAKE_COMMAND} -E tar c ${CMAKE_BINARY_DIR}/repository.zip --format=zip .
     WORKING_DIRECTORY ${APP_REPOSITORY_DIRECTORY}
     COMMENT "Ziping repository..."
 )
