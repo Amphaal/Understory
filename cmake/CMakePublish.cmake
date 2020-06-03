@@ -32,7 +32,7 @@ SET(CPACK_IFW_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/src/app/package/install.
 INCLUDE(CPack)
 
 #configure default component
-cpack_add_component(${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME} DOWNLOADED)
+cpack_add_component(${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME})
 
 ######################################
 # CPACK IFW COMPONENTS CONFIGURATION #
@@ -43,7 +43,7 @@ INCLUDE(CPackIFW)
 
 # #installer configuration
 cpack_ifw_configure_component(${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME}
-FORCED_INSTALLATION
+# FORCED_INSTALLATION
 SCRIPT          "${CMAKE_CURRENT_SOURCE_DIR}/src/app/package/ifw/install.js"
 USER_INTERFACES "${CMAKE_CURRENT_SOURCE_DIR}/src/app/package/ifw/install.ui"
 #TRANSLATIONS "${CMAKE_BINARY_DIR}/fr.qm"
