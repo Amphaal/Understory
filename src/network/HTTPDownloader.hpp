@@ -19,13 +19,21 @@
 
 #pragma once
 
-#include <fstream>
+#include <sstream>
 #include <string>
+#include <vector>
+
 #include <asio.hpp>
 
 using asio::ip::tcp;
 
-void GetFile(const std::string& serverName, const std::string& getCommand, std::ofstream& outFile) {
+namespace UnderStory {
+
+namespace Network {
+
+std::string DownloadHTTPFile(const std::string& serverName, const std::string& getCommand) {
+    std::ostringstream stream;
+
     asio::io_service io_service;
 
     // Get a list of endpoints corresponding to the server name.
@@ -66,20 +74,38 @@ void GetFile(const std::string& serverName, const std::string& getCommand, std::
     std::string status_message;
     std::getline(response_stream, status_message);
 
-
     // Read the response headers, which are terminated by a blank line.
     asio::read_until(socket, response, "\r\n\r\n");
 
     // Process the response headers.
-    std::string header;
-    while (std::getline(response_stream, header) && header != "\r") { }
+    std::string headerTmp;
+    std::vector<std::string> headers;
+    bool hasContentLengthHeader = false;
+
+    // iterate
+    while (std::getline(response_stream, headerTmp) && headerTmp != "\r") {
+        headers.push_back(headerTmp);
+        if(!hasContentLengthHeader) {
+            hasContentLengthHeader = headerTmp.find("Content-Length") != std::string::npos;
+        }
+    }
+
+    if(!hasContentLengthHeader) {
+        throw std::logic_error("Targeted URL is not a file");
+    }
 
     // Write whatever content we already have to output.
     if (response.size() > 0) {
-        outFile << &response;
+        stream << &response;
     }
     // Read until EOF, writing data to output as we go.
     while (asio::read(socket, response, asio::transfer_at_least(1), error)) {
-        outFile << &response;
+        stream << &response;
     }
+
+    return stream.str();
 }
+
+}   // namespace Network
+
+}   // namespace UnderStory

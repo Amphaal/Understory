@@ -23,6 +23,9 @@ project(UnderStory
     LANGUAGES C CXX
 )
 
+SET(APP_REPOSITORY_HOST "dl.bintray.com")
+SET(APP_REPOSITORY_COMMAND "/amphaal/understory/repository/Updates.xml")
+
 include(FetchContent)
 
 #policies

@@ -3,7 +3,6 @@ add_executable(tests tests.cpp)
 add_executable(UnderStory::tests ALIAS tests)
 target_link_libraries(tests PRIVATE
     UnderStory::core
-    UnderStory::network
 )
 list(APPEND TARGETS_TO_TEST 
     tests
@@ -15,7 +14,6 @@ if(LOCAL_TESTING)
     add_executable(localTests local_only.cpp)
     add_executable(UnderStory::localTests ALIAS localTests)
     target_link_libraries(localTests PRIVATE
-        UnderStory::network
         UnderStory::core
     )
     list(APPEND TARGETS_TO_TEST 

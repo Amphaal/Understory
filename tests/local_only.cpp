@@ -17,15 +17,20 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
+#include "src/core/UpdateChecker.hpp"
+using UnderStory::UpdateChecker;
+
+#include <spdlog/spdlog.h>
+
 #include <chrono>
 
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include <catch2/catch.hpp>
 
-#include "src/network/uPnPHdlr.hpp"
+// #include "src/network/uPnPHdlr.hpp"
 
-#include "src/network/USServer.hpp"
-#include "src/network/USClient.hpp"
+// #include "src/network/USServer.hpp"
+// #include "src/network/USClient.hpp"
 
 //
 // Test cases
@@ -50,7 +55,7 @@
     REQUIRE(undirectRequest.get() == 0);
 } */
 
-using UnderStory::Network::Server::USServer;
+/* using UnderStory::Network::Server::USServer;
 using UnderStory::Network::USClient;
 using UnderStory::Network::RawPayload;
 using UnderStory::Network::PayloadType;
@@ -99,4 +104,15 @@ TEST_CASE("client / server - Handshake", "[network]") {
     // wait for threads to finish
     serverThread.join();
     clientThread.join();
+} */
+
+TEST_CASE("Download update manifest", "[update checker]") {
+    spdlog::set_level(spdlog::level::debug);
+
+    auto manifest = UpdateChecker::_getManifest();
+    REQUIRE(!manifest.empty());
+
+    auto version = UpdateChecker::_extractRemoteVersionFromManifest(manifest);
+    spdlog::debug("Compared Versions : Local [{}] <> Remote [{}]", version, APP_CURRENT_VERSION);
+    REQUIRE(!version.empty());
 }
