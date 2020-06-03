@@ -18,7 +18,7 @@ function(generateIcon fromPNG toFolder iconName)
     if(WIN32)
         add_custom_command(OUTPUT ${IconGenerator_OUTPUT_ICON}
             COMMAND ${convert} -background transparent ${fromPNG} 
-                               -define icon:auto-resize=16,32,128,256 
+                               -define icon:auto-resize=16,32,48,64,96,128,256 
                                ${IconGenerator_OUTPUT_ICON}
             COMMENT "Generate app icon"
         )
