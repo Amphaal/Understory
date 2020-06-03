@@ -37,7 +37,6 @@
 #include "src/core/UpdateChecker.hpp"
 
 #include "Utility.hpp"
-#include "Modal.hpp"
 
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 800
@@ -95,15 +94,16 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         this->_window->bindDrawable(    this->shared_from_this(), 0);  // 0 is the rank among all drawables bound
 
         // fps count
-        this->_fpsTracker.start([&](int fpsEstimated){
+        this->_fpsTracker.start([&](int fpsEstimated) {
             std::string title(_windowName);
             title += " - " + std::to_string(fpsEstimated) + " FPS";
             this->_window->setTitle(title);
+
+            this->_onUpdateCheckDone();
         });
 
         // invoke update check
-        _autoUpdaterModal = std::make_shared<Widget::Modal>(this->_window, "test", "test");
-        _autoUpdaterModal->init();
+        _updateCheckResult = UpdateChecker::isNewerVersionAvailable();
 
         // loop
         glfwm::WindowManager::mainLoop();
@@ -123,8 +123,6 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     UI::Engine _engine;
     UI::Nuklear _nuklear;
     UI::FrameTracker _fpsTracker;
-
-    std::shared_ptr<Widget::Modal> _autoUpdaterModal;
 
     glfwm::EventBaseType getHandledEventTypes() const override {
         return static_cast<glfwm::EventBaseType>(glfwm::EventType::FRAMEBUFFERSIZE);
@@ -154,6 +152,20 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
             this->_engine.draw(this->_framebufferSize);
 
         this->_fpsTracker.endRecord();
+    }
+
+    //
+    //
+    //
+
+    std::future<bool> _updateCheckResult;
+    void _onUpdateCheckDone() {
+        if(!_updateCheckResult.valid()) return;
+        if(_updateCheckResult.wait_for(std::chrono::seconds(0)) != std::future_status::ready) return;
+
+        // get result
+        auto result = _updateCheckResult.get();
+        //TODO(amphaal) do smthg
     }
 
     void _defineWindowIcon() {
@@ -197,10 +209,10 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         }
 
         // ext based
-        this->setVSync();
+        this->_setVSync();
     }
 
-    void setVSync() {
+    void _setVSync() {
         // TODO(amphaal) vsync for macos / linux
 
         typedef BOOL(APIENTRY *PFNWGLSWAPINTERVALPROC)(int);
