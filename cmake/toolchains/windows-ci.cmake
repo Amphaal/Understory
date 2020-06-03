@@ -23,11 +23,7 @@ list(APPEND CMAKE_PREFIX_PATH
 #We want Release with debug infos
 SET(CMAKE_BUILD_TYPE Release)
 
-SET(CPACK_IFW_FRAMEWORK_VERSION_FORCED      "3.2.3")
-SET(CPACK_IFW_BINARYCREATOR_EXECUTABLE       ${CMAKE_SOURCE_DIR}/cmake/wrappers/ifw/xbinarycreator.sh)
-SET(CPACK_IFW_REPOGEN_EXECUTABLE             ${CMAKE_SOURCE_DIR}/cmake/wrappers/ifw/xrepogen.sh)
-SET(CPACK_IFW_INSTALLERBASE_EXECUTABLE       ${CMAKE_SOURCE_DIR}/cmake/wrappers/ifw/xinstallerbase.sh)
-SET(CPACK_IFW_DEVTOOL_EXECUTABLE             ${CMAKE_SOURCE_DIR}/cmake/wrappers/ifw/xdevtool.sh)
+# SET(CPACK_IFW_FRAMEWORK_VERSION_FORCED      "3.2.3")
 
 SET (CMAKE_C_COMPILER                       "clang")
 SET (CMAKE_CXX_COMPILER                     "clang++")
