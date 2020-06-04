@@ -34,7 +34,7 @@
 #include "src/app/ui/Nuklear.hpp"
 #include "src/app/ui/Engine.hpp"
 
-#include "src/core/UpdateChecker.hpp"
+#include "src/app/widgets/UpdateCheckerWidget.hpp"
 
 #include "Utility.hpp"
 
@@ -95,15 +95,16 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
         // fps count
         this->_fpsTracker.start([&](int fpsEstimated) {
+            // update title
             std::string title(_windowName);
             title += " - " + std::to_string(fpsEstimated) + " FPS";
             this->_window->setTitle(title);
-
-            this->_onUpdateCheckDone();
         });
 
-        // invoke update check
-        _updateCheckResult = UpdateChecker::isNewerVersionAvailable();
+        // only check for updates on Windows (TODO(amphaal) MacOS ?)
+        #ifdef WIN32
+            _updateChecker.start();
+        #endif
 
         // loop
         glfwm::WindowManager::mainLoop();
@@ -123,6 +124,8 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     UI::Engine _engine;
     UI::Nuklear _nuklear;
     UI::FrameTracker _fpsTracker;
+
+    Widget::UpdateCheckerWidget _updateChecker;
 
     glfwm::EventBaseType getHandledEventTypes() const override {
         return static_cast<glfwm::EventBaseType>(glfwm::EventType::FRAMEBUFFERSIZE);
@@ -157,16 +160,6 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     //
     //
     //
-
-    std::future<bool> _updateCheckResult;
-    void _onUpdateCheckDone() {
-        if(!_updateCheckResult.valid()) return;
-        if(_updateCheckResult.wait_for(std::chrono::seconds(0)) != std::future_status::ready) return;
-
-        // get result
-        auto result = _updateCheckResult.get();
-        //TODO(amphaal) do smthg
-    }
 
     void _defineWindowIcon() {
         #ifndef __APPLE__  // no window icon for OSX

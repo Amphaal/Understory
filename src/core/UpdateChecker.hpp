@@ -22,6 +22,8 @@
 #include <functional>
 #include <string>
 #include <regex>
+#include <filesystem>
+#include <iostream>
 
 #include "src/base/understory.h"
 
@@ -29,21 +31,8 @@
 
 namespace UnderStory {
 
-class UpdateChecker {
+class UpdateChecker_Private {
  public:
-    static std::future<bool> isNewerVersionAvailable() {
-        return std::async(
-            std::launch::async,
-            [&]() { return _isNewerVersionAvailable(); }
-        );
-    }
-
-    static bool _isNewerVersionAvailable() {
-        auto manifest = _getManifest();
-        auto version = _extractRemoteVersionFromManifest(manifest);
-        return _isVersionNewerThanLocal(version);
-    }
-
     static std::string _getManifest() {
         return Network::DownloadHTTPFile(APP_REPOSITORY_HOST, APP_REPOSITORY_COMMAND);
     }
@@ -72,6 +61,51 @@ class UpdateChecker {
 
     static bool _isVersionNewerThanLocal(const std::string &remoteVersion, const std::string &localVersion = APP_CURRENT_VERSION) {
         return localVersion < remoteVersion;
+    }
+
+    static std::filesystem::path _exectedMaintenanceToolPath() {
+        auto installerDir = std::filesystem::current_path().parent_path();
+
+        // TODO(amphaal) MacOS ?
+        #ifdef WIN32
+            std::string installerExec = "maintenancetool.exe";
+        #else
+            std::string installerExec = "maintenancetool";
+        #endif
+
+        auto installerPath = installerDir /= installerExec;
+        return installerPath;
+    }
+};
+
+class UpdateChecker : private UpdateChecker_Private {
+ public:
+    static std::future<bool> isNewerVersionAvailable() {
+        return std::async(
+            std::launch::async,
+            [&]() { return _isNewerVersionAvailable(); }
+        );
+    }
+
+    static void tryToLaunchUpdater() {
+        auto path = _exectedMaintenanceToolPath();
+        if(!std::filesystem::exists(path)) return;
+
+        // command
+        auto command = path.string();
+        command += " --updater";
+
+        // run
+        std::system(command.c_str());
+
+        exit(0);
+    }
+
+ private:
+    static bool _isNewerVersionAvailable() {
+        auto manifest = UpdateChecker_Private::_getManifest();
+        auto version = UpdateChecker_Private::_extractRemoteVersionFromManifest(manifest);
+        return UpdateChecker_Private::_isVersionNewerThanLocal(version);
     }
 };
 

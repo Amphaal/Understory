@@ -18,7 +18,7 @@
 // different license and copyright still refer to this GPL.
 
 #include "src/core/UpdateChecker.hpp"
-using UnderStory::UpdateChecker;
+using UnderStory::UpdateChecker_Private;
 
 #include <spdlog/spdlog.h>
 
@@ -109,10 +109,10 @@ TEST_CASE("client / server - Handshake", "[network]") {
 TEST_CASE("Download update manifest", "[update checker]") {
     spdlog::set_level(spdlog::level::debug);
 
-    auto manifest = UpdateChecker::_getManifest();
+    auto manifest = UpdateChecker_Private::_getManifest();
     REQUIRE(!manifest.empty());
 
-    auto version = UpdateChecker::_extractRemoteVersionFromManifest(manifest);
+    auto version = UpdateChecker_Private::_extractRemoteVersionFromManifest(manifest);
     spdlog::debug("Compared Versions : Local [{}] <> Remote [{}]", version, APP_CURRENT_VERSION);
     REQUIRE(!version.empty());
 }

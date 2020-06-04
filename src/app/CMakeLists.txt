@@ -109,6 +109,7 @@ target_sources(appExec PRIVATE
     main.cpp
     Application.hpp
     Utility.hpp
+    widgets/UpdateCheckerWidget.hpp
     ui/Engine.hpp
     ui/Nuklear.hpp
     ui/base/nuklear_glfw_gl3.h
