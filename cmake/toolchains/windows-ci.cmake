@@ -33,15 +33,23 @@ SET (CMAKE_NM                               "llvm-nm")
 SET (CMAKE_RC_COMPILER                      "llvm-rc")
 
 SET (CMAKE_C_FLAGS                          "-fuse-ld=lld")
-SET (CMAKE_CXX_FLAGS                        "${CMAKE_C_FLAGS}")
+SET (CMAKE_CXX_FLAGS                        ${CMAKE_C_FLAGS})
 
 SET (CMAKE_C_COMPILER_TARGET                "x86_64-w64-mingw32")
 SET (CMAKE_CXX_COMPILER_TARGET              ${CMAKE_C_COMPILER_TARGET})
 
 SET (GCC_VERSION                            "10.1.0")
 
-SET (CMAKE_EXE_LINKER_FLAGS_INIT            "-L ${MINGW64_ROOT}/lib -L ${MINGW64_ROOT}/${CMAKE_C_COMPILER_TARGET}/lib -L ${MINGW64_ROOT}/lib/gcc/${CMAKE_C_COMPILER_TARGET}/${GCC_VERSION} -lpthread")
-SET (CMAKE_SHARED_LINKER_FLAGS_INIT         ${CMAKE_EXE_LINKER_FLAGS_INIT})
+link_directories(
+    ${MINGW64_ROOT}/lib 
+    ${MINGW64_ROOT}/lib/gcc/${CMAKE_C_COMPILER_TARGET}/${GCC_VERSION}
+    ${MINGW64_ROOT}/${CMAKE_C_COMPILER_TARGET}/lib
+)
+
+link_libraries(pthread)
+
+# SET (CMAKE_EXE_LINKER_FLAGS_INIT            "-L ${MINGW64_ROOT}/lib -L ${MINGW64_ROOT}/${CMAKE_C_COMPILER_TARGET}/lib -L ${MINGW64_ROOT}/lib/gcc/${CMAKE_C_COMPILER_TARGET}/${GCC_VERSION} -lpthread")
+# SET (CMAKE_SHARED_LINKER_FLAGS_INIT         ${CMAKE_EXE_LINKER_FLAGS_INIT})
 
 SET (CMAKE_C_STANDARD_INCLUDE_DIRECTORIES  
     ${MINGW64_ROOT}/include

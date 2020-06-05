@@ -21,6 +21,7 @@
 
 
 #include <functional>
+#include <future>
 
 #include "src/core/UpdateChecker.hpp"
 
