@@ -17,14 +17,16 @@ message(STATUS "Using toolchain file: [${CMAKE_TOOLCHAIN_FILE}].")
 
 # project setup
 project(UnderStory
-    VERSION 0.0.01
+    VERSION 0.0.2
     DESCRIPTION "An intuitive Pen & Paper experience"
     HOMEPAGE_URL "https://github.com/Amphaal/understory"
     LANGUAGES C CXX
 )
 
 SET(APP_REPOSITORY_HOST "dl.bintray.com")
-SET(APP_REPOSITORY_COMMAND "/amphaal/understory/repository/Updates.xml")
+SET(APP_REPOSITORY_COMMAND_LITE "/amphaal/understory/repository")
+SET(APP_REPOSITORY_COMMAND "${APP_REPOSITORY_COMMAND_LITE}/Updates.xml")
+SET(APP_REPOSITORY_URL "https://${APP_REPOSITORY_HOST/${APP_REPOSITORY_COMMAND_LITE}")
 
 include(FetchContent)
 

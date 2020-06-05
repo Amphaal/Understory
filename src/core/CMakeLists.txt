@@ -16,9 +16,9 @@ target_link_libraries(appCore INTERFACE UnderStory::network)
 #link
 target_link_libraries(appCore INTERFACE stb)
 
-##
-##
-##
+###########################
+## Deps : tinyProcessLib ##
+###########################
 
 #fetch
 FetchContent_Declare(tinyProcessLib
