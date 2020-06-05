@@ -107,14 +107,14 @@ install(
 #############
 
 target_sources(appExec PRIVATE
-    main.cpp
-    Application.hpp
-    Utility.hpp
     widgets/UpdateCheckerWidget.hpp
     ui/Engine.hpp
     ui/Nuklear.hpp
     ui/base/nuklear_glfw_gl3.h
     ui/debug/FrameTracker.hpp
+    Application.hpp
+    Utility.hpp
+    main.cpp
 )
 
 target_link_libraries(appExec PRIVATE UnderStory::network)
