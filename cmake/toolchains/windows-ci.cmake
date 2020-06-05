@@ -23,8 +23,6 @@ list(APPEND CMAKE_PREFIX_PATH
 #We want Release with debug infos
 SET(CMAKE_BUILD_TYPE Release)
 
-# SET(CPACK_IFW_FRAMEWORK_VERSION_FORCED      "3.2.3")
-
 SET (CMAKE_C_COMPILER                       "clang")
 SET (CMAKE_CXX_COMPILER                     "clang++")
 SET (CMAKE_AR                               "llvm-ar")
@@ -45,11 +43,6 @@ link_directories(
     ${MINGW64_ROOT}/lib/gcc/${CMAKE_C_COMPILER_TARGET}/${GCC_VERSION}
     ${MINGW64_ROOT}/${CMAKE_C_COMPILER_TARGET}/lib
 )
-
-link_libraries(pthread)
-
-# SET (CMAKE_EXE_LINKER_FLAGS_INIT            "-L ${MINGW64_ROOT}/lib -L ${MINGW64_ROOT}/${CMAKE_C_COMPILER_TARGET}/lib -L ${MINGW64_ROOT}/lib/gcc/${CMAKE_C_COMPILER_TARGET}/${GCC_VERSION} -lpthread")
-# SET (CMAKE_SHARED_LINKER_FLAGS_INIT         ${CMAKE_EXE_LINKER_FLAGS_INIT})
 
 SET (CMAKE_C_STANDARD_INCLUDE_DIRECTORIES  
     ${MINGW64_ROOT}/include

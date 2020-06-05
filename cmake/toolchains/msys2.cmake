@@ -21,7 +21,6 @@ SET(APP_BUNDLE_TYPE "")
 
 SET(CMAKE_BUILD_TYPE Debug)
 
-SET (CMAKE_ASM_MASM_COMPILER    "uasm")
 SET (CMAKE_C_COMPILER           "clang")
 SET (CMAKE_CXX_COMPILER         "clang++")
 
