@@ -24,10 +24,15 @@
 #include <regex>
 #include <filesystem>
 #include <iostream>
+#include <vector>
 
 #include "src/base/understory.h"
 
 #include "src/network/HTTPDownloader.hpp"
+
+#include <process.hpp>
+
+#include <spdlog/spdlog.h>
 
 namespace UnderStory {
 
@@ -52,15 +57,21 @@ class UpdateChecker_Private {
                     first = false;
                     continue;
                 }
+
+                spdlog::debug("UpdateChecker : Found remote version from manifest [{}]", group.str());
                 return group;
             }
         }
 
+        spdlog::warn("UpdateChecker : Cannot find remote version from manifest");
         return std::string();
     }
 
     static bool _isVersionNewerThanLocal(const std::string &remoteVersion, const std::string &localVersion = APP_CURRENT_VERSION) {
-        return localVersion < remoteVersion;
+        spdlog::debug("UpdateChecker : Local version is [{}]", localVersion);
+        auto isNewer =  localVersion < remoteVersion;
+        spdlog::debug("UpdateChecker : Must update from remote ? [{}]", isNewer);
+        return isNewer;
     }
 
     static std::filesystem::path _exectedMaintenanceToolPath() {
@@ -87,22 +98,24 @@ class UpdateChecker : private UpdateChecker_Private {
         );
     }
 
-    static void tryToLaunchUpdater() {
-        auto path = _exectedMaintenanceToolPath();
-        if(!std::filesystem::exists(path)) return;
-
-        // command
-        auto command = path.string();
-        command += " --updater";
+    static void tryToLaunchUpdater(const std::filesystem::path &updaterPath = _exectedMaintenanceToolPath()) {
+        if(!std::filesystem::exists(updaterPath)) {
+            spdlog::warn("UpdateChecker : Cannot find updater at [{}]", updaterPath.string());
+            return;
+        }
 
         // run
-        std::system(command.c_str());
+        std::vector<std::string> args {updaterPath.string(), "--updater"};
+        spdlog::debug("UpdateChecker : Launching updater [{}]...", updaterPath.string());
+        TinyProcessLib::Process run(args);
 
+        spdlog::debug("UpdateChecker : Quitting {}...", APP_NAME);
         exit(0);
     }
 
  private:
     static bool _isNewerVersionAvailable() {
+        spdlog::debug("UpdateChecker : Checking updates...");
         auto manifest = UpdateChecker_Private::_getManifest();
         auto version = UpdateChecker_Private::_extractRemoteVersionFromManifest(manifest);
         return UpdateChecker_Private::_isVersionNewerThanLocal(version);

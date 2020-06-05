@@ -17,6 +17,19 @@ target_link_libraries(appCore INTERFACE UnderStory::network)
 target_link_libraries(appCore INTERFACE stb)
 
 ##
+##
+##
+
+#fetch
+FetchContent_Declare(tinyProcessLib
+    GIT_REPOSITORY  "https://gitlab.com/eidheim/tiny-process-library.git"
+)
+FetchContent_MakeAvailable(tinyProcessLib)
+
+#link
+target_link_libraries(appCore INTERFACE tiny-process-library)
+
+##
 ## MODELS
 ##
 

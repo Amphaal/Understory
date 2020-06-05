@@ -19,9 +19,10 @@
 
 #pragma once
 
-#include "src/core/UpdateChecker.hpp"
 
 #include <functional>
+
+#include "src/core/UpdateChecker.hpp"
 
 #include <rxcpp/rx.hpp>
 

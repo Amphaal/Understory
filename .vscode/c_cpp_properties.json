@@ -19,7 +19,8 @@
                 "${workspaceFolder}/_gen/_deps/spdlog-src/include",
                 "${workspaceFolder}/_gen/_deps/glfwm-src/include",
                 "${workspaceFolder}/_gen/_deps/nuklear-src",
-                "${workspaceFolder}/_gen/_deps/rxcpp-src/Rx/v2/src"
+                "${workspaceFolder}/_gen/_deps/rxcpp-src/Rx/v2/src",
+                "${workspaceFolder}/_gen/_deps/tinyprocesslib-src"
             ],
             "defines": [
                 "_DEBUG",

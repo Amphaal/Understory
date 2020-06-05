@@ -37,9 +37,11 @@ std::string DownloadHTTPFile(const std::string& serverName, const std::string& g
 
     asio::io_service io_service;
 
+    std::string scheme("http");
+
     // Get a list of endpoints corresponding to the server name.
     tcp::resolver resolver(io_service);
-    tcp::resolver::query query(serverName, "http");
+    tcp::resolver::query query(serverName, scheme);
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
     tcp::resolver::iterator end;
 
@@ -54,10 +56,13 @@ std::string DownloadHTTPFile(const std::string& serverName, const std::string& g
     asio::streambuf request;
     std::ostream request_stream(&request);
 
+    auto url = scheme + "://" + serverName + getCommand;
     request_stream << "GET " << getCommand << " HTTP/1.0\r\n";
     request_stream << "Host: " << serverName << "\r\n";
     request_stream << "Accept: */*\r\n";
     request_stream << "Connection: close\r\n\r\n";
+
+    spdlog::debug("HTTPDownloader : Downloading from [{}]...", url);
 
     // Send the request.
     asio::write(socket, request);
@@ -92,7 +97,7 @@ std::string DownloadHTTPFile(const std::string& serverName, const std::string& g
     }
 
     if(!hasContentLengthHeader) {
-        throw std::logic_error("Targeted URL is not a file");
+        throw std::logic_error("HTTPDownloader : Targeted URL is not a file");
     }
 
     // Write whatever content we already have to output.
@@ -103,6 +108,8 @@ std::string DownloadHTTPFile(const std::string& serverName, const std::string& g
     while (asio::read(socket, response, asio::transfer_at_least(1), error)) {
         stream << &response;
     }
+
+    spdlog::debug("HTTPDownloader : Finished downloading [{}]", url);
 
     return stream.str();
 }

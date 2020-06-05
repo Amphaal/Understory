@@ -117,6 +117,7 @@ target_sources(appExec PRIVATE
 )
 
 target_link_libraries(appExec PRIVATE UnderStory::network)
+target_link_libraries(appExec PRIVATE UnderStory::core)
 
 #####################
 ## Deps : CMake RC ##
@@ -132,13 +133,6 @@ cmrc_add_resource_library(appResources
 )
 
 target_link_libraries(appExec PRIVATE appResources)
-
-################
-## Deps : stb ##
-################
-
-#link
-target_link_libraries(appExec PRIVATE stb)
 
 #################
 ## Deps : GLFW ##
@@ -210,7 +204,7 @@ FetchContent_Populate(nuklear)
 
 #define as target
 add_library(nuklear INTERFACE)
-target_include_directories(stb INTERFACE ${nuklear_SOURCE_DIR})
+target_include_directories(nuklear INTERFACE ${nuklear_SOURCE_DIR})
 
 #link
 target_link_libraries(appExec PRIVATE nuklear)
