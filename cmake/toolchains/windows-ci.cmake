@@ -1,6 +1,6 @@
-SET(CMAKE_SYSTEM_NAME "Generic")
-# SET(CMAKE_SYSTEM_VERSION 6.1 CACHE INTERNAL "") #target Windows 7
-# SET(MINGW ON)
+SET(CMAKE_SYSTEM_NAME "Windows")
+SET(CMAKE_SYSTEM_VERSION 6.1 CACHE INTERNAL "") #target Windows 7
+SET(MINGW ON)
 
 # search for programs in the build host directories
 set (CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
@@ -30,8 +30,8 @@ SET (CMAKE_RANLIB                           "llvm-ranlib")
 SET (CMAKE_NM                               "llvm-nm")
 SET (CMAKE_RC_COMPILER                      "llvm-rc")
 
-SET (CMAKE_C_FLAGS                          "-fuse-ld=lld")
-SET (CMAKE_CXX_FLAGS                        ${CMAKE_C_FLAGS})
+# SET (CMAKE_C_FLAGS                          "-fuse-ld=lld")
+# SET (CMAKE_CXX_FLAGS                        ${CMAKE_C_FLAGS})
 
 SET (CMAKE_C_COMPILER_TARGET                "x86_64-w64-mingw32")
 SET (CMAKE_CXX_COMPILER_TARGET              ${CMAKE_C_COMPILER_TARGET})
