@@ -1,5 +1,5 @@
-SET(CMAKE_SYSTEM_NAME "Generic")
-# SET(CMAKE_SYSTEM_VERSION 6.1 CACHE INTERNAL "") #target Windows 7
+SET(CMAKE_SYSTEM_NAME "Windows")
+SET(CMAKE_SYSTEM_VERSION 6.1 CACHE INTERNAL "") #target Windows 7
 SET(MINGW ON)
 
 # search for programs in the build host directories
