@@ -30,6 +30,8 @@
 #include <string>
 #include <memory>
 
+#include "src/base/understory.h"
+
 #include "src/app/ui/debug/FrameTracker.hpp"
 #include "src/app/ui/Nuklear.hpp"
 #include "src/app/ui/Engine.hpp"
@@ -37,6 +39,8 @@
 #include "src/app/widgets/UpdateCheckerWidget.hpp"
 
 #include "Utility.hpp"
+
+#include <spdlog/spdlog.h>
 
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 800

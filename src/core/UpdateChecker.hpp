@@ -94,8 +94,7 @@ class UpdateChecker : private UpdateChecker_Private {
  public:
     static std::future<bool> isNewerVersionAvailable() {
         return std::async(
-            std::launch::async,
-            [&]() { return _isNewerVersionAvailable(); }
+            _isNewerVersionAvailable
         );
     }
 
