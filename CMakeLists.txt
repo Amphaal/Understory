@@ -85,15 +85,10 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
     add_subdirectory(tests)
 endif()
 
-# add_subdirectory(src/app)
+add_subdirectory(src/app)
 
 #########################
 ## publishing handling ##
 #########################
 
 include(CMakePublish)
-
-add_executable(test test.cpp)
-target_link_libraries(test PRIVATE UnderStory::base)
-target_link_libraries(test PRIVATE UnderStory::network)
-# set_target_properties(test PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
