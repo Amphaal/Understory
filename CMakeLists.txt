@@ -110,6 +110,8 @@ set(CMAKE_C_STANDARD 11)
 
 # unset(CMAKE_IMPORT_LIBRARY_SUFFIX)
 
+add_compile_options(-std=c++17)
+
 add_executable(test test.cpp)
 # set_target_properties(test PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
 
