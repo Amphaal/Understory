@@ -113,6 +113,6 @@ set(CMAKE_C_STANDARD 11)
 add_link_options(-lpthread)
 
 add_executable(test test.cpp)
-# set_target_properties(test PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
+#set_target_properties(test PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 include(CMakePublish)
