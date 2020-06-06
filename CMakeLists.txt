@@ -101,13 +101,16 @@ project(UnderStory
     VERSION 0.0.2
     DESCRIPTION "An intuitive Pen & Paper experience"
     HOMEPAGE_URL "https://github.com/Amphaal/understory"
-    LANGUAGES C CXX
+    LANGUAGES CXX
 )
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 11)
 
+unset(CMAKE_IMPORT_LIBRARY_SUFFIX)
+
 add_executable(test test.cpp)
+# set_target_properties(test PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 include(CMakePublish)
