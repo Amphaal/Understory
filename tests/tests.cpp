@@ -59,12 +59,12 @@ using UnderStory::UpdateChecker_Private;
 TEST_CASE("Version comparaison", "[update checker]") {
     spdlog::set_level(spdlog::level::debug);
 
-    REQUIRE_FALSE(UpdateChecker_Private::_isVersionNewerThanLocal(APP_CURRENT_VERSION));
+    REQUIRE_FALSE(_isVersionNewerThanLocal(APP_CURRENT_VERSION));
 
     std::string test_localVersion("0.5.0");
-    REQUIRE_FALSE(UpdateChecker_Private::_isVersionNewerThanLocal("0.5.0", test_localVersion));
-    REQUIRE(UpdateChecker_Private::_isVersionNewerThanLocal("0.5.1", test_localVersion));
-    REQUIRE(UpdateChecker_Private::_isVersionNewerThanLocal("0.5.10", test_localVersion));
-    REQUIRE_FALSE(UpdateChecker_Private::_isVersionNewerThanLocal("0.4.10", test_localVersion));
-    REQUIRE(UpdateChecker_Private::_isVersionNewerThanLocal("1.0", test_localVersion));
+    REQUIRE_FALSE(_isVersionNewerThanLocal("0.5.0", test_localVersion));
+    REQUIRE(_isVersionNewerThanLocal("0.5.1", test_localVersion));
+    REQUIRE(_isVersionNewerThanLocal("0.5.10", test_localVersion));
+    REQUIRE_FALSE(_isVersionNewerThanLocal("0.4.10", test_localVersion));
+    REQUIRE(_isVersionNewerThanLocal("1.0", test_localVersion));
 }
