@@ -17,7 +17,7 @@ set_target_properties(appExec PROPERTIES OUTPUT_NAME "${PROJECT_NAME_LC}")  # de
 #optimise for release
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
     # disable for now (LLD bug)
-    set_target_properties(appExec PROPERTIES INTERPROCEDURAL_OPTIMIZATION FALSE) #enable LTO
+    set_target_properties(appExec PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE) #enable LTO
 endif()
 
 # generate icons from png
