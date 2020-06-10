@@ -37,7 +37,7 @@
 
 #include <string>
 
-#include "src/app/ui/base/nuklear_glfw_gl3.h"
+#include "nuklear_glfw_gl3.h"
 
 namespace UnderStory {
 

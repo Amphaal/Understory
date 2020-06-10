@@ -28,45 +28,14 @@
 
 #include "src/app/Utility.hpp"
 
+#include "Texture.hpp"
+#include "EngineInternal.hpp"
+
+#include "src/app/ui/layout/GridLayout.hpp"
+
 namespace UnderStory {
 
 namespace UI {
-
-class Texture {
- public:
-    explicit Texture(const Utility::RawImage &rawImage) {
-        // load and create a texture
-        // -------------------------
-        glGenTextures(1, &_texture);
-
-        glBindTexture(GL_TEXTURE_2D, _texture);  // all upcoming GL_TEXTURE_2D operations now have effect on this texture object
-        // set the texture wrapping parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);  // set texture wrapping to GL_REPEAT (default wrapping method)
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        // set texture filtering parameters
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rawImage.s.width, rawImage.s.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawImage.pixels);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        _size = rawImage.s;
-    }
-
-    void use() const {
-        glBindTexture(GL_TEXTURE_2D, _texture);
-    }
-
-    ~Texture() {
-        glDeleteTextures(1, &_texture);
-    }
-
-    Utility::Size size() const { return _size; }
-
- private:
-    GLuint _texture;
-    Utility::Size _size;
-};
 
 class Engine {
  public:
@@ -79,13 +48,14 @@ class Engine {
     }
 
     void init() {
+        this->_programId = EngineInternal::getProgram();
+
+        _layout.setCb([](int squareSize, int x, int y){
+            glViewport(x, y, squareSize, squareSize);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        });
+
         this->_loadDataInBuffers();
-
-        GLuint vShaderId = _compileShaders(vertexShader, GL_VERTEX_SHADER);
-        GLuint fShaderId = _compileShaders(fragmentShader, GL_FRAGMENT_SHADER);
-
-        this->_programId = _linkProgram(vShaderId, fShaderId);
-
         _initd = true;
     }
 
@@ -103,10 +73,7 @@ class Engine {
 
         glUseProgram(_programId);
 
-        auto animateX = ((sin(glfwGetTime()) + 1) / 2) * logoTexture.size().width;
-        animateX = animateX - logoTexture.size().width;
-        glViewport(animateX, 0, logoTexture.size().width, logoTexture.size().height);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        _layout.draw(framebufferSize, 10);
     }
 
  private:
@@ -115,109 +82,9 @@ class Engine {
     std::vector<GLuint> _vertexArraysIndexes;
     std::vector<GLuint> _buffersIndexes;
     std::vector<Texture> _textures;
+    GridLayout _layout;
 
     GLuint _VBO, _VAO, _EBO;
-
-    static inline std::string vertexShader = R"(
-        #version 410 core
-        layout (location = 0) in vec3 aPos;
-        layout (location = 1) in vec3 aColor;
-        layout (location = 2) in vec2 aTexCoord;
-
-        out vec3 ourColor;
-        out vec2 TexCoord;
-
-        void main()
-        {
-            gl_Position = vec4(aPos, 1.0);
-            ourColor = aColor;
-            TexCoord = aTexCoord;
-        }
-    )";
-
-    static inline std::string fragmentShader = R"(
-        #version 410 core
-        out vec4 FragColor;
-        
-        in vec3 ourColor;
-        in vec2 TexCoord;
-
-        uniform sampler2D ourTexture;
-
-        void main()
-        {
-            FragColor = texture(ourTexture, TexCoord);
-        }
-    )";
-
-    // Compile and create shader object and returns its id
-    static GLuint _compileShaders(std::string shader, GLenum type) {
-        const char *shaderCode = shader.c_str();
-        GLuint shaderId = glCreateShader(type);
-
-        if (shaderId == 0) {  // Error: Cannot create shader object
-            std::cout << "Error creating shaders!";
-            return 0;
-        }
-
-        // Attach source code to this object
-        glShaderSource(shaderId, 1, &shaderCode, NULL);
-        glCompileShader(shaderId);  // compile the shader object
-
-        GLint compileStatus;
-
-        // check for compilation status
-        glGetShaderiv(shaderId, GL_COMPILE_STATUS, &compileStatus);
-
-        if (!compileStatus) {  // If compilation was not successfull
-            int length;
-            glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &length);
-            char *cMessage = new char[length];
-
-            // Get additional information
-            glGetShaderInfoLog(shaderId, length, &length, cMessage);
-            std::cout << "Cannot Compile Shader: " << cMessage;
-            delete[] cMessage;
-            glDeleteShader(shaderId);
-            return 0;
-        }
-
-        return shaderId;
-    }
-
-    // Creates a program containing vertex and fragment shader
-    // links it and returns its ID
-    static GLuint _linkProgram(GLuint vertexShaderId, GLuint fragmentShaderId) {
-        GLuint _programId = glCreateProgram();  // crate a program
-
-        if (_programId == 0) {
-            std::cout << "Error Creating Shader Program";
-            return 0;
-        }
-
-        // Attach both the shaders to it
-        glAttachShader(_programId, vertexShaderId);
-        glAttachShader(_programId, fragmentShaderId);
-
-        // Create executable of this program
-        glLinkProgram(_programId);
-
-        GLint linkStatus;
-
-        // Get the link status for this program
-        glGetProgramiv(_programId, GL_LINK_STATUS, &linkStatus);
-
-        if (!linkStatus) {  // If the linking failed
-            std::cout << "Error Linking program";
-            glDetachShader(_programId, vertexShaderId);
-            glDetachShader(_programId, fragmentShaderId);
-            glDeleteProgram(_programId);
-
-            return 0;
-        }
-
-        return _programId;
-    }
 
     void _loadDataInBuffers() {
         GLfloat vertices[] = {

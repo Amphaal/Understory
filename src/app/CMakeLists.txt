@@ -107,15 +107,13 @@ install(
 #############
 
 target_sources(appExec PRIVATE
-    widgets/UpdateCheckerWidget.hpp
-    ui/Engine.hpp
-    ui/Nuklear.hpp
-    ui/base/nuklear_glfw_gl3.h
-    ui/debug/FrameTracker.hpp
     Application.hpp
     Utility.hpp
     main.cpp
 )
+
+add_subdirectory(widgets)
+add_subdirectory(ui)
 
 target_link_libraries(appExec PRIVATE UnderStory::network)
 target_link_libraries(appExec PRIVATE UnderStory::core)
