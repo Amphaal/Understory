@@ -55,7 +55,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
         // define window flags
         glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MINOR, 1);
+        glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MINOR, 0);
         glfwm::WindowManager::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // force core
         glfwm::WindowManager::setHint(GLFW_SAMPLES, 4);  // set antialiasing
         glfwm::WindowManager::setHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
@@ -63,13 +63,19 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
             glfwm::WindowManager::setHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         #endif
 
-        // create window and initial context
-        this->_window = glfwm::WindowManager::createWindow(
-            WINDOW_WIDTH,
-            WINDOW_HEIGHT,
-            this->_windowName,
-            this->getHandledEventTypes()
-        );
+        try {
+            // create window and initial context
+            this->_window = glfwm::WindowManager::createWindow(
+                WINDOW_WIDTH,
+                WINDOW_HEIGHT,
+                this->_windowName,
+                this->getHandledEventTypes()
+            );
+        } catch(...) {
+            const char* description;
+            glfwGetError(&description);
+            throw std::logic_error(description);
+        }
 
         glfwm::WindowManager::setWaitTimeout(0);
         this->_window->makeContextCurrent();
