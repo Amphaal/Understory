@@ -50,31 +50,46 @@ class Engine {
     void init() {
         this->_programId = EngineInternal::getProgram();
 
-        _layout.setCb([](int squareSize, int x, int y){
-            glViewport(x, y, squareSize, squareSize);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        });
+        // _layout.setCb([](int squareSize, int x, int y) {
+
+        // })
 
         this->_loadDataInBuffers();
         _initd = true;
     }
 
     void draw(const Utility::Size &framebufferSize) {
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glMatrixMode(GL_MODELVIEW);      // To operate on Model-View matrix
+        glLoadIdentity();                // Reset the model-view matrix
 
-        glActiveTexture(GL_TEXTURE0);
-        auto &logoTexture = _textures[0];
-        logoTexture.use();
+        // this->_layout.draw();
 
-        glBindVertexArray(_VAO);
-        glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-
-        glUseProgram(_programId);
-
-        _layout.draw(framebufferSize, 10);
+        glTranslatef(-1.0f, 1.0f, 0.0f);  // Translate left and up
+        glBegin(GL_QUADS);                // Each set of 4 vertices form a quad
+            glColor3f(1.0f, 0.0f, 0.0f);  // Red
+            glVertex2f(-.5f, -.5f);     // Define vertices in counter-clockwise (CCW) order
+            glVertex2f(.5f, -.5f);     //  so that the normal (front-face) is facing you
+            glVertex2f(.5f, .5f);
+            glVertex2f(-.5f, .5f);
+        glEnd();
     }
+
+    // void draw(const Utility::Size &framebufferSize) {
+        // glEnable(GL_BLEND);
+        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // glActiveTexture(GL_TEXTURE0);
+        // auto &logoTexture = _textures[0];
+        // logoTexture.use();
+
+        // glBindVertexArray(_VAO);
+        // glBindBuffer(GL_ARRAY_BUFFER, _VBO);
+        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
+
+        // glUseProgram(_programId);
+
+        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // }
 
  private:
     bool _initd = false;

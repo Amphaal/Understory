@@ -56,7 +56,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         // define window flags
         glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-        glfwm::WindowManager::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // force core
+        glfwm::WindowManager::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);  // force core
         glfwm::WindowManager::setHint(GLFW_SAMPLES, 4);  // set antialiasing
         glfwm::WindowManager::setHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
         #ifdef __APPLE__
@@ -144,6 +144,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     bool handle(const glfwm::EventPointer &e) override {
         switch(e->getEventType()) {
             case glfwm::EventType::FRAMEBUFFERSIZE : {
+                this->_reshape();
                 this->draw(this->_window->getID());
                 this->_window->swapBuffers();
                 return true;
@@ -160,8 +161,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     void draw(const glfwm::WindowID id) override {
         this->_fpsTracker.recordFrame();
 
-            this->_updateViewportAndClear();
-            this->_nuklear.drawTest();
+            this->_clear();
             this->_engine.draw(this->_framebufferSize);
 
         this->_fpsTracker.endRecord();
@@ -180,13 +180,33 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         #endif
     }
 
-    void _updateViewportAndClear() {
+    void _reshape() {
         // use "getFramebufferSize" to handle high DPI screen
         this->_window->getFramebufferSize(_framebufferSize.width, _framebufferSize.height);
 
-        // reset viewport to default
-        glViewport(0, 0, _framebufferSize.width, _framebufferSize.height);
+        auto &width = _framebufferSize.width;
+        auto &height = _framebufferSize.height;
 
+        // Compute aspect ratio of the new window
+        if (height == 0) height = 1;                // To prevent divide by 0
+        auto aspect = (GLfloat)width / (GLfloat)height;
+
+        // reset viewport to default
+        glViewport(0, 0, width, height);
+
+        // Set the aspect ratio of the clipping area to match the viewport
+        glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
+        glLoadIdentity();             // Reset the projection matrix
+        if (width >= height) {
+            // aspect >= 1, set the height from -1 to 1, with larger width
+            gluOrtho2D(-1.0 * aspect, 1.0 * aspect, -1.0, 1.0);
+        } else {
+            // aspect < 1, set the width to -1 to 1, with larger height
+            gluOrtho2D(-1.0, 1.0, -1.0 / aspect, 1.0 / aspect);
+        }
+    }
+
+    void _clear() {
         // clear frame
         glClear(GL_COLOR_BUFFER_BIT);
         // define clear color
@@ -200,7 +220,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
     void _glewSetup() {
         // must be called before GLEW inst
-        this->_updateViewportAndClear();
+        this->_reshape();
 
         // hard define exp flag
         glewExperimental = 1;
