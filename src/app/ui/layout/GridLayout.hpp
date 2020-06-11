@@ -38,7 +38,7 @@ class GridLayout {
     GridLayout() {}
 
     void draw(const UnderStory::Utility::Size& constraints, int itemsCount) {
-        if(!_onCoords) return;
+        if(!_onTileDrawing) return;
 
         const int* constraint = nullptr;
         int* row = nullptr;
@@ -77,19 +77,19 @@ class GridLayout {
                 *column += _padding + _squareSize;
             }
 
-            _onCoords(_squareSize, x, y);
+            _onTileDrawing(_squareSize, x, y);
 
             itemsCount--;
             rowVirgin = false;
         }
     }
 
-    void setCb(const DrawCallback &cb) {
-        _onCoords = cb;
+    void setOnTileDrawing(const DrawCallback &cb) {
+        _onTileDrawing = cb;
     }
 
  private:
-    DrawCallback _onCoords;
+    DrawCallback _onTileDrawing;
     int _squareSize = 120;
     int _padding = 2;
     Direction _direction = LeftToRight;

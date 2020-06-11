@@ -197,13 +197,15 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         // Set the aspect ratio of the clipping area to match the viewport
         glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
         glLoadIdentity();             // Reset the projection matrix
-        if (width >= height) {
-            // aspect >= 1, set the height from -1 to 1, with larger width
-            gluOrtho2D(-1.0 * aspect, 1.0 * aspect, -1.0, 1.0);
-        } else {
-            // aspect < 1, set the width to -1 to 1, with larger height
-            gluOrtho2D(-1.0, 1.0, -1.0 / aspect, 1.0 / aspect);
-        }
+        // if (width >= height) {
+        //     // aspect >= 1, set the height from -1 to 1, with larger width
+        //     gluOrtho2D(-1.0 * aspect, 1.0 * aspect, -1.0, 1.0);
+        // } else {
+        //     // aspect < 1, set the width to -1 to 1, with larger height
+        //     gluOrtho2D(-1.0, 1.0, -1.0 / aspect, 1.0 / aspect);
+        // }
+
+        gluOrtho2D(0.0f, width, height, 0.0f);
     }
 
     void _clear() {

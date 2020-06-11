@@ -50,28 +50,26 @@ class Engine {
     void init() {
         this->_programId = EngineInternal::getProgram();
 
-        // _layout.setCb([](int squareSize, int x, int y) {
+        _layout.setOnTileDrawing([](int squareSize, int x, int y) {
+            glLoadIdentity();
+            glTranslatef(x, y , 0.0f);
 
-        // })
+            glBegin(GL_QUADS);
+                glColor4f(1.0f, 0.0f, 0.0f, .5f);
+                glVertex2f(0, 0);
+                glVertex2f(squareSize, 0);
+                glVertex2f(squareSize, squareSize);
+                glVertex2f(0, squareSize);
+            glEnd();
+        });
 
         this->_loadDataInBuffers();
         _initd = true;
     }
 
     void draw(const Utility::Size &framebufferSize) {
-        glMatrixMode(GL_MODELVIEW);      // To operate on Model-View matrix
-        glLoadIdentity();                // Reset the model-view matrix
-
-        // this->_layout.draw();
-
-        glTranslatef(-1.0f, 1.0f, 0.0f);  // Translate left and up
-        glBegin(GL_QUADS);                // Each set of 4 vertices form a quad
-            glColor3f(1.0f, 0.0f, 0.0f);  // Red
-            glVertex2f(-.5f, -.5f);     // Define vertices in counter-clockwise (CCW) order
-            glVertex2f(.5f, -.5f);     //  so that the normal (front-face) is facing you
-            glVertex2f(.5f, .5f);
-            glVertex2f(-.5f, .5f);
-        glEnd();
+        glMatrixMode(GL_MODELVIEW);
+        this->_layout.draw(framebufferSize, 4);
     }
 
     // void draw(const Utility::Size &framebufferSize) {
