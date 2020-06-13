@@ -19,13 +19,16 @@
 
 #pragma once
 
+#include <tweeny.h>
+
 #include <glm/glm.hpp>
 
 namespace UnderStory {
 
 namespace UI {
 
-struct GridTile {
+class GridTile {
+ public:
     enum AnimationState {
         Idle,
         Moving,
@@ -34,13 +37,30 @@ struct GridTile {
         Removing
     };
 
-    glm::vec4 destRect;
     glm::vec4 currentRect;
 
-    glm::vec4 destColor;
-    glm::vec4 currentColor;
+    GridTile() {
+        animateOpacity = tweeny::from(currentColor[3])
+            .to(destColor[3])
+            .during(1000)
+            .via(tweeny::easing::circularInOut);
+
+        animateOpacity.onStep([=](float v) {
+            currentColor[3] = 1.0;
+            return false;
+        });
+    }
+
+    void step() {
+        animateOpacity.step(7);
+    }
+
+    glm::vec4 destColor { 0.0f, 1.0f, 0.0f, 1.0f };
+    glm::vec4 currentColor { 0.0f, 1.0f, 0.0f, 0.0f };
 
     AnimationState state = Inserting;
+
+    tweeny::tween<float> animateOpacity;
 };
 
 }  // namespace UI

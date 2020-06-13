@@ -26,19 +26,45 @@
 
 #include "GridTile.hpp"
 
+#include <rxcpp/rx.hpp>
+
 namespace UnderStory {
 
 namespace UI {
 
 class GridLayout {
  public:
-    using DrawCallback = std::function<void(int squareSize, int x, int y)>;
+    using DrawCallback = std::function<void(const GridTile& tile)>;
     enum Direction {
         LeftToRight,
         TopToBottom
     };
 
-    GridLayout() {}
+    GridLayout() {
+        _animHandler = rxcpp::observable<>::interval(std::chrono::milliseconds(7))
+        .subscribe_on(rxcpp::observe_on_new_thread())
+        .subscribe([&](int) {
+            progressStep();
+        });
+    }
+ 
+    void addTile() {
+        GridTile tile;
+        _tiles.push_back(tile);
+    }
+
+    void progressStep() {
+        for(auto &tile : _tiles) {
+            tile.step();
+        }
+    }
+
+    void addTiles(int howMany) {
+        while(howMany) {
+            addTile();
+            howMany--;
+        }
+    }
 
     void draw(const UnderStory::Utility::Size& constraints) {
         if(!_onTileDrawing) return;
@@ -81,7 +107,14 @@ class GridLayout {
                 *column += _padding + _squareSize;
             }
 
-            _onTileDrawing(_squareSize, x, y);
+            tile.currentRect = glm::vec4(
+                *row,                    // p1x
+                *column,                 // p1y
+                *row + _squareSize,      // p2x
+                *column + _squareSize    // p2y
+            );
+
+            _onTileDrawing(tile);
 
             rowVirgin = false;
         }
@@ -97,6 +130,7 @@ class GridLayout {
     int _padding = 2;
     Direction _direction = LeftToRight;
     std::vector<GridTile> _tiles;
+    rxcpp::composite_subscription _animHandler;
 };
 
 }  // namespace UI
