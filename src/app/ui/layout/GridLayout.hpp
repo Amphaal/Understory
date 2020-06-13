@@ -20,8 +20,11 @@
 #pragma once
 
 #include <functional>
+#include <vector>
 
 #include "src/app/Utility.hpp"
+
+#include "GridTile.hpp"
 
 namespace UnderStory {
 
@@ -37,8 +40,9 @@ class GridLayout {
 
     GridLayout() {}
 
-    void draw(const UnderStory::Utility::Size& constraints, int itemsCount) {
+    void draw(const UnderStory::Utility::Size& constraints) {
         if(!_onTileDrawing) return;
+        if(!_tiles.size()) return;
 
         const int* constraint = nullptr;
         int* row = nullptr;
@@ -65,7 +69,7 @@ class GridLayout {
         *column = _padding;
 
         bool rowVirgin = true;
-        while (itemsCount) {
+        for (auto &tile : _tiles) {
             *row += _padding;
 
             if(!rowVirgin) {
@@ -79,7 +83,6 @@ class GridLayout {
 
             _onTileDrawing(_squareSize, x, y);
 
-            itemsCount--;
             rowVirgin = false;
         }
     }
@@ -93,6 +96,7 @@ class GridLayout {
     int _squareSize = 120;
     int _padding = 2;
     Direction _direction = LeftToRight;
+    std::vector<GridTile> _tiles;
 };
 
 }  // namespace UI

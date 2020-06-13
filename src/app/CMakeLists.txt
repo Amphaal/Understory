@@ -207,3 +207,16 @@ target_include_directories(nuklear INTERFACE ${nuklear_SOURCE_DIR})
 
 #link
 target_link_libraries(appExec PRIVATE nuklear)
+
+###################
+## Deps : Tweeny ##
+###################
+
+#fetch
+FetchContent_Declare(tweeny
+    GIT_REPOSITORY  "https://github.com/mobius3/tweeny.git"
+)
+FetchContent_MakeAvailable(tweeny)
+
+#link
+target_link_libraries(appExec PRIVATE tweeny)
