@@ -42,16 +42,16 @@ class GridTile {
     GridTile() {
         animateOpacity = tweeny::from(currentColor[3])
             .to(destColor[3])
-            .during(1000)
-            .via(tweeny::easing::circularInOut);
+            .during(2000)
+            .via(tweeny::easing::linear);
 
         animateOpacity.onStep([=](float v) {
-            currentColor[3] = 1.0;
-            return false;
+            this->currentColor[3] = v;
+            return v == 1 ? true : false;
         });
     }
 
-    void step() {
+    void advance() {
         animateOpacity.step(7);
     }
 

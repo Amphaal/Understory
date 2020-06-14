@@ -138,16 +138,22 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     Widget::UpdateCheckerWidget _updateChecker;
 
     glfwm::EventBaseType getHandledEventTypes() const override {
-        return static_cast<glfwm::EventBaseType>(glfwm::EventType::FRAMEBUFFERSIZE);
+        return static_cast<glfwm::EventBaseType>(
+            glfwm::EventType::FRAMEBUFFERSIZE |
+            glfwm::EventType::KEY
+        );
     }
 
     bool handle(const glfwm::EventPointer &e) override {
         switch(e->getEventType()) {
             case glfwm::EventType::FRAMEBUFFERSIZE : {
-                this->_reshape();
-                this->draw(this->_window->getID());
-                this->_window->swapBuffers();
-                return true;
+                return _onFrameBufferSizeChanged();
+            }
+            break;
+
+            case glfwm::EventType::KEY : {
+                auto event = dynamic_cast<glfwm::EventKey*>(e.get());
+                return this->_engine.onKeyPress(event);
             }
             break;
 
@@ -252,6 +258,13 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
         if (wglSwapIntervalEXT)
             wglSwapIntervalEXT(1);
+    }
+
+    bool _onFrameBufferSizeChanged() {
+        this->_reshape();
+        this->draw(this->_window->getID());
+        this->_window->swapBuffers();
+        return true;
     }
 };
 

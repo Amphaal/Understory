@@ -40,22 +40,25 @@ class GridLayout {
         TopToBottom
     };
 
-    GridLayout() {
-        _animHandler = rxcpp::observable<>::interval(std::chrono::milliseconds(7))
-        .subscribe_on(rxcpp::observe_on_new_thread())
-        .subscribe([&](int) {
-            progressStep();
-        });
-    }
- 
+    GridLayout() {}
+
     void addTile() {
-        GridTile tile;
-        _tiles.push_back(tile);
+        _tiles.emplace_back();
+    }
+
+    void startAnimations() {
+        if(_animStarted) return;
+        _animHandler = rxcpp::observable<>::interval(std::chrono::milliseconds(7))
+            .subscribe_on(rxcpp::observe_on_new_thread())
+            .subscribe([&](int) {
+                progressStep();
+            });
+        _animStarted = true;
     }
 
     void progressStep() {
         for(auto &tile : _tiles) {
-            tile.step();
+            tile.advance();
         }
     }
 
@@ -130,6 +133,8 @@ class GridLayout {
     int _padding = 2;
     Direction _direction = LeftToRight;
     std::vector<GridTile> _tiles;
+
+    bool _animStarted = false;
     rxcpp::composite_subscription _animHandler;
 };
 

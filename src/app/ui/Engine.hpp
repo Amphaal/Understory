@@ -47,10 +47,24 @@ class Engine {
         glDeleteBuffers(_buffersIndexes.size(), _buffersIndexes.data());
     }
 
+    bool onKeyPress(glfwm::EventKey* event) {
+        if(event->getAction() != glfwm::ActionType::RELEASE) return true;
+
+        switch (event->getKey()) {
+            case glfwm::KeyType::KEY_A: {
+                _layout.addTile();
+            }
+            break;
+
+            default:
+                break;
+        }
+
+        return true;
+    }
+
     void init() {
         this->_programId = EngineInternal::getProgram();
-
-        _layout.addTiles(1);
 
         _layout.setOnTileDrawing([](const GridTile& tile) {
             glBegin(GL_QUADS);
@@ -61,12 +75,14 @@ class Engine {
                 glVertex2f(tile.currentRect[0], tile.currentRect[3]);
             glEnd();
         });
+        _layout.addTiles(1);
 
         this->_loadDataInBuffers();
         _initd = true;
     }
 
     void draw(const Utility::Size &framebufferSize) {
+        _layout.startAnimations();
         glMatrixMode(GL_MODELVIEW);
         this->_layout.draw(framebufferSize);
     }
