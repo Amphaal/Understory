@@ -37,7 +37,7 @@
 
 #include <string>
 
-#include "nuklear_glfw_gl3.h"
+#include "nuklear_sdl_gl3.h"
 
 namespace UnderStory {
 

@@ -1,1 +1,1 @@
-gettext protobuf miniupnpc asio glfw glew glm
+gettext protobuf miniupnpc asio sdl2 glew glm
