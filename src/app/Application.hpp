@@ -68,22 +68,15 @@ class Application : public std::enable_shared_from_this<Application> {
         this->_defineWindowIcon();
     }
 
-    ~Application() {
-        // terminate window
-        glfwm::WindowManager::terminate();
-    }
+    ~Application() {}
 
     void run() {
-        // bind handlers
-        this->_window->bindEventHandler(this->shared_from_this(), 0);  // 0 is the rank among all event handlers bound
-        this->_window->bindDrawable(    this->shared_from_this(), 0);  // 0 is the rank among all drawables bound
-
         // fps count
         this->_fpsTracker.start([&](int fpsEstimated) {
             // update title
             std::string title(_windowName);
             title += " - " + std::to_string(fpsEstimated) + " FPS";
-            this->_window->setTitle(title);
+            SDL_SetWindowTitle(_window, title.c_str())
         });
 
         // only check for updates on Windows (TODO(amphaal) MacOS ?)
@@ -92,7 +85,10 @@ class Application : public std::enable_shared_from_this<Application> {
         #endif
 
         // loop
-        glfwm::WindowManager::mainLoop();
+        while(1) {
+            _processEvents();
+            _draw();
+        }
     }
 
  private:
@@ -106,41 +102,37 @@ class Application : public std::enable_shared_from_this<Application> {
     SDL_Renderer* _renderer;
 
     Utility::Size _framebufferSize;
-    nk_colorf _backgroundColor {0.10f, 0.18f, 0.24f, .5f};
+    glm::vec4 _backgroundColor {0.10f, 0.18f, 0.24f, .5f};
 
     UI::Engine _engine;
     UI::FrameTracker _fpsTracker;
 
     Widget::UpdateCheckerWidget _updateChecker;
 
-    glfwm::EventBaseType getHandledEventTypes() const override {
-        return static_cast<glfwm::EventBaseType>(
-            glfwm::EventType::FRAMEBUFFERSIZE |
-            glfwm::EventType::KEY
-        );
-    }
+    void _processEvents() {
+        /* Our SDL event placeholder. */
+        SDL_Event event;
 
-    bool handle(const glfwm::EventPointer &e) override {
-        switch(e->getEventType()) {
-            case glfwm::EventType::FRAMEBUFFERSIZE : {
-                return _onFrameBufferSizeChanged();
+        /* Grab all the events off the queue. */
+        while( SDL_PollEvent(&event)) {
+            switch( event.type ) {
+            case SDL_KEYDOWN:
+                /* Handle key presses. */
+                _processKeyDown(&event.key.keysym);
+                break;
+            case SDL_QUIT:
+                SDL_Quit();
+                exit();
+                break;
             }
-            break;
-
-            case glfwm::EventType::KEY : {
-                auto event = dynamic_cast<glfwm::EventKey*>(e.get());
-                return this->_engine.onKeyPress(event);
-            }
-            break;
-
-            default : {
-                return false;
-            }
-            break;
         }
     }
 
-    void draw(const glfwm::WindowID id) override {
+    void _processKeyDown(SDL_Keysym key) {
+        this->_engine.onKeyPress(key);
+    }
+
+    void _draw() override {
         this->_fpsTracker.recordFrame();
 
             this->_clear();
@@ -157,7 +149,7 @@ class Application : public std::enable_shared_from_this<Application> {
         #ifndef __APPLE__  // no window icon for OSX
             // define icon
             auto iconImage = Utility::getIcon();
-            auto icon = SDL_CreateRGBSurfaceFrom(iconImage.pixels, 16,16,16,16*2,0x0f00,0x00f0,0x000f,0xf000);
+            auto icon = SDL_CreateRGBSurfaceFrom(iconImage.pixels, 16, 16, 16, 16*2, 0x0f00, 0x00f0, 0x000f, 0xf000);
             SDL_SetWindowIcon(_window, icon);
         #endif
     }
@@ -177,16 +169,8 @@ class Application : public std::enable_shared_from_this<Application> {
         glViewport(0, 0, width, height);
 
         // Set the aspect ratio of the clipping area to match the viewport
-        glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
-        glLoadIdentity();             // Reset the projection matrix
-        // if (width >= height) {
-        //     // aspect >= 1, set the height from -1 to 1, with larger width
-        //     gluOrtho2D(-1.0 * aspect, 1.0 * aspect, -1.0, 1.0);
-        // } else {
-        //     // aspect < 1, set the width to -1 to 1, with larger height
-        //     gluOrtho2D(-1.0, 1.0, -1.0 / aspect, 1.0 / aspect);
-        // }
-
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
         gluOrtho2D(0.0f, width, height, 0.0f);
     }
 
@@ -215,8 +199,8 @@ class Application : public std::enable_shared_from_this<Application> {
             exit(1);
         }
 
-        // define 
-        this->_setVSync();
+        // define vsync
+        SDL_GL_SetSwapInterval(1);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
