@@ -47,22 +47,6 @@ class Engine {
         glDeleteBuffers(_buffersIndexes.size(), _buffersIndexes.data());
     }
 
-    bool onKeyPress(glfwm::EventKey* event) {
-        if(event->getAction() != glfwm::ActionType::RELEASE) return true;
-
-        switch (event->getKey()) {
-            case glfwm::KeyType::KEY_A: {
-                _layout.addTile();
-            }
-            break;
-
-            default:
-                break;
-        }
-
-        return true;
-    }
-
     void init() {
         this->_programId = EngineInternal::getProgram();
 

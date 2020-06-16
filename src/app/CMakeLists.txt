@@ -178,23 +178,6 @@ FetchContent_Populate(rxcpp)
 #link
 target_include_directories(appExec PRIVATE ${rxcpp_SOURCE_DIR}/Rx/v2/src)
 
-####################
-## Deps : Nuklear ##
-####################
-
-#fetch
-FetchContent_Declare(nuklear
-    GIT_REPOSITORY  "https://github.com/Immediate-Mode-UI/Nuklear.git"
-)
-FetchContent_Populate(nuklear)
-
-#define as target
-add_library(nuklear INTERFACE)
-target_include_directories(nuklear INTERFACE ${nuklear_SOURCE_DIR})
-
-#link
-target_link_libraries(appExec PRIVATE nuklear)
-
 ###################
 ## Deps : Tweeny ##
 ###################

@@ -17,7 +17,6 @@
                 "${workspaceFolder}/_gen/_cmrc/include",
                 "${workspaceFolder}/_gen/_deps/stb-src",
                 "${workspaceFolder}/_gen/_deps/spdlog-src/include",
-                "${workspaceFolder}/_gen/_deps/nuklear-src",
                 "${workspaceFolder}/_gen/_deps/rxcpp-src/Rx/v2/src",
                 "${workspaceFolder}/_gen/_deps/tinyprocesslib-src",
                 "${workspaceFolder}/_gen/_deps/tweeny-src/include"

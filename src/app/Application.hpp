@@ -19,9 +19,9 @@
 
 #pragma once
 
-#include <GL/glew.h>
 #include <GL/wglext.h>
-#include <GLFW/glfw3.h>
+
+#include <SDL2/SDL.h>
 
 #include <iostream>
 #include <stdexcept>
@@ -33,7 +33,6 @@
 #include "src/base/understory.h"
 
 #include "src/app/ui/debug/FrameTracker.hpp"
-#include "src/app/ui/nuklear/Nuklear.hpp"
 #include "src/app/ui/Engine.hpp"
 
 #include "src/app/widgets/UpdateCheckerWidget.hpp"
@@ -47,44 +46,20 @@
 
 namespace UnderStory {
 
-class Application : public glfwm::EventHandler, public glfwm::Drawable, public std::enable_shared_from_this<Application> {
+class Application : public std::enable_shared_from_this<Application> {
  public:
     Application() {
-        // init GLFW
-        if(!glfwm::WindowManager::init()) throw std::exception();
+        // init SDL2
+        if(!SDL_Init(SDL_INIT_VIDEO) < 0) throw std::logic_error(SDL_GetError());
 
-        // define window flags
-        glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-        glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-        glfwm::WindowManager::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);  // force core
-        glfwm::WindowManager::setHint(GLFW_SAMPLES, 4);  // set antialiasing
-        glfwm::WindowManager::setHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
-        #ifdef __APPLE__
-            glfwm::WindowManager::setHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-        #endif
-
-        try {
-            // create window and initial context
-            this->_window = glfwm::WindowManager::createWindow(
-                WINDOW_WIDTH,
-                WINDOW_HEIGHT,
-                this->_windowName,
-                this->getHandledEventTypes()
-            );
-        } catch(...) {
-            const char* description;
-            glfwGetError(&description);
-            throw std::logic_error(description);
+        // inst window
+        if (SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN, &_window, &_renderer) < 0) {
+            SDL_Quit();
+            throw std::logic_error(SDL_GetError());
         }
-
-        glfwm::WindowManager::setWaitTimeout(0);
-        this->_window->makeContextCurrent();
 
         // setup glew and ext
         this->_glewSetup();
-
-        // init nuklear
-        this->_nuklear.init(this->_window->glfwWindow, &this->_backgroundColor);
 
         // init engine
         this->_engine.init();
@@ -127,12 +102,13 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         static inline std::string _windowName = APP_FULL_DENOM;
     #endif
 
-    glfwm::WindowPointer _window;
+    SDL_Window* _window;
+    SDL_Renderer* _renderer;
+
     Utility::Size _framebufferSize;
     nk_colorf _backgroundColor {0.10f, 0.18f, 0.24f, .5f};
 
     UI::Engine _engine;
-    UI::Nuklear _nuklear;
     UI::FrameTracker _fpsTracker;
 
     Widget::UpdateCheckerWidget _updateChecker;
@@ -181,8 +157,8 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         #ifndef __APPLE__  // no window icon for OSX
             // define icon
             auto iconImage = Utility::getIcon();
-            GLFWimage wIcon { iconImage.s.width, iconImage.s.height, iconImage.pixels };
-            this->_window->setIcon(1, &wIcon);
+            auto icon = SDL_CreateRGBSurfaceFrom(iconImage.pixels, 16,16,16,16*2,0x0f00,0x00f0,0x000f,0xf000);
+            SDL_SetWindowIcon(_window, icon);
         #endif
     }
 
@@ -239,25 +215,11 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
             exit(1);
         }
 
-        // ext based
+        // define 
         this->_setVSync();
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-
-    void _setVSync() {
-        // TODO(amphaal) vsync for macos / linux
-
-        typedef BOOL(APIENTRY *PFNWGLSWAPINTERVALPROC)(int);
-        PFNWGLSWAPINTERVALPROC wglSwapIntervalEXT = 0;
-
-        auto extensions = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
-
-        wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)wglGetProcAddress("wglSwapIntervalEXT");
-
-        if (wglSwapIntervalEXT)
-            wglSwapIntervalEXT(1);
     }
 
     bool _onFrameBufferSizeChanged() {
