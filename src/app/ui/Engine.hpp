@@ -47,22 +47,6 @@ class Engine {
         glDeleteBuffers(_buffersIndexes.size(), _buffersIndexes.data());
     }
 
-    bool onKeyPress(glfwm::EventKey* event) {
-        if(event->getAction() != glfwm::ActionType::RELEASE) return true;
-
-        switch (event->getKey()) {
-            case glfwm::KeyType::KEY_A: {
-                _layout.addTile();
-            }
-            break;
-
-            default:
-                break;
-        }
-
-        return true;
-    }
-
     void init() {
         this->_programId = EngineInternal::getProgram();
 
@@ -85,6 +69,10 @@ class Engine {
         _layout.progressStep();
         glMatrixMode(GL_MODELVIEW);
         this->_layout.draw(framebufferSize);
+    }
+
+    void onKeyPress(SDL_Keysym *key) {
+        this->_layout.addTile();
     }
 
     // void draw(const Utility::Size &framebufferSize) {
