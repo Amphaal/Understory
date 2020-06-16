@@ -82,7 +82,7 @@ class Engine {
     }
 
     void draw(const Utility::Size &framebufferSize) {
-        _layout.startAnimations();
+        _layout.progressStep();
         glMatrixMode(GL_MODELVIEW);
         this->_layout.draw(framebufferSize);
     }

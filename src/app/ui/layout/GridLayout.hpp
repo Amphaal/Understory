@@ -46,16 +46,6 @@ class GridLayout {
         _tiles.emplace_back();
     }
 
-    void startAnimations() {
-        if(_animStarted) return;
-        _animHandler = rxcpp::observable<>::interval(std::chrono::milliseconds(7))
-            .subscribe_on(rxcpp::observe_on_new_thread())
-            .subscribe([&](int) {
-                progressStep();
-            });
-        _animStarted = true;
-    }
-
     void progressStep() {
         for(auto &tile : _tiles) {
             tile.advance();
