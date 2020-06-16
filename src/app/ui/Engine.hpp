@@ -71,6 +71,10 @@ class Engine {
         this->_layout.draw(framebufferSize);
     }
 
+    void onKeyPress(SDL_Keysym *key) {
+        this->_layout.addTile();
+    }
+
     // void draw(const Utility::Size &framebufferSize) {
         // glEnable(GL_BLEND);
         // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

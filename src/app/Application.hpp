@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <GL/wglext.h>
-
 #include <SDL2/SDL.h>
 
 #include <iostream>
@@ -50,10 +48,12 @@ class Application : public std::enable_shared_from_this<Application> {
  public:
     Application() {
         // init SDL2
-        if(!SDL_Init(SDL_INIT_VIDEO) < 0) throw std::logic_error(SDL_GetError());
+        SDL_SetMainReady();
+        if(SDL_Init(SDL_INIT_VIDEO)) throw std::logic_error(SDL_GetError());
 
         // inst window
-        if (SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN, &_window, &_renderer) < 0) {
+        _window = SDL_CreateWindow(APP_FULL_DENOM, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE);
+        if (!_window) {
             SDL_Quit();
             throw std::logic_error(SDL_GetError());
         }
@@ -63,9 +63,6 @@ class Application : public std::enable_shared_from_this<Application> {
 
         // init engine
         this->_engine.init();
-
-        // ui
-        this->_defineWindowIcon();
     }
 
     ~Application() {}
@@ -76,7 +73,7 @@ class Application : public std::enable_shared_from_this<Application> {
             // update title
             std::string title(_windowName);
             title += " - " + std::to_string(fpsEstimated) + " FPS";
-            SDL_SetWindowTitle(_window, title.c_str())
+            SDL_SetWindowTitle(_window, title.c_str());
         });
 
         // only check for updates on Windows (TODO(amphaal) MacOS ?)
@@ -99,7 +96,6 @@ class Application : public std::enable_shared_from_this<Application> {
     #endif
 
     SDL_Window* _window;
-    SDL_Renderer* _renderer;
 
     Utility::Size _framebufferSize;
     glm::vec4 _backgroundColor {0.10f, 0.18f, 0.24f, .5f};
@@ -122,17 +118,17 @@ class Application : public std::enable_shared_from_this<Application> {
                 break;
             case SDL_QUIT:
                 SDL_Quit();
-                exit();
+                exit(0);
                 break;
             }
         }
     }
 
-    void _processKeyDown(SDL_Keysym key) {
+    void _processKeyDown(SDL_Keysym *key) {
         this->_engine.onKeyPress(key);
     }
 
-    void _draw() override {
+    void _draw() {
         this->_fpsTracker.recordFrame();
 
             this->_clear();
@@ -145,18 +141,8 @@ class Application : public std::enable_shared_from_this<Application> {
     //
     //
 
-    void _defineWindowIcon() {
-        #ifndef __APPLE__  // no window icon for OSX
-            // define icon
-            auto iconImage = Utility::getIcon();
-            auto icon = SDL_CreateRGBSurfaceFrom(iconImage.pixels, 16, 16, 16, 16*2, 0x0f00, 0x00f0, 0x000f, 0xf000);
-            SDL_SetWindowIcon(_window, icon);
-        #endif
-    }
-
     void _reshape() {
-        // use "getFramebufferSize" to handle high DPI screen
-        this->_window->getFramebufferSize(_framebufferSize.width, _framebufferSize.height);
+        SDL_GL_GetDrawableSize(_window, &_framebufferSize.width, &_framebufferSize.height);
 
         auto &width = _framebufferSize.width;
         auto &height = _framebufferSize.height;
@@ -188,6 +174,12 @@ class Application : public std::enable_shared_from_this<Application> {
 
     void _glewSetup() {
         // must be called before GLEW inst
+        auto context = SDL_GL_CreateContext(_window);
+        if(!context) {
+            throw std::logic_error(SDL_GetError());
+        }
+
+        SDL_GL_MakeCurrent(_window, context);
         this->_reshape();
 
         // hard define exp flag
@@ -208,8 +200,8 @@ class Application : public std::enable_shared_from_this<Application> {
 
     bool _onFrameBufferSizeChanged() {
         this->_reshape();
-        this->draw(this->_window->getID());
-        this->_window->swapBuffers();
+        this->_draw();
+        SDL_GL_SwapWindow(_window);
         return true;
     }
 };
