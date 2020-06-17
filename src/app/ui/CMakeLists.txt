@@ -5,3 +5,5 @@ target_sources(appExec PRIVATE
     debug/FrameTracker.hpp
     layout/GridLayout.hpp
 )
+
+add_subdirectory(nuklear)

@@ -49,7 +49,7 @@ class Utility {
     };
 
     static const RawImage getIcon() {
-        return getRawImage("logo_64.png");
+        return getRawImage("logo.png");
     }
 
     static const RawImage getRawImage(const std::string &path, bool flip = false) {

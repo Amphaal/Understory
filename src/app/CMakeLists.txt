@@ -134,12 +134,12 @@ cmrc_add_resource_library(appResources
 target_link_libraries(appExec PRIVATE appResources)
 
 #################
-## Deps : SDL2 ##
+## Deps : GLFW ##
 #################
 
-find_package(sdl2 REQUIRED)
+find_package(glfw3 REQUIRED)
 
-target_link_libraries(appExec PRIVATE sdl2)
+target_link_libraries(appExec PRIVATE glfw)
 
 #################
 ## Deps : GLEW ##
@@ -148,6 +148,19 @@ target_link_libraries(appExec PRIVATE sdl2)
 find_package(GLEW REQUIRED)
 
 target_link_libraries(appExec PRIVATE GLEW::GLEW)
+
+##################
+## Deps : GLFWM ##
+##################
+
+#fetch
+FetchContent_Declare(glfwm
+    GIT_REPOSITORY  "https://github.com/Amphaal/glfwm.git"
+)
+FetchContent_MakeAvailable(glfwm)
+
+#link
+target_link_libraries(appExec PRIVATE glfwm)
 
 ################
 ## Deps : GLM ##
@@ -177,6 +190,23 @@ FetchContent_Populate(rxcpp)
 
 #link
 target_include_directories(appExec PRIVATE ${rxcpp_SOURCE_DIR}/Rx/v2/src)
+
+####################
+## Deps : Nuklear ##
+####################
+
+#fetch
+FetchContent_Declare(nuklear
+    GIT_REPOSITORY  "https://github.com/Immediate-Mode-UI/Nuklear.git"
+)
+FetchContent_Populate(nuklear)
+
+#define as target
+add_library(nuklear INTERFACE)
+target_include_directories(nuklear INTERFACE ${nuklear_SOURCE_DIR})
+
+#link
+target_link_libraries(appExec PRIVATE nuklear)
 
 ###################
 ## Deps : Tweeny ##

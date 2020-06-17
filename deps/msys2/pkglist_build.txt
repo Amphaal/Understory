@@ -2,6 +2,6 @@ mingw64/mingw-w64-x86_64-protobuf
 mingw64/mingw-w64-x86_64-asio
 mingw64/mingw-w64-x86_64-gettext
 mingw64/mingw-w64-x86_64-miniupnpc
-mingw64/mingw-w64-x86_64-SDL2
+mingw64/mingw-w64-x86_64-glfw
 mingw64/mingw-w64-x86_64-glew
 mingw64/mingw-w64-x86_64-glm

@@ -21,6 +21,7 @@
 
 #include <functional>
 
+#include <GLFWM/glfwm.hpp>
 #include <rxcpp/rx.hpp>
 
 namespace UnderStory {

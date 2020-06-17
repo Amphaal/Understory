@@ -19,7 +19,9 @@
 
 #pragma once
 
-#include <SDL2/SDL.h>
+#include <GL/glew.h>
+#include <GL/wglext.h>
+#include <GLFW/glfw3.h>
 
 #include <iostream>
 #include <stdexcept>
@@ -31,6 +33,7 @@
 #include "src/base/understory.h"
 
 #include "src/app/ui/debug/FrameTracker.hpp"
+#include "src/app/ui/nuklear/Nuklear.hpp"
 #include "src/app/ui/Engine.hpp"
 
 #include "src/app/widgets/UpdateCheckerWidget.hpp"
@@ -44,36 +47,68 @@
 
 namespace UnderStory {
 
-class Application : public std::enable_shared_from_this<Application> {
+class Application : public glfwm::EventHandler, public glfwm::Drawable, public std::enable_shared_from_this<Application> {
  public:
     Application() {
-        // init SDL2
-        SDL_SetMainReady();
-        if(SDL_Init(SDL_INIT_VIDEO)) throw std::logic_error(SDL_GetError());
+        // init GLFW
+        if(!glfwm::WindowManager::init()) throw std::exception();
 
-        // inst window
-        _window = SDL_CreateWindow(APP_FULL_DENOM, 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_OPENGL|SDL_WINDOW_RESIZABLE);
-        if (!_window) {
-            SDL_Quit();
-            throw std::logic_error(SDL_GetError());
+        // define window flags
+        glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+        glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+        glfwm::WindowManager::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);  // force core
+        glfwm::WindowManager::setHint(GLFW_SAMPLES, 4);  // set antialiasing
+        glfwm::WindowManager::setHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+        #ifdef __APPLE__
+            glfwm::WindowManager::setHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        #endif
+
+        try {
+            // create window and initial context
+            this->_window = glfwm::WindowManager::createWindow(
+                WINDOW_WIDTH,
+                WINDOW_HEIGHT,
+                this->_windowName,
+                this->getHandledEventTypes()
+            );
+        } catch(...) {
+            const char* description;
+            glfwGetError(&description);
+            throw std::logic_error(description);
         }
+
+        glfwm::WindowManager::setWaitTimeout(0);
+        this->_window->makeContextCurrent();
 
         // setup glew and ext
         this->_glewSetup();
 
+        // init nuklear
+        this->_nuklear.init(this->_window->glfwWindow, &this->_backgroundColor);
+
         // init engine
         this->_engine.init();
+
+        // ui
+        this->_defineWindowIcon();
     }
 
-    ~Application() {}
+    ~Application() {
+        // terminate window
+        glfwm::WindowManager::terminate();
+    }
 
     void run() {
+        // bind handlers
+        this->_window->bindEventHandler(this->shared_from_this(), 0);  // 0 is the rank among all event handlers bound
+        this->_window->bindDrawable(    this->shared_from_this(), 0);  // 0 is the rank among all drawables bound
+
         // fps count
         this->_fpsTracker.start([&](int fpsEstimated) {
             // update title
             std::string title(_windowName);
             title += " - " + std::to_string(fpsEstimated) + " FPS";
-            SDL_SetWindowTitle(_window, title.c_str());
+            this->_window->setTitle(title);
         });
 
         // only check for updates on Windows (TODO(amphaal) MacOS ?)
@@ -82,10 +117,7 @@ class Application : public std::enable_shared_from_this<Application> {
         #endif
 
         // loop
-        while(1) {
-            _processEvents();
-            _draw();
-        }
+        glfwm::WindowManager::mainLoop();
     }
 
  private:
@@ -95,40 +127,44 @@ class Application : public std::enable_shared_from_this<Application> {
         static inline std::string _windowName = APP_FULL_DENOM;
     #endif
 
-    SDL_Window* _window;
-
+    glfwm::WindowPointer _window;
     Utility::Size _framebufferSize;
-    glm::vec4 _backgroundColor {0.10f, 0.18f, 0.24f, .5f};
+    nk_colorf _backgroundColor {0.10f, 0.18f, 0.24f, .5f};
 
     UI::Engine _engine;
+    UI::Nuklear _nuklear;
     UI::FrameTracker _fpsTracker;
 
     Widget::UpdateCheckerWidget _updateChecker;
 
-    void _processEvents() {
-        /* Our SDL event placeholder. */
-        SDL_Event event;
+    glfwm::EventBaseType getHandledEventTypes() const override {
+        return static_cast<glfwm::EventBaseType>(
+            glfwm::EventType::FRAMEBUFFERSIZE |
+            glfwm::EventType::KEY
+        );
+    }
 
-        /* Grab all the events off the queue. */
-        while( SDL_PollEvent(&event)) {
-            switch( event.type ) {
-            case SDL_KEYDOWN:
-                /* Handle key presses. */
-                _processKeyDown(&event.key.keysym);
-                break;
-            case SDL_QUIT:
-                SDL_Quit();
-                exit(0);
-                break;
+    bool handle(const glfwm::EventPointer &e) override {
+        switch(e->getEventType()) {
+            case glfwm::EventType::FRAMEBUFFERSIZE : {
+                return _onFrameBufferSizeChanged();
             }
+            break;
+
+            case glfwm::EventType::KEY : {
+                auto event = dynamic_cast<glfwm::EventKey*>(e.get());
+                return this->_engine.onKeyPress(event);
+            }
+            break;
+
+            default : {
+                return false;
+            }
+            break;
         }
     }
 
-    void _processKeyDown(SDL_Keysym *key) {
-        this->_engine.onKeyPress(key);
-    }
-
-    void _draw() {
+    void draw(const glfwm::WindowID id) override {
         this->_fpsTracker.recordFrame();
 
             this->_clear();
@@ -141,8 +177,18 @@ class Application : public std::enable_shared_from_this<Application> {
     //
     //
 
+    void _defineWindowIcon() {
+        #ifndef __APPLE__  // no window icon for OSX
+            // define icon
+            auto iconImage = Utility::getIcon();
+            GLFWimage wIcon { iconImage.s.width, iconImage.s.height, iconImage.pixels };
+            this->_window->setIcon(1, &wIcon);
+        #endif
+    }
+
     void _reshape() {
-        SDL_GL_GetDrawableSize(_window, &_framebufferSize.width, &_framebufferSize.height);
+        // use "getFramebufferSize" to handle high DPI screen
+        this->_window->getFramebufferSize(_framebufferSize.width, _framebufferSize.height);
 
         auto &width = _framebufferSize.width;
         auto &height = _framebufferSize.height;
@@ -155,8 +201,16 @@ class Application : public std::enable_shared_from_this<Application> {
         glViewport(0, 0, width, height);
 
         // Set the aspect ratio of the clipping area to match the viewport
-        glMatrixMode(GL_PROJECTION);
-        glLoadIdentity();
+        glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
+        glLoadIdentity();             // Reset the projection matrix
+        // if (width >= height) {
+        //     // aspect >= 1, set the height from -1 to 1, with larger width
+        //     gluOrtho2D(-1.0 * aspect, 1.0 * aspect, -1.0, 1.0);
+        // } else {
+        //     // aspect < 1, set the width to -1 to 1, with larger height
+        //     gluOrtho2D(-1.0, 1.0, -1.0 / aspect, 1.0 / aspect);
+        // }
+
         gluOrtho2D(0.0f, width, height, 0.0f);
     }
 
@@ -174,12 +228,6 @@ class Application : public std::enable_shared_from_this<Application> {
 
     void _glewSetup() {
         // must be called before GLEW inst
-        auto context = SDL_GL_CreateContext(_window);
-        if(!context) {
-            throw std::logic_error(SDL_GetError());
-        }
-
-        SDL_GL_MakeCurrent(_window, context);
         this->_reshape();
 
         // hard define exp flag
@@ -191,17 +239,31 @@ class Application : public std::enable_shared_from_this<Application> {
             exit(1);
         }
 
-        // define vsync
-        SDL_GL_SetSwapInterval(1);
+        // ext based
+        this->_setVSync();
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
 
+    void _setVSync() {
+        // TODO(amphaal) vsync for macos / linux
+
+        typedef BOOL(APIENTRY *PFNWGLSWAPINTERVALPROC)(int);
+        PFNWGLSWAPINTERVALPROC wglSwapIntervalEXT = 0;
+
+        auto extensions = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
+
+        wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)wglGetProcAddress("wglSwapIntervalEXT");
+
+        if (wglSwapIntervalEXT)
+            wglSwapIntervalEXT(1);
+    }
+
     bool _onFrameBufferSizeChanged() {
         this->_reshape();
-        this->_draw();
-        SDL_GL_SwapWindow(_window);
+        this->draw(this->_window->getID());
+        this->_window->swapBuffers();
         return true;
     }
 };
