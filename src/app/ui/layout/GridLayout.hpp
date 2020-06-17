@@ -26,15 +26,13 @@
 
 #include "GridTile.hpp"
 
-#include <rxcpp/rx.hpp>
-
 namespace UnderStory {
 
 namespace UI {
 
 class GridLayout {
  public:
-    using DrawCallback = std::function<void(const GridTile& tile)>;
+    using DrawCallback = std::function<void(std::unique_ptr<UnderStory::UI::GridTile> &tile)>;
     enum Direction {
         LeftToRight,
         TopToBottom
@@ -43,22 +41,12 @@ class GridLayout {
     GridLayout() {}
 
     void addTile() {
-        _tiles.emplace_back();
-    }
-
-    void startAnimations() {
-        if(_animStarted) return;
-        _animHandler = rxcpp::observable<>::interval(std::chrono::milliseconds(7))
-            .subscribe_on(rxcpp::observe_on_new_thread())
-            .subscribe([&](int) {
-                progressStep();
-            });
-        _animStarted = true;
+        _tiles.emplace_back(std::make_unique<GridTile>());
     }
 
     void progressStep() {
         for(auto &tile : _tiles) {
-            tile.advance();
+            tile->advance();
         }
     }
 
@@ -110,7 +98,7 @@ class GridLayout {
                 *column += _padding + _squareSize;
             }
 
-            tile.currentRect = glm::vec4(
+            tile->currentRect = glm::vec4(
                 *row,                    // p1x
                 *column,                 // p1y
                 *row + _squareSize,      // p2x
@@ -132,7 +120,7 @@ class GridLayout {
     int _squareSize = 120;
     int _padding = 2;
     Direction _direction = LeftToRight;
-    std::vector<GridTile> _tiles;
+    std::vector<std::unique_ptr<GridTile>> _tiles;
 
     bool _animStarted = false;
     rxcpp::composite_subscription _animHandler;

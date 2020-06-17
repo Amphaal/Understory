@@ -66,13 +66,13 @@ class Engine {
     void init() {
         this->_programId = EngineInternal::getProgram();
 
-        _layout.setOnTileDrawing([](const GridTile& tile) {
+        _layout.setOnTileDrawing([](const std::unique_ptr<GridTile>& tile) {
             glBegin(GL_QUADS);
-                glColor4f(tile.currentColor[0], tile.currentColor[1], tile.currentColor[2], tile.currentColor[3]);
-                glVertex2f(tile.currentRect[0], tile.currentRect[1]);
-                glVertex2f(tile.currentRect[2], tile.currentRect[1]);
-                glVertex2f(tile.currentRect[2], tile.currentRect[3]);
-                glVertex2f(tile.currentRect[0], tile.currentRect[3]);
+                glColor4f(tile->currentColor[0], tile->currentColor[1], tile->currentColor[2], tile->currentColor[3]);
+                glVertex2f(tile->currentRect[0], tile->currentRect[1]);
+                glVertex2f(tile->currentRect[2], tile->currentRect[1]);
+                glVertex2f(tile->currentRect[2], tile->currentRect[3]);
+                glVertex2f(tile->currentRect[0], tile->currentRect[3]);
             glEnd();
         });
         _layout.addTiles(1);
@@ -82,7 +82,7 @@ class Engine {
     }
 
     void draw(const Utility::Size &framebufferSize) {
-        _layout.startAnimations();
+        _layout.progressStep();
         glMatrixMode(GL_MODELVIEW);
         this->_layout.draw(framebufferSize);
     }

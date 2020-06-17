@@ -39,9 +39,6 @@ class GridTile {
 
     glm::vec4 currentRect;
 
-    //TODO 
-    GridTile(GridTile&&)
-
     GridTile() {
         animateOpacity = tweeny::from(currentColor[3])
             .to(destColor[3])
