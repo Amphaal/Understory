@@ -21,6 +21,7 @@
 
 #include <functional>
 #include <vector>
+#include <memory>
 
 #include "src/app/Utility.hpp"
 
@@ -47,6 +48,12 @@ class GridLayout {
     void progressStep() {
         for(auto &tile : _tiles) {
             tile->advance();
+        }
+    }
+
+    void changeColor() {
+        for(auto &tile : _tiles) {
+            tile->animateColor({ 1.0f, 0.0f, 0.0f, 1.0f });
         }
     }
 

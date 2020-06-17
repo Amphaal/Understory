@@ -25,6 +25,7 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <memory>
 
 #include "src/app/Utility.hpp"
 
@@ -53,6 +54,11 @@ class Engine {
         switch (event->getKey()) {
             case glfwm::KeyType::KEY_A: {
                 _layout.addTile();
+            }
+            break;
+
+            case glfwm::KeyType::KEY_Q: {
+                _layout.changeColor();
             }
             break;
 

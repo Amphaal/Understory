@@ -37,30 +37,41 @@ class GridTile {
         Removing
     };
 
-    glm::vec4 currentRect;
-
     GridTile() {
-        animateOpacity = tweeny::from(currentColor[3])
-            .to(destColor[3])
-            .during(2000)
-            .via(tweeny::easing::linear);
-
-        animateOpacity.onStep([=](float v) {
-            this->currentColor[3] = v;
-            return v == 1 ? true : false;
-        });
+        animateColor({ 0.0f, 1.0f, 0.0f, 1.0f });
     }
 
     void advance() {
-        animateOpacity.step(7);
+        auto step = 7;  // TODO(amphaal) refresh rate sync ?
+        _animateColor.step(step);
     }
 
-    glm::vec4 destColor { 0.0f, 1.0f, 0.0f, 1.0f };
+    void animateColor(glm::vec4 to) {
+        _destColor = to;
+
+        _animateColor =
+        tweeny::from(currentColor[0], currentColor[1], currentColor[2], currentColor[3])
+               .to(_destColor[0], _destColor[1], _destColor[2], _destColor[3])
+               .during(1000)
+               .via(tweeny::easing::linear);
+
+        auto cb = [=](float r, float g, float b, float a) {
+            currentColor[0] = r;
+            currentColor[1] = g;
+            currentColor[2] = b;
+            currentColor[3] = a;
+            return false;
+        };
+
+        _animateColor.onStep(cb);
+    }
+
     glm::vec4 currentColor { 0.0f, 1.0f, 0.0f, 0.0f };
+    glm::vec4 currentRect  { 0.0f, 0.0f, 0.0f, 0.0f };
 
-    AnimationState state = Inserting;
-
-    tweeny::tween<float> animateOpacity;
+ private:
+    tweeny::tween<float, float, float, float> _animateColor;
+    glm::vec4 _destColor;
 };
 
 }  // namespace UI
