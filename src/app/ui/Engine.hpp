@@ -40,7 +40,7 @@ namespace UI {
 
 class Engine {
  public:
-    Engine() {}
+    explicit Engine(const UnderStory::Utility::Size* constraints) : _layout(constraints) {}
     ~Engine() {
         if(!_initd) return;
 
@@ -53,7 +53,12 @@ class Engine {
 
         switch (event->getKey()) {
             case glfwm::KeyType::KEY_A: {
-                _layout.addTile();
+                _layout.addTiles(1);
+            }
+            break;
+
+            case glfwm::KeyType::KEY_Z: {
+                _layout.removeTiles(1);
             }
             break;
 
@@ -87,10 +92,9 @@ class Engine {
         _initd = true;
     }
 
-    void draw(const Utility::Size &framebufferSize) {
-        _layout.progressStep();
-        glMatrixMode(GL_MODELVIEW);
-        this->_layout.draw(framebufferSize);
+    void draw() {
+        _layout.advance();
+        _layout.draw();
     }
 
     // void draw(const Utility::Size &framebufferSize) {

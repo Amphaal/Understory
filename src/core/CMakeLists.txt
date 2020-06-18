@@ -22,7 +22,7 @@ target_link_libraries(appCore INTERFACE stb)
 
 #fetch
 FetchContent_Declare(tinyProcessLib
-    GIT_REPOSITORY  "https://gitlab.com/eidheim/tiny-process-library.git"
+    GIT_REPOSITORY  "https://gitlab.com/Amphaal/tiny-process-library.git"
 )
 FetchContent_MakeAvailable(tinyProcessLib)
 

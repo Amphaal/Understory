@@ -53,7 +53,7 @@ class GridTile {
         _animateColor =
         tweeny::from(currentColor[0], currentColor[1], currentColor[2], currentColor[3])
                .to(_destColor[0], _destColor[1], _destColor[2], _destColor[3])
-               .during(1000)
+               .during(300)
                .via(tweeny::easing::linear);
 
         auto cb = [=](float r, float g, float b, float a) {
@@ -67,6 +67,10 @@ class GridTile {
         _animateColor.onStep(cb);
     }
 
+    void animateRemoval(std::function<void(void)> whenAnimationEnds) {
+
+    }
+
     void animateRect(glm::vec4 to) {
         if(to == _destRect) return;
 
@@ -74,8 +78,8 @@ class GridTile {
 
         _animateRect = tweeny::from(currentRect[0], currentRect[1], currentRect[2], currentRect[3])
                .to(_destRect[0], _destRect[1], _destRect[2], _destRect[3])
-               .during(1000)
-               .via(tweeny::easing::linear);
+               .during(200)
+               .via(tweeny::easing::cubicIn);
 
         auto cb = [=](float x1, float y1, float x2, float y2) {
             currentRect[0] = x1;

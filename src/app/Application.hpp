@@ -49,7 +49,7 @@ namespace UnderStory {
 
 class Application : public glfwm::EventHandler, public glfwm::Drawable, public std::enable_shared_from_this<Application> {
  public:
-    Application() {
+    Application() : _engine(&this->_framebufferSize) {
         // init GLFW
         if(!glfwm::WindowManager::init()) throw std::exception();
 
@@ -168,7 +168,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         this->_fpsTracker.recordFrame();
 
             this->_clear();
-            this->_engine.draw(this->_framebufferSize);
+            this->_engine.draw();
 
         this->_fpsTracker.endRecord();
     }
@@ -212,6 +212,8 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         // }
 
         gluOrtho2D(0.0f, width, height, 0.0f);
+
+        glMatrixMode(GL_MODELVIEW);
     }
 
     void _clear() {

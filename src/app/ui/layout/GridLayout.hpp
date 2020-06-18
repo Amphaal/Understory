@@ -39,15 +39,18 @@ class GridLayout {
         TopToBottom
     };
 
-    GridLayout() {}
+    explicit GridLayout(const UnderStory::Utility::Size* constraints) : _constraints(constraints) {}
 
-    void addTile() {
-        _tiles.emplace_back(std::make_unique<GridTile>());
-    }
-
-    void progressStep() {
+    void advance() {
+        _updateState();
         for(auto &tile : _tiles) {
             tile->advance();
+        }
+    }
+
+    void draw() {
+        for(auto &tile : _tiles) {
+            _onTileDrawing(tile);
         }
     }
 
@@ -57,14 +60,38 @@ class GridLayout {
         }
     }
 
-    void addTiles(int howMany) {
+    void removeTiles(int howMany) {
         while(howMany) {
-            addTile();
+            _addTile();
             howMany--;
         }
     }
 
-    void draw(const UnderStory::Utility::Size& constraints) {
+    void addTiles(int howMany) {
+        while(howMany) {
+            _addTile();
+            howMany--;
+        }
+    }
+
+    void setOnTileDrawing(const DrawCallback &cb) {
+        _onTileDrawing = cb;
+    }
+
+ private:
+    int _squareSize = 120;
+    int _padding = 2;
+    Direction _direction = LeftToRight;
+
+    DrawCallback _onTileDrawing;
+    std::vector<std::unique_ptr<GridTile>> _tiles;
+    const UnderStory::Utility::Size* _constraints = nullptr;
+
+    void _addTile() {
+        _tiles.emplace_back(std::make_unique<GridTile>());
+    }
+
+    void _updateState() {
         if(!_onTileDrawing) return;
         if(!_tiles.size()) return;
 
@@ -76,14 +103,14 @@ class GridLayout {
 
         switch(_direction) {
             case LeftToRight: {
-                constraint = &constraints.width;
+                constraint = &_constraints->width;
                 row = &x;
                 column = &y;
             }
             break;
 
             case TopToBottom: {
-                constraint = &constraints.height;
+                constraint = &_constraints->height;
                 row = &y;
                 column = &x;
             }
@@ -112,25 +139,9 @@ class GridLayout {
                 *column + _squareSize    // p2y
             });
 
-            _onTileDrawing(tile);
-
             rowVirgin = false;
         }
     }
-
-    void setOnTileDrawing(const DrawCallback &cb) {
-        _onTileDrawing = cb;
-    }
-
- private:
-    DrawCallback _onTileDrawing;
-    int _squareSize = 120;
-    int _padding = 2;
-    Direction _direction = LeftToRight;
-    std::vector<std::unique_ptr<GridTile>> _tiles;
-
-    bool _animStarted = false;
-    rxcpp::composite_subscription _animHandler;
 };
 
 }  // namespace UI
