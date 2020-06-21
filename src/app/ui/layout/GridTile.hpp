@@ -29,14 +29,6 @@ namespace UI {
 
 class GridTile {
  public:
-    enum AnimationState {
-        Idle,
-        Moving,
-        Hovered,
-        Inserting,
-        Removing
-    };
-
     GridTile() {
         animateColor({ 0.0f, 1.0f, 0.0f, 1.0f });
     }
@@ -67,10 +59,6 @@ class GridTile {
         _animateColor.onStep(cb);
     }
 
-    void animateRemoval(std::function<void(void)> whenAnimationEnds) {
-
-    }
-
     void animateRect(glm::vec4 to) {
         if(to == _destRect) return;
 
@@ -94,6 +82,8 @@ class GridTile {
 
     glm::vec4 currentColor { 0.0f, 1.0f, 0.0f, 0.0f };
     glm::vec4 currentRect  { 0.0f, 0.0f, 0.0f, 0.0f };
+
+    bool beingRemoved = false;
 
  private:
     tweeny::tween<float, float, float, float> _animateColor;

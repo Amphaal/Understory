@@ -40,7 +40,7 @@ namespace UI {
 
 class Engine {
  public:
-    explicit Engine(const UnderStory::Utility::Size* constraints) : _layout(constraints) {}
+    explicit Engine(const UnderStory::Utility::Size* constraints, const glm::vec2* pointerPos) : _layout(constraints, pointerPos) {}
     ~Engine() {
         if(!_initd) return;
 

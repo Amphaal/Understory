@@ -39,7 +39,7 @@ class EngineInternal {
 
  private:
     static inline std::string vertexShader = R"(
-        #version 410 core
+        #version 400 core
         layout (location = 0) in vec3 aPos;
         layout (location = 1) in vec3 aColor;
         layout (location = 2) in vec2 aTexCoord;
@@ -56,7 +56,7 @@ class EngineInternal {
     )";
 
     static inline std::string fragmentShader = R"(
-        #version 410 core
+        #version 400 core
         out vec4 FragColor;
         
         in vec3 ourColor;

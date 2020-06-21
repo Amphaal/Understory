@@ -49,7 +49,7 @@ namespace UnderStory {
 
 class Application : public glfwm::EventHandler, public glfwm::Drawable, public std::enable_shared_from_this<Application> {
  public:
-    Application() : _engine(&this->_framebufferSize) {
+    Application() : _engine(&this->_framebufferSize, &_pointerPos) {
         // init GLFW
         if(!glfwm::WindowManager::init()) throw std::exception();
 
@@ -129,6 +129,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
     glfwm::WindowPointer _window;
     Utility::Size _framebufferSize;
+    glm::vec2 _pointerPos;
     nk_colorf _backgroundColor {0.10f, 0.18f, 0.24f, .5f};
 
     UI::Engine _engine;
@@ -140,7 +141,8 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     glfwm::EventBaseType getHandledEventTypes() const override {
         return static_cast<glfwm::EventBaseType>(
             glfwm::EventType::FRAMEBUFFERSIZE |
-            glfwm::EventType::KEY
+            glfwm::EventType::KEY |
+            glfwm::EventType::CURSOR_POSITION
         );
     }
 
@@ -154,6 +156,13 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
             case glfwm::EventType::KEY : {
                 auto event = dynamic_cast<glfwm::EventKey*>(e.get());
                 return this->_engine.onKeyPress(event);
+            }
+            break;
+
+            case glfwm::EventType::CURSOR_POSITION : {
+                auto event = dynamic_cast<glfwm::EventCursorPosition*>(e.get());
+                _pointerPos = { event->getX(), event->getY() };
+                return true;
             }
             break;
 

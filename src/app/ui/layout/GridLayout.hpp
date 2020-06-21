@@ -39,7 +39,7 @@ class GridLayout {
         TopToBottom
     };
 
-    explicit GridLayout(const UnderStory::Utility::Size* constraints) : _constraints(constraints) {}
+    explicit GridLayout(const UnderStory::Utility::Size* constraints, const glm::vec2* pointerPos) : _constraints(constraints), _pointerPos(pointerPos) {}
 
     void advance() {
         _updateState();
@@ -61,8 +61,18 @@ class GridLayout {
     }
 
     void removeTiles(int howMany) {
+        auto i = 0;
         while(howMany) {
-            _addTile();
+            if(i + 1 > _tiles.size()) break;
+
+            auto &tile = _tiles[i];
+            if(tile->beingRemoved) {
+                i++;
+                continue;
+            }
+
+            tile->beingRemoved = true;
+            tile->animateRect({});
             howMany--;
         }
     }
@@ -86,6 +96,7 @@ class GridLayout {
     DrawCallback _onTileDrawing;
     std::vector<std::unique_ptr<GridTile>> _tiles;
     const UnderStory::Utility::Size* _constraints = nullptr;
+    const glm::vec2* _pointerPos = nullptr;
 
     void _addTile() {
         _tiles.emplace_back(std::make_unique<GridTile>());
@@ -132,14 +143,16 @@ class GridLayout {
                 *column += _padding + _squareSize;
             }
 
+            rowVirgin = false;
+
+            if(tile->beingRemoved) continue;
+
             tile->animateRect({
                 *row,                    // p1x
                 *column,                 // p1y
                 *row + _squareSize,      // p2x
                 *column + _squareSize    // p2y
             });
-
-            rowVirgin = false;
         }
     }
 };
