@@ -20,7 +20,8 @@
 #pragma once
 
 #include <functional>
-#include <vector>
+#include <map>
+#include <set>
 #include <memory>
 
 #include "src/app/Utility.hpp"
@@ -43,37 +44,44 @@ class GridLayout {
 
     void advance() {
         _updateState();
-        for(auto &tile : _tiles) {
+        for(auto & [k, tile] : _tiles) {
             tile->advance();
+        }
+
+        // delete
+        if(!_tbrTiles.empty()) {
+            for(const auto &key : _tbrTiles) {
+                _tiles.erase(key);
+            }
+            _tbrTiles.clear();
         }
     }
 
     void draw() {
-        for(auto &tile : _tiles) {
+        for(auto & [k, tile] : _tiles) {
             _onTileDrawing(tile);
         }
     }
 
     void changeColor() {
-        for(auto &tile : _tiles) {
+        for(auto & [k, tile] : _tiles) {
             tile->animateColor({ 1.0f, 0.0f, 0.0f, 1.0f });
         }
     }
 
     void removeTiles(int howMany) {
-        auto i = 0;
-        while(howMany) {
-            if(i + 1 > _tiles.size()) break;
+        if(howMany <= 0) return;
 
-            auto &tile = _tiles[i];
-            if(tile->beingRemoved) {
-                i++;
-                continue;
-            }
+        for(auto i = _tiles.begin(); i != _tiles.end(); i++) {
+            auto &tile = i->second;
+            if(tile->beingRemoved) continue;
 
-            tile->beingRemoved = true;
-            tile->animateRect({});
+            tile->animateRemoval([=]() {
+                _tbrTiles.insert(i->first);
+            });
             howMany--;
+
+            if(!howMany) break;
         }
     }
 
@@ -94,12 +102,19 @@ class GridLayout {
     Direction _direction = LeftToRight;
 
     DrawCallback _onTileDrawing;
-    std::vector<std::unique_ptr<GridTile>> _tiles;
+    std::map<int, std::unique_ptr<GridTile>> _tiles;
+    int _tilesIndex = 0;
+    std::set<int> _tbrTiles;
+
     const UnderStory::Utility::Size* _constraints = nullptr;
     const glm::vec2* _pointerPos = nullptr;
 
     void _addTile() {
-        _tiles.emplace_back(std::make_unique<GridTile>());
+        _tiles.emplace(
+            _tilesIndex,
+            std::make_unique<GridTile>()
+        );
+        _tilesIndex++;
     }
 
     void _updateState() {
@@ -131,7 +146,7 @@ class GridLayout {
         *column = _padding;
 
         bool rowVirgin = true;
-        for (auto &tile : _tiles) {
+        for (auto & [k, tile] : _tiles) {
             *row += _padding;
 
             if(!rowVirgin) {

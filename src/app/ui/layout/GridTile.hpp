@@ -48,15 +48,41 @@ class GridTile {
                .during(300)
                .via(tweeny::easing::linear);
 
-        auto cb = [=](float r, float g, float b, float a) {
+        auto cb = [=](tweeny::tween<float, float, float, float> & t, float r, float g, float b, float a) {
             currentColor[0] = r;
             currentColor[1] = g;
             currentColor[2] = b;
             currentColor[3] = a;
+            if(t.progress() == 1.0f) return true;
             return false;
         };
 
         _animateColor.onStep(cb);
+    }
+
+    void animateRemoval(std::function<void(void)> onRemoval) {
+        _destRect = { };
+        this->beingRemoved = true;
+
+        _animateRect = tweeny::from(currentRect[0], currentRect[1], currentRect[2], currentRect[3])
+               .to(_destRect[0], _destRect[1], _destRect[2], _destRect[3])
+               .during(200)
+               .via(tweeny::easing::cubicIn);
+
+        auto cb = [=](tweeny::tween<float, float, float, float> & t, float x1, float y1, float x2, float y2) {
+            currentRect[0] = x1;
+            currentRect[1] = y1;
+            currentRect[2] = x2;
+            currentRect[3] = y2;
+
+            if(t.progress() == 1.0f) {
+                onRemoval();
+            }
+
+            return false;
+        };
+
+        _animateRect.onStep(cb);
     }
 
     void animateRect(glm::vec4 to) {
@@ -69,11 +95,12 @@ class GridTile {
                .during(200)
                .via(tweeny::easing::cubicIn);
 
-        auto cb = [=](float x1, float y1, float x2, float y2) {
+        auto cb = [=](tweeny::tween<float, float, float, float> & t, float x1, float y1, float x2, float y2) {
             currentRect[0] = x1;
             currentRect[1] = y1;
             currentRect[2] = x2;
             currentRect[3] = y2;
+            if(t.progress() == 1.0f) return true;
             return false;
         };
 
