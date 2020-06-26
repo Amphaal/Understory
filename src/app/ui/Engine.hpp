@@ -48,6 +48,11 @@ class Engine {
         glDeleteBuffers(_buffersIndexes.size(), _buffersIndexes.data());
     }
 
+    bool onScrollEvent(glfwm::EventScroll* event) {
+        // TODO(amphaal)
+        return true;
+    }
+
     bool onKeyPress(glfwm::EventKey* event) {
         if(event->getAction() != glfwm::ActionType::RELEASE) return true;
 
@@ -64,6 +69,11 @@ class Engine {
 
             case glfwm::KeyType::KEY_Q: {
                 _layout.changeColor();
+            }
+            break;
+
+            case glfwm::KeyType::KEY_S: {
+                _layout.changeLayoutDirection();
             }
             break;
 

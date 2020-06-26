@@ -142,7 +142,8 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         return static_cast<glfwm::EventBaseType>(
             glfwm::EventType::FRAMEBUFFERSIZE |
             glfwm::EventType::KEY |
-            glfwm::EventType::CURSOR_POSITION
+            glfwm::EventType::CURSOR_POSITION |
+            glfwm::EventType::SCROLL
         );
     }
 
@@ -165,6 +166,11 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
                 return true;
             }
             break;
+
+            case glfwm::EventType::SCROLL : {
+                auto event = dynamic_cast<glfwm::EventScroll*>(e.get());
+                return this->_engine.onScrollEvent(event);
+            };
 
             default : {
                 return false;

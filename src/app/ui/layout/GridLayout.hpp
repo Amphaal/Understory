@@ -65,6 +65,10 @@ class GridLayout {
         }
     }
 
+    void changeLayoutDirection() {
+        _direction = _direction == LeftToRight ? TopToBottom : LeftToRight;
+    }
+
     void changeColor() {
         for(auto & [k, tile] : _tiles) {
             tile->animateColor({ 1.0f, 0.0f, 0.0f, 1.0f });
@@ -192,8 +196,10 @@ class GridLayout {
         // define start values
         newLine();
 
-        // iterate
         auto atLeastOneTile = false;
+        auto tileHoveredFound = false;
+
+        // iterate
         for (auto & [k, tile] : _tiles) {
             *row += _padding;
 
@@ -204,15 +210,26 @@ class GridLayout {
 
             if(tile->beingRemoved) continue;
 
-            tile->animateRect({
+            auto rect = glm::vec4 {
                 *row,                    // p1x
                 *column,                 // p1y
                 *row + _squareSize,      // p2x
                 *column + _squareSize    // p2y
-            });
+            };
+
+            tile->animateRect(rect);
+
+            // hovering
+            auto isHovered = false;
+            if(!tileHoveredFound) {
+                if(tile->isPointInTile(*_pointerPos)) {
+                    tileHoveredFound = true;
+                    isHovered = true;
+                }
+            }
+            tile->setHovered(isHovered);
 
             atLeastOneTile = true;
-
             *row += _squareSize;
         }
     }
