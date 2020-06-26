@@ -119,7 +119,7 @@ class GridLayout {
         _tilesIndex++;
     }
 
-    int _findColumnFirstBorder(int constraint) {
+    int _findColumnFirstBorder(int constraint, int tilesCount) {
         auto x = 0;
         auto size = 0;
         int returnVal = 0;
@@ -134,13 +134,13 @@ class GridLayout {
                 break;
             }
 
-            if(constraint == size) {  // if size is exactly the constraint, no border needed
+            if(constraint == size) {  // if size is exactly the constraint, no centering needed
                 break;
             } else if(constraint < size) {  // if size is too big, step down 1 tile and return result
                 x--;
 
-                // if previous step is no tile, no border needed
-                if(x == 0) break;
+                if(x == 0) break;  // if previous step is no tile, no centering needed
+                if(tilesCount <= x) break;  // if all tiles already fit on a single line, no centering needed
 
                 // request another trip, but force break
                 mustBreak = true;
@@ -183,7 +183,7 @@ class GridLayout {
         }
 
         // prepare new line handler
-        auto fcb = _findColumnFirstBorder(*constraint);
+        auto fcb = _findColumnFirstBorder(*constraint, _tiles.size());
         auto newLine = [=](bool firstLine = true) {
             *row = firstLine ? fcb : fcb + _padding;
             *column += firstLine ? _padding : _padding + _squareSize;
