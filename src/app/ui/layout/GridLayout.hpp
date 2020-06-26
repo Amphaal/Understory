@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <spdlog/spdlog.h>
+
 #include <functional>
 #include <map>
 #include <set>
@@ -98,7 +100,7 @@ class GridLayout {
 
  private:
     int _squareSize = 120;
-    int _padding = 2;
+    int _padding = 20;
     Direction _direction = LeftToRight;
 
     DrawCallback _onTileDrawing;
@@ -117,16 +119,49 @@ class GridLayout {
         _tilesIndex++;
     }
 
+    int _findColumnFirstBorder(int constraint) {
+        auto x = 0;
+        auto size = 0;
+        int returnVal = 0;
+        bool mustBreak = false;
+
+        while(true) {
+            size = _squareSize * x + (x + 1) * _padding;
+
+            if(mustBreak) {
+                auto borderBothSides = constraint - size;
+                returnVal = borderBothSides ? borderBothSides / 2 : borderBothSides;
+                break;
+            }
+
+            if(constraint == size) {  // if size is exactly the constraint, no border needed
+                returnVal = 0;
+                break;
+            } else if(constraint < size) {  // if size is too big, step down 1 tile and return result
+                x--;
+                mustBreak = true;
+                continue;
+            }
+
+            x++;
+        }
+
+        return returnVal;
+    }
+
     void _updateState() {
+        // checks
         if(!_onTileDrawing) return;
         if(!_tiles.size()) return;
 
+        // prepare
         const int* constraint = nullptr;
         int* row = nullptr;
         int* column = nullptr;
         int x = 0;
         int y = 0;
 
+        // bind depending on direction
         switch(_direction) {
             case LeftToRight: {
                 constraint = &_constraints->width;
@@ -143,22 +178,24 @@ class GridLayout {
             break;
         }
 
-        *column = _padding;
+        // prepare new line handler
+        auto fcb = _findColumnFirstBorder(*constraint);
+        auto newLine = [=](bool firstLine = true) {
+            *row = firstLine ? fcb : fcb + _padding;
+            *column += firstLine ? _padding : _padding + _squareSize;
+        };
 
-        bool rowVirgin = true;
+        // define start values
+        newLine();
+
+        // iterate
         for (auto & [k, tile] : _tiles) {
             *row += _padding;
 
-            if(!rowVirgin) {
-                *row += _squareSize;
+            // check if must be new lined
+            if(*row + _squareSize > *constraint) {
+                newLine(false);
             }
-
-            if(*row + _squareSize > *constraint && !rowVirgin) {
-                *row = _padding;
-                *column += _padding + _squareSize;
-            }
-
-            rowVirgin = false;
 
             if(tile->beingRemoved) continue;
 
@@ -168,6 +205,8 @@ class GridLayout {
                 *row + _squareSize,      // p2x
                 *column + _squareSize    // p2y
             });
+
+            *row += _squareSize;
         }
     }
 };

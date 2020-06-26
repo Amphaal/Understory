@@ -250,25 +250,12 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
             exit(1);
         }
 
-        // ext based
-        this->_setVSync();
+        // activate vsync
+        glfwSwapInterval(1);
 
+        // handles transparency
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-    }
-
-    void _setVSync() {
-        // TODO(amphaal) vsync for macos / linux
-
-        typedef BOOL(APIENTRY *PFNWGLSWAPINTERVALPROC)(int);
-        PFNWGLSWAPINTERVALPROC wglSwapIntervalEXT = 0;
-
-        auto extensions = reinterpret_cast<const char*>(glGetString(GL_EXTENSIONS));
-
-        wglSwapIntervalEXT = (PFNWGLSWAPINTERVALPROC)wglGetProcAddress("wglSwapIntervalEXT");
-
-        if (wglSwapIntervalEXT)
-            wglSwapIntervalEXT(1);
     }
 
     bool _onFrameBufferSizeChanged() {
