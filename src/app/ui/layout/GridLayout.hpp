@@ -211,10 +211,10 @@ class GridLayout {
             if(tile->beingRemoved) continue;
 
             auto rect = glm::vec4 {
-                *row,                    // p1x
-                *column,                 // p1y
-                *row + _squareSize,      // p2x
-                *column + _squareSize    // p2y
+                x,                    // p1x
+                y,                 // p1y
+                x + _squareSize,      // p2x
+                y + _squareSize    // p2y
             };
 
             tile->animateRect(rect);

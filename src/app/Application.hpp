@@ -171,6 +171,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
                 auto event = dynamic_cast<glfwm::EventScroll*>(e.get());
                 return this->_engine.onScrollEvent(event);
             };
+            break;
 
             default : {
                 return false;
