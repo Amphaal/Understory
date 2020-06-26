@@ -135,10 +135,14 @@ class GridLayout {
             }
 
             if(constraint == size) {  // if size is exactly the constraint, no border needed
-                returnVal = 0;
                 break;
             } else if(constraint < size) {  // if size is too big, step down 1 tile and return result
                 x--;
+
+                // if previous step is no tile, no border needed
+                if(x == 0) break;
+
+                // request another trip, but force break
                 mustBreak = true;
                 continue;
             }
@@ -189,11 +193,12 @@ class GridLayout {
         newLine();
 
         // iterate
+        auto atLeastOneTile = false;
         for (auto & [k, tile] : _tiles) {
             *row += _padding;
 
             // check if must be new lined
-            if(*row + _squareSize > *constraint) {
+            if(*row + _squareSize > *constraint && atLeastOneTile) {
                 newLine(false);
             }
 
@@ -205,6 +210,8 @@ class GridLayout {
                 *row + _squareSize,      // p2x
                 *column + _squareSize    // p2y
             });
+
+            atLeastOneTile = true;
 
             *row += _squareSize;
         }
