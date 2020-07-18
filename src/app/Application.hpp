@@ -56,7 +56,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         // define window flags
         glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
         glfwm::WindowManager::setHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-        glfwm::WindowManager::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);  // force core
+        glfwm::WindowManager::setHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // force core
         glfwm::WindowManager::setHint(GLFW_SAMPLES, 4);  // set antialiasing
         glfwm::WindowManager::setHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
         #ifdef __APPLE__
@@ -209,32 +209,14 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         auto &width = _framebufferSize.width;
         auto &height = _framebufferSize.height;
 
-        // Compute aspect ratio of the new window
-        if (height == 0) height = 1;                // To prevent divide by 0
-        auto aspect = (GLfloat)width / (GLfloat)height;
-
         // reset viewport to default
         glViewport(0, 0, width, height);
-
-        // Set the aspect ratio of the clipping area to match the viewport
-        glMatrixMode(GL_PROJECTION);  // To operate on the Projection matrix
-        glLoadIdentity();             // Reset the projection matrix
-        // if (width >= height) {
-        //     // aspect >= 1, set the height from -1 to 1, with larger width
-        //     gluOrtho2D(-1.0 * aspect, 1.0 * aspect, -1.0, 1.0);
-        // } else {
-        //     // aspect < 1, set the width to -1 to 1, with larger height
-        //     gluOrtho2D(-1.0, 1.0, -1.0 / aspect, 1.0 / aspect);
-        // }
-
-        gluOrtho2D(0.0f, width, height, 0.0f);
-
-        glMatrixMode(GL_MODELVIEW);
     }
 
     void _clear() {
         // clear frame
         glClear(GL_COLOR_BUFFER_BIT);
+
         // define clear color
         glClearColor(
             this->_backgroundColor.r,

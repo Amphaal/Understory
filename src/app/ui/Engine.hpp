@@ -34,13 +34,17 @@
 
 #include "src/app/ui/layout/GridLayout.hpp"
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 namespace UnderStory {
 
 namespace UI {
 
 class Engine {
  public:
-    explicit Engine(const UnderStory::Utility::Size* constraints, const glm::vec2* pointerPos) : _layout(constraints, pointerPos) {}
+    explicit Engine(const UnderStory::Utility::Size* constraints, const glm::vec2* pointerPos) : _constraints(constraints) {}
     ~Engine() {
         if(!_initd) return;
 
@@ -56,73 +60,53 @@ class Engine {
     bool onKeyPress(glfwm::EventKey* event) {
         if(event->getAction() != glfwm::ActionType::RELEASE) return true;
 
-        switch (event->getKey()) {
-            case glfwm::KeyType::KEY_A: {
-                _layout.addTiles(1);
-            }
-            break;
-
-            case glfwm::KeyType::KEY_Z: {
-                _layout.removeTiles(1);
-            }
-            break;
-
-            case glfwm::KeyType::KEY_Q: {
-                _layout.changeColor();
-            }
-            break;
-
-            case glfwm::KeyType::KEY_S: {
-                _layout.changeLayoutDirection();
-            }
-            break;
-
-            default:
-                break;
-        }
-
         return true;
     }
 
     void init() {
+        //
         this->_programId = EngineInternal::getProgram();
-
-        _layout.setOnTileDrawing([](const std::unique_ptr<GridTile>& tile) {
-            glBegin(GL_QUADS);
-                glColor4f(tile->currentColor[0], tile->currentColor[1], tile->currentColor[2], tile->currentColor[3]);
-                glVertex2f(tile->currentRect[0], tile->currentRect[1]);
-                glVertex2f(tile->currentRect[2], tile->currentRect[1]);
-                glVertex2f(tile->currentRect[2], tile->currentRect[3]);
-                glVertex2f(tile->currentRect[0], tile->currentRect[3]);
-            glEnd();
-        });
-        _layout.addTiles(1);
-
         this->_loadDataInBuffers();
+
+        // TODO(amphaal) use texture, move block
+        glActiveTexture(GL_TEXTURE0);
+        auto &logoTexture = _textures[0];
+        logoTexture.use();
+
+        //
+        glUseProgram(_programId);
+
+        //
         _initd = true;
     }
 
     void draw() {
-        _layout.advance();
-        _layout.draw();
+        {
+            glm::mat4 model(1.0);
+            model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+            int modelLoc = glGetUniformLocation(_programId, "model");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        }
+
+        {
+            glm::mat4 view(1.0);
+            view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+            int viewLoc = glGetUniformLocation(_programId, "view");
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+        }
+
+        {
+            glm::mat4 projection(1.0);
+            projection = glm::perspective(glm::radians(45.0f), _constraints->wF() / _constraints->hF(), 0.1f, 100.0f);
+
+            int projLoc = glGetUniformLocation(_programId, "projection");
+            glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        }
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     }
-
-    // void draw(const Utility::Size &framebufferSize) {
-        // glEnable(GL_BLEND);
-        // glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        // glActiveTexture(GL_TEXTURE0);
-        // auto &logoTexture = _textures[0];
-        // logoTexture.use();
-
-        // glBindVertexArray(_VAO);
-        // glBindBuffer(GL_ARRAY_BUFFER, _VBO);
-        // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _EBO);
-
-        // glUseProgram(_programId);
-
-        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-    // }
 
  private:
     bool _initd = false;
@@ -130,7 +114,7 @@ class Engine {
     std::vector<GLuint> _vertexArraysIndexes;
     std::vector<GLuint> _buffersIndexes;
     std::vector<Texture> _textures;
-    GridLayout _layout;
+    const UnderStory::Utility::Size* _constraints = nullptr;
 
     GLuint _VBO, _VAO, _EBO;
 
@@ -174,7 +158,7 @@ class Engine {
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * fSize, reinterpret_cast<void*>(6 * fSize));
         glEnableVertexAttribArray(2);
 
-        _useAsTexture("logo.png");
+        _useAsTexture("wall.jpg");
     }
 
     Texture& _useAsTexture(const std::string &path) {

@@ -42,7 +42,7 @@ class Texture {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, rawImage.s.width, rawImage.s.height, 0, GL_RGBA, GL_UNSIGNED_BYTE, rawImage.pixels);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rawImage.s.width, rawImage.s.height, 0, GL_RGB, GL_UNSIGNED_BYTE, rawImage.pixels);
         glGenerateMipmap(GL_TEXTURE_2D);
 
         _size = rawImage.s;

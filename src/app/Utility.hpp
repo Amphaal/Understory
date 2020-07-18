@@ -36,6 +36,14 @@ class Utility {
     struct Size {
         int width;
         int height;
+
+        float wF() const {
+            return static_cast<float>(width);
+        }
+
+        float hF() const {
+            return static_cast<float>(height);
+        }
     };
 
     struct RawImage {
