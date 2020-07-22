@@ -215,7 +215,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
     void _clear() {
         // clear frame
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // define clear color
         glClearColor(
@@ -245,6 +245,9 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         // handles transparency
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        // enable z-index
+        glEnable(GL_DEPTH_TEST);
     }
 
     bool _onFrameBufferSizeChanged() {

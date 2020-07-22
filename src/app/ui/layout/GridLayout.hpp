@@ -212,9 +212,9 @@ class GridLayout {
 
             auto rect = glm::vec4 {
                 x,                    // p1x
-                y,                 // p1y
+                y,                    // p1y
                 x + _squareSize,      // p2x
-                y + _squareSize    // p2y
+                y + _squareSize       // p2y
             };
 
             tile->animateRect(rect);

@@ -44,7 +44,7 @@ namespace UI {
 
 class Engine {
  public:
-    explicit Engine(const UnderStory::Utility::Size* constraints, const glm::vec2* pointerPos) : _constraints(constraints) {}
+    explicit Engine(const UnderStory::Utility::Size* constraints, const glm::vec2* pointerPos) : _constraints(constraints), _assetsGrid(constraints, pointerPos) {}
     ~Engine() {
         if(!_initd) return;
 
@@ -77,26 +77,34 @@ class Engine {
         glUseProgram(_programId);
 
         //
+        _assetsGrid.setOnTileDrawing([=](std::unique_ptr<UnderStory::UI::GridTile> &tile) {
+            {
+                glm::mat4 model(1.0);
+                model = glm::translate(model, glm::vec3(tile->currentPos, 0.0f));
+
+                int modelLoc = glGetUniformLocation(_programId, "model");
+                glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+            }
+            glDrawArrays(GL_TRIANGLES, 0, 6);
+        });
+
+        //
         _initd = true;
     }
 
     void draw() {
-        {
-            glm::mat4 model(1.0);
-            model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        // define matrixes
 
-            int modelLoc = glGetUniformLocation(_programId, "model");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-        }
-
+        // view
         {
             glm::mat4 view(1.0);
-            view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+            view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
 
             int viewLoc = glGetUniformLocation(_programId, "view");
             glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         }
 
+        // projection
         {
             glm::mat4 projection(1.0);
             projection = glm::perspective(glm::radians(45.0f), _constraints->wF() / _constraints->hF(), 0.1f, 100.0f);
@@ -105,7 +113,9 @@ class Engine {
             glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
         }
 
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        // animate and draw
+        _assetsGrid.advance();
+        _assetsGrid.draw();
     }
 
  private:
@@ -115,6 +125,7 @@ class Engine {
     std::vector<GLuint> _buffersIndexes;
     std::vector<Texture> _textures;
     const UnderStory::Utility::Size* _constraints = nullptr;
+    GridLayout _assetsGrid;
 
     GLuint _VBO, _VAO, _EBO;
 

@@ -56,20 +56,18 @@ class GridTile {
     }
 
     void animateRemoval(std::function<void(void)> onRemoval) {
-        _destRect = { };
+        _destPos = { };
         this->beingRemoved = true;
 
-        _animateRectTw =
-        tweeny::from(currentRect[0], currentRect[1], currentRect[2], currentRect[3])
-               .to(_destRect[0], _destRect[1], _destRect[2], _destRect[3])
+        _animatePosTw =
+        tweeny::from(currentPos[0], currentPos[1])
+               .to(_destPos[0], _destPos[1])
                .during(200)
                .via(tweeny::easing::cubicIn);
 
-        auto cb = [=](tweeny::tween<float, float, float, float> & t, float x1, float y1, float x2, float y2) {
-            currentRect[0] = x1;
-            currentRect[1] = y1;
-            currentRect[2] = x2;
-            currentRect[3] = y2;
+        auto cb = [=](tweeny::tween<float, float> & t, float x, float y) {
+            currentPos[0] = x;
+            currentPos[1] = y;
 
             if(t.progress() == 1.0f) {
                 onRemoval();
@@ -78,25 +76,23 @@ class GridTile {
             return false;
         };
 
-        _animateRectTw.onStep(cb);
+        _animatePosTw.onStep(cb);
     }
 
-    void animateRect(glm::vec4 to) {
-        if(to == _destRect) return;
+    void animatePos(glm::vec2 to) {
+        if(to == _destPos) return;
 
-        _destRect = to;
+        _destPos = to;
 
         _animateRectTw =
-        tweeny::from(currentRect[0], currentRect[1], currentRect[2], currentRect[3])
-               .to(_destRect[0], _destRect[1], _destRect[2], _destRect[3])
+        tweeny::from(currentPos[0], currentPos[1])
+               .to(_destPos[0], _destPos[1])
                .during(200)
                .via(tweeny::easing::cubicIn);
 
-        auto cb = [=](tweeny::tween<float, float, float, float> & t, float x1, float y1, float x2, float y2) {
-            currentRect[0] = x1;
-            currentRect[1] = y1;
-            currentRect[2] = x2;
-            currentRect[3] = y2;
+        auto cb = [=](tweeny::tween<float, float> & t, float x, float y) {
+            currentPos[0] = x;
+            currentPos[1] = y;
             if(t.progress() == 1.0f) return true;
             return false;
         };
@@ -105,17 +101,17 @@ class GridTile {
     }
 
     glm::vec4 currentColor { 0.0f, 1.0f, 0.0f, 0.0f };
-    glm::vec4 currentRect  { 0.0f, 0.0f, 0.0f, 0.0f };
+    glm::vec2 currentPos { 0.0f, 0.0f };
 
     bool beingRemoved = false;
 
  private:
     tweeny::tween<float, float, float, float> _animateColorTw;
-    tweeny::tween<float, float, float, float> _animateRectTw;
+    tweeny::tween<float, float> _animatePosTw;
     glm::vec4 _destColor;
     glm::vec4 _hoverColor { 1.0f, 1.0f, 0.0f, 1.0f };
     glm::vec4 _unhoverColor;
-    glm::vec4 _destRect;
+    glm::vec2 _destPos;
 
     bool _isHovered = false;
 
