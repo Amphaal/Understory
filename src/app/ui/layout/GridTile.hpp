@@ -36,7 +36,7 @@ class GridTile {
     void advance() {
         auto step = 7;  // TODO(amphaal) refresh rate sync ?
         _animateColorTw.step(step);
-        _animateRectTw.step(step);
+        _animatePosTw.step(step);
     }
 
     void setHovered(bool isHovered) {
@@ -50,8 +50,8 @@ class GridTile {
     }
 
     bool isPointInTile(glm::vec2 point) {
-        auto xOk = point[0] >= _destRect[0] && point[0] <= _destRect[2];
-        auto yOk = point[1] >= _destRect[1] && point[1] <= _destRect[3];
+        auto xOk = point[0] >= _destPos[0] && point[0] <= _destPos[2];
+        auto yOk = point[1] >= _destPos[1] && point[1] <= _destPos[3];
         return xOk && yOk;
     }
 
@@ -84,7 +84,7 @@ class GridTile {
 
         _destPos = to;
 
-        _animateRectTw =
+        _animatePosTw =
         tweeny::from(currentPos[0], currentPos[1])
                .to(_destPos[0], _destPos[1])
                .during(200)
@@ -97,7 +97,7 @@ class GridTile {
             return false;
         };
 
-        _animateRectTw.onStep(cb);
+        _animatePosTw.onStep(cb);
     }
 
     glm::vec4 currentColor { 0.0f, 1.0f, 0.0f, 0.0f };

@@ -21,7 +21,8 @@
                 "${workspaceFolder}/_gen/_deps/nuklear-src",
                 "${workspaceFolder}/_gen/_deps/rxcpp-src/Rx/v2/src",
                 "${workspaceFolder}/_gen/_deps/tinyprocesslib-src",
-                "${workspaceFolder}/_gen/_deps/tweeny-src/include"
+                "${workspaceFolder}/_gen/_deps/tweeny-src/include",
+                "C:/msys64/mingw64/include/freetype2"
             ],
             "defines": [
                 "_DEBUG",

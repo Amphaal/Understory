@@ -217,7 +217,7 @@ class GridLayout {
                 y + _squareSize       // p2y
             };
 
-            tile->animateRect(rect);
+            tile->animatePos(rect);
 
             // hovering
             auto isHovered = false;

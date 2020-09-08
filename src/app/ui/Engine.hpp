@@ -44,7 +44,9 @@ namespace UI {
 
 class Engine {
  public:
-    explicit Engine(const UnderStory::Utility::Size* constraints, const glm::vec2* pointerPos) : _constraints(constraints), _assetsGrid(constraints, pointerPos) {}
+    explicit Engine(const UnderStory::Utility::Size* constraints, const glm::vec2* pointerPos) :
+        _constraints(constraints), _assetsGrid(constraints, pointerPos), _font(Utility::getFont("simplicity.ttf")) {}
+
     ~Engine() {
         if(!_initd) return;
 
@@ -69,6 +71,7 @@ class Engine {
         this->_loadDataInBuffers();
 
         // TODO(amphaal) use texture, move block
+        _useAsTexture("wall.jpg");
         glActiveTexture(GL_TEXTURE0);
         auto &logoTexture = _textures[0];
         logoTexture.use();
@@ -77,18 +80,18 @@ class Engine {
         glUseProgram(_programId);
 
         //
-        _assetsGrid.setOnTileDrawing([=](std::unique_ptr<UnderStory::UI::GridTile> &tile) {
-            {
-                glm::mat4 model(1.0);
-                model = glm::translate(model, glm::vec3(tile->currentPos, 0.0f));
+        // _assetsGrid.addTiles(1);
+        // _assetsGrid.setOnTileDrawing([=](std::unique_ptr<UnderStory::UI::GridTile> &tile) {
+        //     {
+        //         glm::mat4 model(1.0);
+        //         model = glm::translate(model, glm::vec3(tile->currentPos, 0.0f));
 
-                int modelLoc = glGetUniformLocation(_programId, "model");
-                glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-            }
-            glDrawArrays(GL_TRIANGLES, 0, 6);
-        });
+        //         int modelLoc = glGetUniformLocation(_programId, "model");
+        //         glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        //     }
+        //     glDrawArrays(GL_TRIANGLES, 0, 6);
+        // });
 
-        //
         _initd = true;
     }
 
@@ -98,7 +101,7 @@ class Engine {
         // view
         {
             glm::mat4 view(1.0);
-            view = glm::translate(view, glm::vec3(0.0f, 0.0f, -5.0f));
+            view = glm::translate(view, glm::vec3(_xWorld, _yWorld, _zWorld));
 
             int viewLoc = glGetUniformLocation(_programId, "view");
             glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
@@ -113,21 +116,44 @@ class Engine {
             glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
         }
 
+        // model
+        {
+            glm::mat4 model(1.0);
+            model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+            int modelLoc = glGetUniformLocation(_programId, "model");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+        }
+
+        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        auto p = this->_font.Render("TEST");
+
         // animate and draw
-        _assetsGrid.advance();
-        _assetsGrid.draw();
+        // _assetsGrid.advance();
+        // _assetsGrid.draw();
     }
 
  private:
     bool _initd = false;
     GLuint _programId;
+
+    GLuint _VBO, _VAO, _EBO;
     std::vector<GLuint> _vertexArraysIndexes;
     std::vector<GLuint> _buffersIndexes;
     std::vector<Texture> _textures;
+
+    //
+    FTPixmapFont _font;
+
+    //
     const UnderStory::Utility::Size* _constraints = nullptr;
     GridLayout _assetsGrid;
 
-    GLuint _VBO, _VAO, _EBO;
+    //
+    float _xWorld = .0f;
+    float _yWorld = .0f;
+    float _zWorld = -3.0f;
 
     void _loadDataInBuffers() {
         GLfloat vertices[] = {
@@ -168,8 +194,6 @@ class Engine {
         // texture coord attribute
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * fSize, reinterpret_cast<void*>(6 * fSize));
         glEnableVertexAttribArray(2);
-
-        _useAsTexture("wall.jpg");
     }
 
     Texture& _useAsTexture(const std::string &path) {

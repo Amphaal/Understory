@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <FTGL/ftgl.h>
 #include <stb_image.h>
 
 #include <vector>
@@ -60,8 +61,19 @@ class Utility {
         return getRawImage("logo.png");
     }
 
+    static FTGLPixmapFont getFont(const std::string &path) {
+        // load font
+        auto fontFile = _getResource(path);
+        FTGLPixmapFont font((unsigned char*)fontFile.begin(), fontFile.size());
+        if(font.Error()) throw std::logic_error("Could not load font !");
+
+        // Set the font size and render a small text.
+        font.FaceSize(72);
+        return font;
+    }
+
     static const RawImage getRawImage(const std::string &path, bool flip = false) {
-        auto iconF = cmrc::appResources::get_filesystem().open(path);
+        auto iconF = _getResource(path);
         std::vector<unsigned char> icon{iconF.begin(), iconF.end()};
 
         int width, height, channels;
@@ -85,6 +97,11 @@ class Utility {
             logoAsBMP,
             channels
         };
+    }
+
+ private:
+    static cmrc::file _getResource(const std::string &path) {
+        return cmrc::appResources::get_filesystem().open(path);
     }
 };
 

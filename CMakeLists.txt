@@ -71,21 +71,24 @@ add_library(stb INTERFACE)
 target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
 target_compile_definitions(stb INTERFACE STB_IMAGE_IMPLEMENTATION)
 
-###########
-## Tests ##
-###########
+################
+## Submodules ##
+################
 
 add_subdirectory(src/base)
 add_subdirectory(src/network)
 add_subdirectory(src/models)
 add_subdirectory(src/core)
+add_subdirectory(src/app)
+
+###########
+## Tests ##
+###########
 
 #dont build tests if included as submodule
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
     add_subdirectory(tests)
 endif()
-
-add_subdirectory(src/app)
 
 #########################
 ## publishing handling ##
