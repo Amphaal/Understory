@@ -17,10 +17,8 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
-
 #pragma once
 
-#include <FTGL/ftgl.h>
 #include <stb_image.h>
 
 #include <vector>
@@ -61,15 +59,8 @@ class Utility {
         return getRawImage("logo.png");
     }
 
-    static FTGLPixmapFont getFont(const std::string &path) {
-        // load font
-        auto fontFile = _getResource(path);
-        FTGLPixmapFont font((unsigned char*)fontFile.begin(), fontFile.size());
-        if(font.Error()) throw std::logic_error("Could not load font !");
-
-        // Set the font size and render a small text.
-        font.FaceSize(72);
-        return font;
+    static cmrc::file getResource(const std::string &path) {
+        return _getResource(path);
     }
 
     static const RawImage getRawImage(const std::string &path, bool flip = false) {

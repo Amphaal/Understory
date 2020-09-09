@@ -22,6 +22,7 @@
 #include <GL/glew.h>
 #include <GL/wglext.h>
 #include <GLFW/glfw3.h>
+#include <spdlog/spdlog.h>
 
 #include <iostream>
 #include <stdexcept>
@@ -39,8 +40,6 @@
 #include "src/app/widgets/UpdateCheckerWidget.hpp"
 
 #include "Utility.hpp"
-
-#include <spdlog/spdlog.h>
 
 #define WINDOW_WIDTH 1200
 #define WINDOW_HEIGHT 800
@@ -112,7 +111,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         });
 
         // only check for updates on Windows (TODO(amphaal) MacOS ?)
-        #ifdef WIN32 && _DEBUG
+        #if defined(WIN32) && !defined(_DEBUG)
             _updateChecker.start();
         #endif
 

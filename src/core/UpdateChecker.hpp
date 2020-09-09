@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <spdlog/spdlog.h>
+
 #include <functional>
 #include <string>
 #include <regex>
@@ -32,8 +34,6 @@
 #include "src/network/HTTPDownloader.hpp"
 
 #include <process.hpp>
-
-#include <spdlog/spdlog.h>
 
 namespace UnderStory {
 

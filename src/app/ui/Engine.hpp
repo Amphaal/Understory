@@ -45,7 +45,7 @@ namespace UI {
 class Engine {
  public:
     explicit Engine(const UnderStory::Utility::Size* constraints, const glm::vec2* pointerPos) :
-        _constraints(constraints), _assetsGrid(constraints, pointerPos), _font(Utility::getFont("simplicity.ttf")) {}
+        _constraints(constraints), _assetsGrid(constraints, pointerPos) {}
 
     ~Engine() {
         if(!_initd) return;
@@ -127,8 +127,6 @@ class Engine {
 
         // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
-        auto p = this->_font.Render("TEST");
-
         // animate and draw
         // _assetsGrid.advance();
         // _assetsGrid.draw();
@@ -142,9 +140,6 @@ class Engine {
     std::vector<GLuint> _vertexArraysIndexes;
     std::vector<GLuint> _buffersIndexes;
     std::vector<Texture> _textures;
-
-    //
-    FTPixmapFont _font;
 
     //
     const UnderStory::Utility::Size* _constraints = nullptr;

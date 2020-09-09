@@ -222,20 +222,9 @@ FetchContent_MakeAvailable(tweeny)
 target_link_libraries(appExec PRIVATE tweeny)
 
 
-########################
-## Deps : freetype-gl ##
-########################
+#####################
+## Deps : freetype ##
+#####################
 
-#define
-SET(freetype-gl_BUILD_DEMOS     OFF CACHE BOOL "" FORCE)
-SET(freetype-gl_BUILD_APIDOC    OFF CACHE BOOL "" FORCE)
-SET(freetype-gl_BUILD_TESTS     OFF CACHE BOOL "" FORCE)
-
-#fetch
-FetchContent_Declare(freetype-gl
-    GIT_REPOSITORY  "https://github.com/rougier/freetype-gl.git"
-)
-FetchContent_MakeAvailable(freetype-gl)
-
-#link
-target_link_libraries(appExec PRIVATE freetype-gl)
+find_package(Freetype REQUIRED)
+target_link_libraries(appExec PRIVATE Freetype)
