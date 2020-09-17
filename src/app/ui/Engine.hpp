@@ -27,6 +27,8 @@
 #include <utility>
 #include <memory>
 
+#include <GLFWM/glfwm.hpp>
+
 #include "src/app/Utility.hpp"
 
 #include "Texture.hpp"
@@ -70,16 +72,9 @@ class Engine {
         this->_programId = EngineInternal::getProgram();
         this->_loadDataInBuffers();
 
-        // TODO(amphaal) use texture, move block
-        _useAsTexture("wall.jpg");
-        glActiveTexture(GL_TEXTURE0);
-        auto &logoTexture = _textures[0];
-        logoTexture.use();
-
         //
         glUseProgram(_programId);
 
-        //
         // _assetsGrid.addTiles(1);
         // _assetsGrid.setOnTileDrawing([=](std::unique_ptr<UnderStory::UI::GridTile> &tile) {
         //     {
@@ -92,21 +87,36 @@ class Engine {
         //     glDrawArrays(GL_TRIANGLES, 0, 6);
         // });
 
+        onWindowSizeChange();
+        updateView();
+
         _initd = true;
     }
 
+    bool started() const {
+        return _initd;
+    }
+
     void draw() {
-        // define matrixes
+        // // define matrixes
 
-        // view
+        // model
         {
-            glm::mat4 view(1.0);
-            view = glm::translate(view, glm::vec3(_xWorld, _yWorld, _zWorld));
+            glm::mat4 model(1.0);
+            // model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-            int viewLoc = glGetUniformLocation(_programId, "view");
-            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+            int modelLoc = glGetUniformLocation(_programId, "model");
+            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
         }
 
+        // // animate and draw
+        // _assetsGrid.advance();
+        // _assetsGrid.draw();
+
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    }
+
+    void onWindowSizeChange() {
         // projection
         {
             glm::mat4 projection(1.0);
@@ -115,21 +125,16 @@ class Engine {
             int projLoc = glGetUniformLocation(_programId, "projection");
             glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
         }
+    }
 
-        // model
+    void updateView() {
         {
-            glm::mat4 model(1.0);
-            model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            glm::mat4 view(1.0);
+            view = glm::translate(view, glm::vec3(_xWorld, _yWorld, _zWorld));
 
-            int modelLoc = glGetUniformLocation(_programId, "model");
-            glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+            int viewLoc = glGetUniformLocation(_programId, "view");
+            glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
         }
-
-        // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        // animate and draw
-        // _assetsGrid.advance();
-        // _assetsGrid.draw();
     }
 
  private:
@@ -152,11 +157,11 @@ class Engine {
 
     void _loadDataInBuffers() {
         GLfloat vertices[] = {
-            // positions            // colors           // texture coords
-            1.0f,  1.0f, 0.0f,      1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
-            1.0f, -1.0f, 0.0f,      0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
-            -1.0f, -1.0f, 0.0f,     0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
-            -1.0f,  1.0f, 0.0f,     1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left
+            // 2D positions
+            1.0f,  1.0f,
+            1.0f, -1.0f,
+            -1.0f, -1.0f,
+            -1.0f,  1.0f
         };
 
         GLuint indices[] = {
@@ -181,14 +186,8 @@ class Engine {
 
         // position attribute
         auto fSize = sizeof(float);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * fSize, reinterpret_cast<void*>(0));
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * fSize, reinterpret_cast<void*>(0));
         glEnableVertexAttribArray(0);
-        // color attribute
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * fSize, reinterpret_cast<void*>(3 * fSize));
-        glEnableVertexAttribArray(1);
-        // texture coord attribute
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * fSize, reinterpret_cast<void*>(6 * fSize));
-        glEnableVertexAttribArray(2);
     }
 
     Texture& _useAsTexture(const std::string &path) {

@@ -210,6 +210,9 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
         // reset viewport to default
         glViewport(0, 0, width, height);
+
+        // signals the engine
+        if(this->_engine.started()) this->_engine.onWindowSizeChange();
     }
 
     void _clear() {
