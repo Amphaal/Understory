@@ -1,0 +1,11 @@
+# ninja log v5
+0	147	6224194987016801	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-mkdir	9fd149277c81b1c0
+147	10007	6224195085631310	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-download	761ca18469877f58
+10011	10058	6224195086131756	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-patch	77ec21a124ccd51e
+10007	11316	0	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-update	819dd7cf344102e3
+11316	11361	6224195099160300	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-configure	d13237e104525531
+11361	11408	6224195099630733	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-build	648f480d1b736c44
+11409	11456	6224195100111166	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-install	d0e6fa0f9d116d0a
+11456	11503	6224195100581596	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-test	3bb4b29be623e243
+11503	11568	6224195101232185	CMakeFiles/spdlog-populate-complete	d9be8c9f0937141d
+11503	11568	6224195101232185	spdlog-populate-prefix/src/spdlog-populate-stamp/spdlog-populate-done	d9be8c9f0937141d

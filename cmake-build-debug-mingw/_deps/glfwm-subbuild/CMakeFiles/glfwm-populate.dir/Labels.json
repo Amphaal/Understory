@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "F:/Understory/cmake-build-debug-mingw/_deps/glfwm-subbuild/CMakeFiles/glfwm-populate"
+		},
+		{
+			"file" : "F:/Understory/cmake-build-debug-mingw/_deps/glfwm-subbuild/CMakeFiles/glfwm-populate.rule"
+		},
+		{
+			"file" : "F:/Understory/cmake-build-debug-mingw/_deps/glfwm-subbuild/CMakeFiles/glfwm-populate-complete.rule"
+		},
+		{
+			"file" : "F:/Understory/cmake-build-debug-mingw/_deps/glfwm-subbuild/glfwm-populate-prefix/src/glfwm-populate-stamp/glfwm-populate-install.rule"
+		},
+		{
+			"file" : "F:/Understory/cmake-build-debug-mingw/_deps/glfwm-subbuild/glfwm-populate-prefix/src/glfwm-populate-stamp/glfwm-populate-mkdir.rule"
+		},
+		{
+			"file" : "F:/Understory/cmake-build-debug-mingw/_deps/glfwm-subbuild/glfwm-populate-prefix/src/glfwm-populate-stamp/glfwm-populate-download.rule"
+		},
+		{
+			"file" : "F:/Understory/cmake-build-debug-mingw/_deps/glfwm-subbuild/glfwm-populate-prefix/src/glfwm-populate-stamp/glfwm-populate-update.rule"
+		},
+		{
+			"file" : "F:/Understory/cmake-build-debug-mingw/_deps/glfwm-subbuild/glfwm-populate-prefix/src/glfwm-populate-stamp/glfwm-populate-patch.rule"
+		},
+		{
+			"file" : "F:/Understory/cmake-build-debug-mingw/_deps/glfwm-subbuild/glfwm-populate-prefix/src/glfwm-populate-stamp/glfwm-populate-configure.rule"
+		},
+		{
+			"file" : "F:/Understory/cmake-build-debug-mingw/_deps/glfwm-subbuild/glfwm-populate-prefix/src/glfwm-populate-stamp/glfwm-populate-build.rule"
+		},
+		{
+			"file" : "F:/Understory/cmake-build-debug-mingw/_deps/glfwm-subbuild/glfwm-populate-prefix/src/glfwm-populate-stamp/glfwm-populate-test.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"glfwm-populate"
+		],
+		"name" : "glfwm-populate"
+	}
+}
