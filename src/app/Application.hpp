@@ -48,7 +48,7 @@ namespace UnderStory {
 
 class Application : public glfwm::EventHandler, public glfwm::Drawable, public std::enable_shared_from_this<Application> {
  public:
-    Application() : _engine(&this->_framebufferSize, &_pointerPos) {
+    Application() {
         // init GLFW
         if(!glfwm::WindowManager::init()) throw std::exception();
 
@@ -86,7 +86,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         this->_nuklear.init(this->_window->glfwWindow, &this->_backgroundColor);
 
         // init engine
-        this->_engine.init();
+        this->_engine = new UI::Engine(&this->_framebufferSize, &_pointerPos);
 
         // ui
         this->_defineWindowIcon();
@@ -131,7 +131,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
     glm::vec2 _pointerPos;
     nk_colorf _backgroundColor {0.10f, 0.18f, 0.24f, .5f};
 
-    UI::Engine _engine;
+    UI::Engine* _engine = nullptr;
     UI::Nuklear _nuklear;
     UI::FrameTracker _fpsTracker;
 
@@ -155,7 +155,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
             case glfwm::EventType::KEY : {
                 auto event = dynamic_cast<glfwm::EventKey*>(e.get());
-                return this->_engine.onKeyPress(event);
+                return this->_engine->onKeyPress(event);
             }
             break;
 
@@ -168,7 +168,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
 
             case glfwm::EventType::SCROLL : {
                 auto event = dynamic_cast<glfwm::EventScroll*>(e.get());
-                return this->_engine.onScrollEvent(event);
+                return this->_engine->onScrollEvent(event);
             };
             break;
 
@@ -183,7 +183,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         this->_fpsTracker.recordFrame();
 
             this->_clear();
-            this->_engine.draw();
+            this->_engine->draw();
 
         this->_fpsTracker.endRecord();
     }
@@ -212,7 +212,7 @@ class Application : public glfwm::EventHandler, public glfwm::Drawable, public s
         glViewport(0, 0, width, height);
 
         // signals the engine
-        if(this->_engine.started()) this->_engine.onWindowSizeChange();
+        if(this->_engine) this->_engine->onWindowSizeChange();
     }
 
     void _clear() {

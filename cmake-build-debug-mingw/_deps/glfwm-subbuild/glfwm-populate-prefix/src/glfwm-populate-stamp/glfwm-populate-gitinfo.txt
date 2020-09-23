@@ -1,3 +1,0 @@
-repository='https://github.com/Amphaal/glfwm.git'
-module=''
-tag='origin'

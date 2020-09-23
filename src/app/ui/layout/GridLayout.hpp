@@ -26,6 +26,8 @@
 #include <set>
 #include <memory>
 
+#include "src/app/ui/layout/GridShader.hpp"
+
 #include "src/app/Utility.hpp"
 
 #include "GridTile.hpp"
@@ -42,6 +44,7 @@ class GridLayout {
         TopToBottom
     };
 
+    GridLayout() {}
     explicit GridLayout(const UnderStory::Utility::Size* constraints, const glm::vec2* pointerPos) : _constraints(constraints), _pointerPos(pointerPos) {}
 
     void advance() {
@@ -60,6 +63,7 @@ class GridLayout {
     }
 
     void draw() {
+        glUseProgram(_shader.getProgram());
         for(auto & [k, tile] : _tiles) {
             _onTileDrawing(tile);
         }
@@ -102,7 +106,12 @@ class GridLayout {
         _onTileDrawing = cb;
     }
 
+    const GridShader shader() const {
+        return _shader;
+    }
+
  private:
+    GridShader _shader;
     int _squareSize = 120;
     int _padding = 20;
     Direction _direction = LeftToRight;

@@ -1,3 +1,0 @@
-repository='https://github.com/ReactiveX/RxCpp.git'
-module=''
-tag='origin'

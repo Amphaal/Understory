@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <assert.h>
+
 #include <GL/glew.h>
 
 #include <iostream>
@@ -28,43 +30,22 @@ namespace UnderStory {
 
 namespace UI {
 
-class EngineInternal {
+class Shader {
  public:
-    static GLuint getProgram() {
+    GLuint getProgram() const {
+        assert(_programId);
+        return _programId;
+    }
+
+    Shader(const char * vertexShader, const char * fragmentShader) {
         GLuint vShaderId = _compileShaders(vertexShader, GL_VERTEX_SHADER);
         GLuint fShaderId = _compileShaders(fragmentShader, GL_FRAGMENT_SHADER);
 
-        return _linkProgram(vShaderId, fShaderId);
+        _programId = _linkProgram(vShaderId, fShaderId);
     }
 
  private:
-    static inline std::string vertexShader = R"(
-        #version 330 core
-
-        layout (location = 0) in vec2 aPos;
-
-        out vec3 ourColor;
-  
-        uniform mat4 model;
-        uniform mat4 view;
-        uniform mat4 projection;
-
-        void main()
-        {
-            gl_Position = projection * view * model * vec4(aPos, 0.0f, 1.0f);
-        }
-    )";
-
-    static inline std::string fragmentShader = R"(
-        #version 330 core
-
-        out vec4 FragColor;
-
-        void main()
-        {
-            FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-        }
-    )";
+    GLuint _programId = 0;
 
     // Compile and create shader object and returns its id
     static GLuint _compileShaders(std::string shader, GLenum type) {

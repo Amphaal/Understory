@@ -1,3 +1,0 @@
-F:/Understory/cmake-build-debug-mingw/_deps/tinyprocesslib-subbuild/CMakeFiles/rebuild_cache.dir
-F:/Understory/cmake-build-debug-mingw/_deps/tinyprocesslib-subbuild/CMakeFiles/edit_cache.dir
-F:/Understory/cmake-build-debug-mingw/_deps/tinyprocesslib-subbuild/CMakeFiles/tinyprocesslib-populate.dir
