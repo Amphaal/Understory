@@ -106,77 +106,42 @@ install(
 ## Sources ##
 #############
 
-target_sources(appExec PRIVATE
-    Application.hpp
-    Utility.hpp
-    main.cpp
+# find packages
+find_package(Corrade REQUIRED Main)
+find_package(Magnum REQUIRED
+    GL
+    Shaders
+    Text
+    Sdl2Application
+    Trade
+)
+find_package(MagnumPlugins REQUIRED FreeTypeFont)
+
+set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
+
+corrade_add_resource(USApplication_RESOURCES 
+    resources.conf
 )
 
-add_subdirectory(widgets)
-add_subdirectory(ui)
+target_sources(appExec PRIVATE 
+    USApplication.cpp 
+    ${USApplication_RESOURCES}
+)
+
+# linking
+target_link_libraries(appExec PRIVATE
+    Corrade::Main
+    Magnum::Application
+    Magnum::GL
+    Magnum::Magnum
+    Magnum::Shaders
+    Magnum::Text
+    MagnumPlugins::FreeTypeFont
+    Magnum::Trade
+)
 
 target_link_libraries(appExec PRIVATE UnderStory::network)
 target_link_libraries(appExec PRIVATE UnderStory::core)
-
-#####################
-## Deps : CMake RC ##
-#####################
-
-include(CMakeRC)
-
-# find resources
-file(GLOB_RECURSE APP_RESOURCES_FILES "resources/**")
-cmrc_add_resource_library(appResources
-    WHENCE resources
-    ${APP_RESOURCES_FILES}
-)
-
-target_link_libraries(appExec PRIVATE appResources)
-
-#################
-## Deps : GLFW ##
-#################
-
-find_package(glfw3 REQUIRED)
-
-target_link_libraries(appExec PRIVATE glfw)
-
-#################
-## Deps : GLEW ##
-#################
-
-find_package(GLEW REQUIRED)
-
-target_link_libraries(appExec PRIVATE GLEW::GLEW)
-
-##################
-## Deps : GLFWM ##
-##################
-
-#fetch
-FetchContent_Declare(glfwm
-    GIT_REPOSITORY  "https://github.com/Amphaal/glfwm.git"
-)
-FetchContent_MakeAvailable(glfwm)
-
-#link
-target_link_libraries(appExec PRIVATE glfwm)
-
-################
-## Deps : GLM ##
-################
-
-#find
-find_package(glm REQUIRED)
-
-if(WIN32)
-    SET(GML_TARGET "glm")
-else()
-    SET(GML_TARGET "glm::glm")
-endif()
-
-#link
-target_link_libraries(appExec PRIVATE ${GML_TARGET})
 
 ##################
 ## Deps : RxCpp ##
@@ -190,41 +155,3 @@ FetchContent_Populate(rxcpp)
 
 #link
 target_include_directories(appExec PRIVATE ${rxcpp_SOURCE_DIR}/Rx/v2/src)
-
-####################
-## Deps : Nuklear ##
-####################
-
-#fetch
-FetchContent_Declare(nuklear
-    GIT_REPOSITORY  "https://github.com/Immediate-Mode-UI/Nuklear.git"
-)
-FetchContent_Populate(nuklear)
-
-#define as target
-add_library(nuklear INTERFACE)
-target_include_directories(nuklear INTERFACE ${nuklear_SOURCE_DIR})
-
-#link
-target_link_libraries(appExec PRIVATE nuklear)
-
-###################
-## Deps : Tweeny ##
-###################
-
-#fetch
-FetchContent_Declare(tweeny
-    GIT_REPOSITORY  "https://github.com/mobius3/tweeny.git"
-)
-FetchContent_MakeAvailable(tweeny)
-
-#link
-target_link_libraries(appExec PRIVATE tweeny)
-
-
-#####################
-## Deps : freetype ##
-#####################
-
-find_package(Freetype REQUIRED)
-target_link_libraries(appExec PRIVATE Freetype)

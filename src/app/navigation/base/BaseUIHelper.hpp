@@ -17,21 +17,41 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
-#include <memory>
+#pragma once
 
-#include "Application.hpp"
+#include <Magnum/Timeline.h>
+#include <Magnum/Math/Matrix3.h>
 
-int main(int argc, char *argv[]) {
-    spdlog::set_level(spdlog::level::debug);
+#include <vector>
 
-    auto app = std::make_shared<UnderStory::Application>();
+namespace UnderStory {
 
-    try {
-        app->run();
-    } catch (const std::exception& e) {
-        std::cerr << e.what() << std::endl;
-        return EXIT_FAILURE;
+namespace Navigation {
+
+class BaseUIHelper {
+ public:
+    BaseUIHelper(Magnum::Timeline* timeline, Magnum::Matrix3* mainMatrix) : _timeline(timeline), _mainMatrix(mainMatrix) {}
+
+    virtual void stopAnim() = 0;
+    virtual void advance() = 0;
+
+    void setExcludedWhenPlaying(std::initializer_list<BaseUIHelper*> list) {
+        _excluded = list;
     }
 
-    return EXIT_SUCCESS;
-}
+ protected:
+    Magnum::Timeline* _timeline = nullptr;
+    Magnum::Matrix3* _mainMatrix = nullptr;
+
+    // must be overriden and reused
+    virtual void _startAnim() {
+        for(auto &excluded : _excluded) excluded->stopAnim();
+    }
+
+ private:
+    std::vector<BaseUIHelper*> _excluded;
+};
+
+}  // namespace Navigation
+
+}  // namespace UnderStory
