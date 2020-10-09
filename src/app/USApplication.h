@@ -1,15 +1,32 @@
+// UnderStory
+// An intuitive Pen & Paper experience
+// Copyright (C) 2020 Guillaume Vara
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// Any graphical resources available within the source code may
+// use a different license and copyright : please refer to their metadata
+// for further details. Graphical resources without explicit references to a
+// different license and copyright still refer to this GPL.
+
 #pragma once
 
 #include <Corrade/PluginManager/Manager.h>
 #include <Corrade/Utility/FormatStl.h>
 #include <Corrade/Utility/Resource.h>
+
 #include <Magnum/GL/DefaultFramebuffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/GL/Renderbuffer.h>
-#include <Magnum/Math/Color.h>
-#include <Magnum/Math/Complex.h>
-#include <Magnum/Math/Matrix3.h>
 #include <Magnum/Platform/Sdl2Application.h>
 #include <Magnum/Shaders/DistanceFieldVector.h>
 #include <Magnum/Text/AbstractFont.h>
@@ -20,12 +37,20 @@
 #include <Magnum/Trade/MeshData.h>
 #include <Magnum/ImageView.h>
 
+#include <Magnum/Math/Complex.h>
+#include <Magnum/Math/Matrix3.h>
+#include <Magnum/Math/Color.h>
+
 #include <Magnum/Trade/AbstractImporter.h>
 #include <Magnum/Trade/ImageData.h>
 #include <Magnum/GL/TextureFormat.h>
 
 #include <utility>
 #include <string>
+
+#include "src/base/understory.h"
+
+#include "widgets/UpdateCheckerWidget.hpp"
 
 #include "navigation/MouseMoveHelper.hpp"
 #include "navigation/MapScaleHelper.hpp"
@@ -35,6 +60,8 @@
 
 #include "navigation/shaders/selectRect/SelectionRectState.h"
 #include "navigation/shaders/grid/Grid.hpp"
+
+namespace UnderStory {
 
 class USApplication: public Magnum::Platform::Application {
  public:
@@ -73,14 +100,14 @@ class USApplication: public Magnum::Platform::Application {
     Magnum::Shaders::DistanceFieldVector2D _textShader;
 
     Magnum::GL::Texture2D _gridTexture;
-    Grid _gridShader{Magnum::NoCreate};
+    Shader::Grid _gridShader{Magnum::NoCreate};
     Magnum::GL::Mesh _grid{Magnum::GL::MeshPrimitive::Triangles};
     void _defineGrid(Magnum::Utility::Resource &rs);
 
-    SelectionRect _selectRectShader{Magnum::NoCreate};
+    Shader::SelectionRect _selectRectShader{Magnum::NoCreate};
     Magnum::GL::Buffer _selectRectBuffer;
     Magnum::GL::Mesh _selectRect{Magnum::GL::MeshPrimitive::Triangles};
-    SelectionRectState _srs;
+    Navigation::SelectionRectState _srs;
     void _defineSelectionRect();
 
     Magnum::Matrix3 _transformationWorld,
@@ -91,7 +118,11 @@ class USApplication: public Magnum::Platform::Application {
     static const int DOUBLE_CLICK_DELAY_MS = 200;
 
     Magnum::Timeline _timeline;
-    MouseMoveHelper _mmh;
-    MapScaleHelper _msh;
-    KeyboardMoveHelper _kmh;
+    Navigation::MouseMoveHelper _mmh;
+    Navigation::MapScaleHelper _msh;
+    Navigation::KeyboardMoveHelper _kmh;
+
+    Widget::UpdateCheckerWidget _updateChecker;
 };
+
+}  // namespace UnderStory

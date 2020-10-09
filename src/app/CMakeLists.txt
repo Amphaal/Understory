@@ -140,6 +140,9 @@ target_link_libraries(appExec PRIVATE
     Magnum::Trade
 )
 
+target_link_libraries(appExec PRIVATE UnderStory::network)
+target_link_libraries(appExec PRIVATE UnderStory::core)
+
 ##################
 ## Deps : RxCpp ##
 ##################

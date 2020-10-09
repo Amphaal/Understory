@@ -1,12 +1,31 @@
-// TODO integrate back with main project
+// UnderStory
+// An intuitive Pen & Paper experience
+// Copyright (C) 2020 Guillaume Vara
+
+// This program is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// This program is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+
+// Any graphical resources available within the source code may
+// use a different license and copyright : please refer to their metadata
+// for further details. Graphical resources without explicit references to a
+// different license and copyright still refer to this GPL.
+
+// TODO grid precision, antialiasing further
 
 #include "USApplication.h"
 
 using namespace Magnum::Math::Literals;
 
-USApplication::USApplication(const Arguments& arguments): Magnum::Platform::Application{
+UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Platform::Application{
         arguments,
-        Configuration{}.setTitle("UnderStory text app")
+        Configuration{}.setTitle(APP_FULL_DENOM)
                        .setWindowFlags(Configuration::WindowFlag::Resizable),
         GLConfiguration{}
     },
@@ -14,6 +33,9 @@ USApplication::USApplication(const Arguments& arguments): Magnum::Platform::Appl
     _mmh(&_timeline, &_transformationWorld),
     _msh(&_timeline, &_transformationWorld),
     _kmh(&_timeline, &_transformationWorld) {
+    //
+    _updateChecker.start();
+
     // define animation mutual exclusions
     _kmh.setExcludedWhenPlaying({&_mmh});
     _mmh.setExcludedWhenPlaying({&_kmh});
@@ -74,9 +96,9 @@ USApplication::USApplication(const Arguments& arguments): Magnum::Platform::Appl
     _timeline.start();
 }
 
-void USApplication::_defineSelectionRect() {
+void UnderStory::USApplication::_defineSelectionRect() {
     // compile shader
-    _selectRectShader = SelectionRect{};
+    _selectRectShader = Shader::SelectionRect{};
 
     // define indices
     Magnum::GL::Buffer indices;
@@ -86,7 +108,7 @@ void USApplication::_defineSelectionRect() {
     });
 
     // set state tracker
-    _srs = SelectionRectState(&_selectRectShader, &_selectRectBuffer);
+    _srs = Navigation::SelectionRectState(&_selectRectShader, &_selectRectBuffer);
 
     // bind buffer
     _selectRectBuffer.setData(_srs.vertexes(), Magnum::GL::BufferUsage::DynamicDraw);
@@ -97,7 +119,7 @@ void USApplication::_defineSelectionRect() {
             .setIndexBuffer(std::move(indices), 0, Magnum::MeshIndexType::UnsignedInt);
 }
 
-void USApplication::_defineGrid(Magnum::Utility::Resource &rs) {
+void UnderStory::USApplication::_defineGrid(Magnum::Utility::Resource &rs) {
     // load texture
     Corrade::PluginManager::Manager<Magnum::Trade::AbstractImporter> manager;
     auto importer = manager.loadAndInstantiate("PngImporter");
@@ -114,7 +136,7 @@ void USApplication::_defineGrid(Magnum::Utility::Resource &rs) {
         .setSubImage(0, {}, *image);
 
     // compile shader
-    _gridShader = Grid{};
+    _gridShader = Shader::Grid{};
 
     // define indices
     Magnum::GL::Buffer indices;
@@ -127,7 +149,7 @@ void USApplication::_defineGrid(Magnum::Utility::Resource &rs) {
     auto squareSize = Magnum::Vector2 {image->size()} * (1.f / framebufferSize().y());
     auto squareCount = 10000.f;
     auto gridRadius = squareSize * squareCount / 2;
-    const Grid::Vertex gridVData[]{
+    const Shader::Grid::Vertex gridVData[]{
         { {-gridRadius.x(),  gridRadius.y()}, {0.0f,        0.0f} },
         { { gridRadius.x(),  gridRadius.y()}, {squareCount, 0.0f} },
         { { gridRadius.x(), -gridRadius.y()}, {squareCount, squareCount} },
@@ -140,11 +162,11 @@ void USApplication::_defineGrid(Magnum::Utility::Resource &rs) {
 
     // define mesh
     _grid.setCount(indices.size())
-        .addVertexBuffer(std::move(gridVertices), 0, Grid::Position{}, Grid::TextureCoordinates{})
+        .addVertexBuffer(std::move(gridVertices), 0, Shader::Grid::Position{}, Shader::Grid::TextureCoordinates{})
         .setIndexBuffer(std::move(indices),       0, Magnum::MeshIndexType::UnsignedInt);
 }
 
-void USApplication::_updateProjections() {
+void UnderStory::USApplication::_updateProjections() {
     auto ws = Magnum::Vector2{windowSize()};
 
     _projectionWorld = Magnum::Matrix3::projection(
@@ -169,12 +191,12 @@ void USApplication::_updateProjections() {
     _srs.onFramebufferChange();
 }
 
-void USApplication::viewportEvent(ViewportEvent& event) {
+void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
     Magnum::GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
     _updateProjections();
 }
 
-void USApplication::drawEvent() {
+void UnderStory::USApplication::drawEvent() {
     Magnum::GL::defaultFramebuffer.clear(Magnum::GL::FramebufferClear::Color);
 
     // advance animations
@@ -229,15 +251,15 @@ void USApplication::drawEvent() {
     _timeline.nextFrame();
 }
 
-void USApplication::mouseScrollEvent(MouseScrollEvent& event) {
+void UnderStory::USApplication::mouseScrollEvent(MouseScrollEvent& event) {
     _msh.mouseScrollEvent(event, this);
 }
 
-void USApplication::keyReleaseEvent(KeyEvent& event) {
+void UnderStory::USApplication::keyReleaseEvent(KeyEvent& event) {
     _kmh.keyReleaseEvent(event);
 }
 
-void USApplication::keyPressEvent(KeyEvent& event) {
+void UnderStory::USApplication::keyPressEvent(KeyEvent& event) {
     _kmh.keyPressEvent(event);
     _msh.keyPressEvent(event);
 
@@ -250,7 +272,7 @@ void USApplication::keyPressEvent(KeyEvent& event) {
     }
 }
 
-void USApplication::mousePressEvent(MouseEvent& event) {
+void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {
     //
     switch (event.button()) {
         case MouseEvent::Button::Left: {
@@ -283,7 +305,7 @@ void USApplication::mousePressEvent(MouseEvent& event) {
     }
 }
 
-void USApplication::mouseMoveEvent(MouseMoveEvent& event) {
+void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
     if (_lMousePressed) {
         //
         this->setCursor(Cursor::ResizeAll);
@@ -297,7 +319,7 @@ void USApplication::mouseMoveEvent(MouseMoveEvent& event) {
     }
 }
 
-void USApplication::mouseReleaseEvent(MouseEvent& event) {
+void UnderStory::USApplication::mouseReleaseEvent(MouseEvent& event) {
     //
     switch (event.button()) {
         case MouseEvent::Button::Left: {
@@ -326,14 +348,14 @@ void USApplication::mouseReleaseEvent(MouseEvent& event) {
     }
 }
 
-void USApplication::_resetWorldMatrix() {
+void UnderStory::USApplication::_resetWorldMatrix() {
     _mmh.stopAnim();
     _msh.stopAnim();
     _kmh.stopAnim();
     _transformationWorld = Magnum::Matrix3();
 }
 
-void USApplication::_updateDebugText() {
+void UnderStory::USApplication::_updateDebugText() {
     auto tr = _transformationWorld.translation();
 
     auto formatedText = Magnum::Utility::formatString(
@@ -346,4 +368,4 @@ void USApplication::_updateDebugText() {
     _debugText->render(formatedText);
 }
 
-MAGNUM_APPLICATION_MAIN(USApplication)
+MAGNUM_APPLICATION_MAIN(UnderStory::USApplication)
