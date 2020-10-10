@@ -45,7 +45,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
 
     // define
     Magnum::Utility::Resource rs("data");
-    _defineSelectionRect();
+    _defineSelectionRect(rs);
     _defineGrid(rs);
 
     /* Load a TrueTypeFont plugin and open the font */
@@ -96,9 +96,9 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _timeline.start();
 }
 
-void UnderStory::USApplication::_defineSelectionRect() {
+void UnderStory::USApplication::_defineSelectionRect(const Magnum::Utility::Resource &rs) {
     // compile shader
-    _selectRectShader = Shader::SelectionRect{};
+    _selectRectShader = Shader::SelectionRect{rs};
 
     // define indices
     Magnum::GL::Buffer indices;
@@ -119,7 +119,7 @@ void UnderStory::USApplication::_defineSelectionRect() {
             .setIndexBuffer(std::move(indices), 0, Magnum::MeshIndexType::UnsignedInt);
 }
 
-void UnderStory::USApplication::_defineGrid(Magnum::Utility::Resource &rs) {
+void UnderStory::USApplication::_defineGrid(const Magnum::Utility::Resource &rs) {
     // load texture
     Corrade::PluginManager::Manager<Magnum::Trade::AbstractImporter> manager;
     auto importer = manager.loadAndInstantiate("PngImporter");
@@ -136,7 +136,7 @@ void UnderStory::USApplication::_defineGrid(Magnum::Utility::Resource &rs) {
         .setSubImage(0, {}, *image);
 
     // compile shader
-    _gridShader = Shader::Grid{};
+    _gridShader = Shader::Grid{rs};
 
     // define indices
     Magnum::GL::Buffer indices;

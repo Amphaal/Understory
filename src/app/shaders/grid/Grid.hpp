@@ -48,11 +48,8 @@ class Grid : public Magnum::GL::AbstractShaderProgram {
     };
     explicit Grid(Magnum::NoCreateT): Magnum::GL::AbstractShaderProgram{Magnum::NoCreate} {}
 
-    Grid() {
+    explicit Grid(const Magnum::Utility::Resource &rs) {
         MAGNUM_ASSERT_GL_VERSION_SUPPORTED(Magnum::GL::Version::GL330);
-
-        /* Load and compile shaders from compiled-in resource */
-        Magnum::Utility::Resource rs("data");
 
         Magnum::GL::Shader vert{Magnum::GL::Version::GL330, Magnum::GL::Shader::Type::Vertex};
         Magnum::GL::Shader frag{Magnum::GL::Version::GL330, Magnum::GL::Shader::Type::Fragment};

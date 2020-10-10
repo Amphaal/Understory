@@ -58,8 +58,8 @@
 
 #include "navigation/base/states/MouseMovements.h"
 
-#include "navigation/shaders/selectRect/SelectionRectState.h"
-#include "navigation/shaders/grid/Grid.hpp"
+#include "shaders/selectRect/SelectionRectState.h"
+#include "shaders/grid/Grid.hpp"
 
 namespace UnderStory {
 
@@ -102,13 +102,13 @@ class USApplication: public Magnum::Platform::Application {
     Magnum::GL::Texture2D _gridTexture;
     Shader::Grid _gridShader{Magnum::NoCreate};
     Magnum::GL::Mesh _grid{Magnum::GL::MeshPrimitive::Triangles};
-    void _defineGrid(Magnum::Utility::Resource &rs);
+    void _defineGrid(const Magnum::Utility::Resource &rs);
 
     Shader::SelectionRect _selectRectShader{Magnum::NoCreate};
     Magnum::GL::Buffer _selectRectBuffer;
     Magnum::GL::Mesh _selectRect{Magnum::GL::MeshPrimitive::Triangles};
     Navigation::SelectionRectState _srs;
-    void _defineSelectionRect();
+    void _defineSelectionRect(const Magnum::Utility::Resource &rs);
 
     Magnum::Matrix3 _transformationWorld,
                     _projectionWorld,
