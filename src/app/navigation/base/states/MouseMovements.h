@@ -119,14 +119,15 @@ class MouseMovements {
         if(!bufSize) return Magnum::Vector2();
 
         // define sample strengh
-        auto sampleStrengh = static_cast<float>(bufSize) / 100;
-        if(sampleStrengh > 1) sampleStrengh = 1;
+        auto sampleStrength = static_cast<float>(bufSize) / 100;
+        if(sampleStrength > 1) sampleStrength = 1;
 
         // define acceleration factor (maximum sampling time / cumulated sampled time)
         auto accelerationFactor = sqrt(static_cast<float>(ACCELERATION_THRESHOLD_MS) / _accelMs);
 
         // define output
-        return _accelCumulator * Magnum::Vector2{accelerationFactor * sampleStrengh};
+        auto definitiveAccel = accelerationFactor * sampleStrength;
+        return _accelCumulator * Magnum::Vector2{definitiveAccel};
     }
 
     void _mayReduceAccelerationBuffer() {

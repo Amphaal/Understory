@@ -4,6 +4,7 @@
         "--login",
         "-i"
     ],
+    "glsllint.glslangValidatorPath": "C:/msys64/mingw64/bin/glslangValidator.exe",
     "terminal.integrated.env.windows": {
         "MSYSTEM": "MINGW64",
         "MSYS2_PATH_TYPE": "inherit",
