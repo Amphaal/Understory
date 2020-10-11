@@ -11,10 +11,10 @@
             "name" : "Tests",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/_gen/bin/tests",
+            "program": "${workspaceFolder}/build/bin/tests",
             "MIMode": "lldb",
             "windows": {
-                "program": "${workspaceFolder}/_gen/bin/tests.exe",
+                "program": "${workspaceFolder}/build/bin/tests.exe",
                 "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe",
                 "MIMode": "gdb"
             }
@@ -26,10 +26,10 @@
             "name" : "Local Tests",
             "request": "launch",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/_gen/bin/localTests",
+            "program": "${workspaceFolder}/build/bin/localTests",
             "MIMode": "lldb",
             "windows": {
-                "program": "${workspaceFolder}/_gen/bin/localTests.exe",
+                "program": "${workspaceFolder}/build/bin/localTests.exe",
                 "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe",
                 "MIMode": "gdb"
             }
@@ -39,8 +39,8 @@
             "preLaunchTask": "2. Build",
             "name" : "Launch",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\_gen\\bin",
-            "program": "${workspaceFolder}\\_gen\\bin\\understory.exe",
+            "cwd": "${workspaceFolder}\\build\\bin",
+            "program": "${workspaceFolder}\\build\\bin\\understory.exe",
             "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe",
             "MIMode": "gdb",
             "environment": [],

@@ -23,7 +23,7 @@
             "type": "shell",
             "command": "ninja",
             "options": {
-                "cwd": "${workspaceRoot}/_gen"
+                "cwd": "${workspaceRoot}/build"
             },
             "problemMatcher": []
         },

@@ -13,11 +13,11 @@
             },
             "includePath": [
                 "${workspaceFolder}",
-                "${workspaceFolder}/_gen",
-                "${workspaceFolder}/_gen/_deps/stb-src",
-                "${workspaceFolder}/_gen/_deps/spdlog-src/include",
-                "${workspaceFolder}/_gen/_deps/rxcpp-src/Rx/v2/src",
-                "${workspaceFolder}/_gen/_deps/tinyprocesslib-src",
+                "${workspaceFolder}/build",
+                "${workspaceFolder}/build/_deps/stb-src",
+                "${workspaceFolder}/build/_deps/spdlog-src/include",
+                "${workspaceFolder}/build/_deps/rxcpp-src/Rx/v2/src",
+                "${workspaceFolder}/build/_deps/tinyprocesslib-src",
                 "C:/msys64/mingw64/include/SDL2"
             ],
             "defines": [
