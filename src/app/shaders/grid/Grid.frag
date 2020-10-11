@@ -12,6 +12,6 @@ void main(){
     if (u_scale < 1.0) {
         alphaDrop = 1.0 - u_scale;
     }
-    
-    gl_FragColor.a = t.g - alphaDrop;
+
+    gl_FragColor.rgba = t;
 }

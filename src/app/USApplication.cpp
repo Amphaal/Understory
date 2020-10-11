@@ -90,9 +90,11 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     Magnum::GL::Renderer::setBlendFunction(Magnum::GL::Renderer::BlendFunction::SourceAlpha, Magnum::GL::Renderer::BlendFunction::OneMinusSourceAlpha);
     Magnum::GL::Renderer::setBlendEquation(Magnum::GL::Renderer::BlendEquation::Add, Magnum::GL::Renderer::BlendEquation::Add);
 
+    //
     _updateProjections();
     _updateDebugText();
 
+    //
     _timeline.start();
 }
 
@@ -130,7 +132,7 @@ void UnderStory::USApplication::_defineGrid(const Magnum::Utility::Resource &rs)
     auto image = importer->image2D(0);
     CORRADE_INTERNAL_ASSERT(image);
     _gridTexture.setWrapping(Magnum::GL::SamplerWrapping::Repeat)
-        .setMagnificationFilter(Magnum::GL::SamplerFilter::Linear)
+        .setMagnificationFilter(Magnum::GL::SamplerFilter::Nearest)
         .setMinificationFilter(Magnum::GL::SamplerFilter::Linear)
         .setStorage(1, Magnum::GL::textureFormat(image->format()), image->size())
         .setSubImage(0, {}, *image);
@@ -146,14 +148,14 @@ void UnderStory::USApplication::_defineGrid(const Magnum::Utility::Resource &rs)
     });
 
     // define data and structure
-    auto squareSize = Magnum::Vector2 {image->size()} * (1.f / framebufferSize().y());
-    auto squareCount = 10000.f;
-    auto gridRadius = squareSize * squareCount / 2;
+    auto squareSize = Magnum::Vector2 {image->size()} * (1.f / static_cast<float>(framebufferSize().y()));
+    auto squareCount = 1000.f;  // CAREFUL, higher need a better precision
+    auto gridRadius = squareSize * squareCount / 2.f;
     const Shader::Grid::Vertex gridVData[]{
-        { {-gridRadius.x(),  gridRadius.y()}, {0.0f,        0.0f} },
-        { { gridRadius.x(),  gridRadius.y()}, {squareCount, 0.0f} },
-        { { gridRadius.x(), -gridRadius.y()}, {squareCount, squareCount} },
-        { {-gridRadius.x(), -gridRadius.y()}, {0.0f,        squareCount} }
+        { {-gridRadius.x(),  gridRadius.y()}, {.0f,        squareCount} },
+        { { gridRadius.x(),  gridRadius.y()}, {squareCount, squareCount} },
+        { { gridRadius.x(), -gridRadius.y()}, {squareCount, .0f} },
+        { {-gridRadius.x(), -gridRadius.y()}, {.0f,        .0f} }
     };
 
     // bind to buffer
@@ -163,7 +165,7 @@ void UnderStory::USApplication::_defineGrid(const Magnum::Utility::Resource &rs)
     // define mesh
     _grid.setCount(indices.size())
         .addVertexBuffer(std::move(gridVertices), 0, Shader::Grid::Position{}, Shader::Grid::TextureCoordinates{})
-        .setIndexBuffer(std::move(indices),       0, Magnum::MeshIndexType::UnsignedInt);
+        .setIndexBuffer (std::move(indices),      0, Magnum::MeshIndexType::UnsignedInt);
 }
 
 void UnderStory::USApplication::_updateProjections() {
