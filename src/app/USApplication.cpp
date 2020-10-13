@@ -130,12 +130,16 @@ void UnderStory::USApplication::_defineGrid(const Magnum::Utility::Resource &rs)
 
     // set texture
     auto image = importer->image2D(0);
+    auto levels = Magnum::Math::log2(image->size().x()) + 1;
     CORRADE_INTERNAL_ASSERT(image);
-    _gridTexture.setWrapping(Magnum::GL::SamplerWrapping::Repeat)
+    _gridTexture
+        .setWrapping(Magnum::GL::SamplerWrapping::Repeat)
         .setMagnificationFilter(Magnum::GL::SamplerFilter::Nearest)
-        .setMinificationFilter(Magnum::GL::SamplerFilter::Linear)
-        .setStorage(1, Magnum::GL::textureFormat(image->format()), image->size())
-        .setSubImage(0, {}, *image);
+        .setMinificationFilter(Magnum::GL::SamplerFilter::Nearest)
+        .setMaxAnisotropy(Magnum::GL::Sampler::maxMaxAnisotropy())
+        .setStorage(levels, Magnum::GL::textureFormat(image->format()), image->size())
+        .setSubImage(0, {}, *image)
+        .generateMipmap();
 
     // compile shader
     _gridShader = Shader::Grid{rs};

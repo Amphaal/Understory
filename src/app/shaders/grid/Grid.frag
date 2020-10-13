@@ -6,11 +6,9 @@ in vec2 interpolatedTextureCoordinates;
 
 void main(){
     vec4 t = texture(textureData, interpolatedTextureCoordinates);
-    gl_FragColor.rgb = color;
     
-    float alphaDrop = 0.0;
-    if (u_scale < 1.0) {
-        alphaDrop = 1.0 - u_scale;
+    if (u_scale < 0.5) {
+        t.a = t.a * u_scale;
     }
 
     gl_FragColor.rgba = t;
