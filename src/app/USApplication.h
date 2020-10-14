@@ -55,6 +55,7 @@
 #include "navigation/MouseMoveHelper.hpp"
 #include "navigation/MapScaleHelper.hpp"
 #include "navigation/KeyboardMoveHelper.hpp"
+#include "navigation/ShortcutsTextHelper.hpp"
 
 #include "navigation/base/states/MouseMovements.h"
 
@@ -97,7 +98,13 @@ class USApplication: public Magnum::Platform::Application {
     Magnum::GL::Mesh _worldText{Magnum::NoCreate};
     Magnum::GL::Buffer _textVertices, _textIndices;
     Magnum::Containers::Pointer<Magnum::Text::Renderer2D> _debugText, _shortcutsText;
+    Magnum::Range2D _shortcutsTextRect;
     Magnum::Shaders::DistanceFieldVector2D _textShader;
+
+    Magnum::Shaders::Flat2D _haulderShader;
+    Magnum::GL::Buffer _haulderBuffer;
+    Magnum::GL::Mesh _haulder{Magnum::GL::MeshPrimitive::TriangleFan};
+    void _defineHaulder();
 
     Magnum::GL::Texture2D _gridTexture;
     Shader::Grid _gridShader{Magnum::NoCreate};
@@ -113,6 +120,7 @@ class USApplication: public Magnum::Platform::Application {
     Magnum::Matrix3 _transformationWorld,
                     _projectionWorld,
                     _transformationProjectionShortcutsText,
+                    _scaleMatrixShortcutsText,
                     _transformationProjectionDebugText;
 
     static const int DOUBLE_CLICK_DELAY_MS = 200;
@@ -121,6 +129,7 @@ class USApplication: public Magnum::Platform::Application {
     Navigation::MouseMoveHelper _mmh;
     Navigation::MapScaleHelper _msh;
     Navigation::KeyboardMoveHelper _kmh;
+    Navigation::ShortcutsTextHelper _sth;
 
     Widget::UpdateCheckerWidget _updateChecker;
 };

@@ -42,7 +42,7 @@ struct SelectionRectState {
     }
 
     Magnum::Math::Range2D<float> asRectangle() const {
-        return {_vertexes[0].position, _vertexes[2].position};
+        return { _vertexes[0].position, _vertexes[2].position };
     }
 
     bool isSelecting() const {
@@ -153,8 +153,8 @@ struct SelectionRectState {
     Magnum::GL::Buffer* _associatedBuffer = nullptr;
 
     //
-    Magnum::Vector2& _p1() { return _vertexes[0].position;}
-    Magnum::Vector2& _p2() { return _vertexes[2].position;}
+    Magnum::Vector2& _p1() { return _vertexes[0].position; }
+    Magnum::Vector2& _p2() { return _vertexes[2].position; }
     Magnum::Vector2i _p1_px, _p2_px;
     bool _isSelecting = false;
 

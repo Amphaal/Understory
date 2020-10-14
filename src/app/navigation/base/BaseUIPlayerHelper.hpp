@@ -68,6 +68,10 @@ class BaseUIPlayerHelper : public BaseUIHelper {
         (*_mainMatrix) = factorMatrix * (*_mainMatrix);
     }
 
+    void _replaceMainMatrix(const Magnum::Matrix3& replacingMatrix) {
+        (*_mainMatrix) = replacingMatrix;
+    }
+
     void _updateAnimationAndPlay(const T &from, const T &to) {
         _animState.from = from;
         _animState.to = to;

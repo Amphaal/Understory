@@ -115,7 +115,10 @@ find_package(Magnum REQUIRED
     Sdl2Application
     Trade
 )
-find_package(MagnumPlugins REQUIRED FreeTypeFont)
+find_package(MagnumPlugins REQUIRED 
+    FreeTypeFont
+    PngImporter
+)
 
 set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
 
@@ -136,8 +139,9 @@ target_link_libraries(appExec PRIVATE
     Magnum::Magnum
     Magnum::Shaders
     Magnum::Text
-    MagnumPlugins::FreeTypeFont
     Magnum::Trade
+    MagnumPlugins::FreeTypeFont
+    MagnumPlugins::PngImporter
 )
 
 target_link_libraries(appExec PRIVATE UnderStory::network)
