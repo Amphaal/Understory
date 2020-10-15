@@ -66,13 +66,40 @@ IF(MINGW AND CMAKE_CROSSCOMPILING)
         message(FATAL_ERROR "MINGW64_ROOT must be set ! Please use a toolchain file !")
     endif()
 
+    SET(MINGW64_BIN ${MINGW64_ROOT}/bin)
+
+    ### MAGNUM
+        # find .dlls
+        list(APPEND MAGNUM_PLUGINS_USED
+            magnum/importers/PngImporter
+            magnum/fonts/FreeTypeFont
+        )
+        list(TRANSFORM MAGNUM_PLUGINS_USED PREPEND ${MINGW64_BIN}/)
+        list(TRANSFORM MAGNUM_PLUGINS_USED APPEND ".dll")
+        file(GLOB_RECURSE MAGNUM_PLUGINS_DLL ${MAGNUM_PLUGINS_USED})
+
+        # plugins to copy
+            add_custom_command(TARGET appExec POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:appExec>/magnum/importers
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MINGW64_BIN}/magnum/importers/PngImporter.dll $<TARGET_FILE_DIR:appExec>/magnum/importers
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MINGW64_BIN}/magnum/importers/PngImporter.conf $<TARGET_FILE_DIR:appExec>/magnum/importers
+            )
+
+            add_custom_command(TARGET appExec POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:appExec>/magnum/fonts
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MINGW64_BIN}/magnum/fonts/FreeTypeFont.dll $<TARGET_FILE_DIR:appExec>/magnum/fonts
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MINGW64_BIN}/magnum/fonts/FreeTypeFont.conf $<TARGET_FILE_DIR:appExec>/magnum/fonts
+            )
+    ###
+
     #generate requirements
     add_dependencies(appExec peldd)
     add_custom_command(TARGET appExec POST_BUILD
         COMMAND 
             ${PELDD_EXEC} -a
-            -p ${MINGW64_ROOT}/bin
+            -p ${MINGW64_BIN}
             $<TARGET_FILE:appExec>
+            ${MAGNUM_PLUGINS_DLL}
             | sed -f ${CMAKE_SOURCE_DIR}/cmake/antislash-to-slash.sed
             | tr -d '\\015' 
             > lib_requirements.txt

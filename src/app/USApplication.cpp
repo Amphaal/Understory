@@ -73,13 +73,14 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _debugText->reserve(100, Magnum::GL::BufferUsage::DynamicDraw, Magnum::GL::BufferUsage::StaticDraw);
 
     // define shortcut text as static
-    const std::string sText = "[D-pad] move camera\n"
-                "[Esc] reset camera\n"
-                "[MouseScroll] zoom-in on cursor / zoom out\n"
-                "[NumPad +/-] inplace zoom\n"
-                "[LeftClick (Double click)] center screen on cursor\n"
-                "[LeftClick (Maintain)] move camera\n"
-                "[RightClick (Maintain/Release)] Snapshot zoom-in";
+    const std::string sText =
+                "[LeftClick  (DoubleClick)] Center screen on cursor\n"
+                "[LeftClick  (Maintain)]                       Move camera\n"
+                "[RightClick (Maintain / Release)]             Snapshot zoom-in\n"
+                "[D-Pad]                       Move camera\n"
+                "[Esc]                       Reset camera\n"
+                "[MouseScroll]                                       Zoom\n"
+                "[NumPad +/-]                                       Zoom";
     _shortcutsText.reset(new Magnum::Text::Renderer2D(*_font, _cache, 14.0f, Magnum::Text::Alignment::TopRight));
     _shortcutsText->reserve(sText.size(), Magnum::GL::BufferUsage::StaticDraw, Magnum::GL::BufferUsage::StaticDraw);
     _shortcutsText->render(sText);
@@ -181,12 +182,11 @@ void UnderStory::USApplication::_defineGrid(const Magnum::Utility::Resource &rs)
 
     // define data and structure
     auto squareSize = Magnum::Vector2 {image->size()} * (1.f / static_cast<float>(framebufferSize().y()));
-    auto squareCount = 1000.f;  // CAREFUL, higher need a better precision
-    auto gridRadius = squareSize * squareCount / 2.f;
+    auto gridRadius = squareSize * MAP_SIZE / 2.f;
     const Shader::Grid::Vertex gridVData[]{
-        { {-gridRadius.x(),  gridRadius.y()}, {.0f,         squareCount} },
-        { { gridRadius.x(),  gridRadius.y()}, {squareCount, squareCount} },
-        { { gridRadius.x(), -gridRadius.y()}, {squareCount, .0f} },
+        { {-gridRadius.x(),  gridRadius.y()}, {.0f,         MAP_SIZE} },
+        { { gridRadius.x(),  gridRadius.y()}, {MAP_SIZE,    MAP_SIZE} },
+        { { gridRadius.x(), -gridRadius.y()}, {MAP_SIZE,    .0f} },
         { {-gridRadius.x(), -gridRadius.y()}, {.0f,         .0f} }
     };
 
@@ -269,8 +269,8 @@ void UnderStory::USApplication::drawEvent() {
     // debug text
     _updateDebugText();
     _textShader
-        .setColor(0xffffff_rgbf)
-        .setOutlineColor(0xffffffAA_rgbaf)
+        .setColor(DEBUG_TEXT_COLOR)
+        .setOutlineColor(DEBUG_TEXT_COLOR)
         .setOutlineRange(0.47f, 0.44f)
         .setSmoothness(0.33f)
         .setTransformationProjectionMatrix(_transformationProjectionDebugText)
@@ -284,6 +284,7 @@ void UnderStory::USApplication::drawEvent() {
     // shortcuts text
     _textShader
         .setColor(_sth.textColor())
+        .setOutlineColor(0xffffffAA_rgbaf)
         .setTransformationProjectionMatrix(_transformationProjectionShortcutsText * _scaleMatrixShortcutsText)
         .draw(_shortcutsText->mesh());
 

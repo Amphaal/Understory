@@ -123,7 +123,9 @@ class USApplication: public Magnum::Platform::Application {
                     _scaleMatrixShortcutsText,
                     _transformationProjectionDebugText;
 
-    static const int DOUBLE_CLICK_DELAY_MS = 200;
+    static constexpr int DOUBLE_CLICK_DELAY_MS = 200;
+    static constexpr float MAP_SIZE = 1000.f;  // CAREFUL, higher need a better precision
+    static constexpr Magnum::Color4 DEBUG_TEXT_COLOR {1.f, .7f, .3f};
 
     Magnum::Timeline _timeline;
     Navigation::MouseMoveHelper _mmh;
