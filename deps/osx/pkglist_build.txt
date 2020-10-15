@@ -1,1 +1,1 @@
-gettext protobuf miniupnpc asio magnum magnum-plugins
+gettext protobuf miniupnpc asio magnum magnum-plugins corrade
