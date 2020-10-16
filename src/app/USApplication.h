@@ -101,7 +101,7 @@ class USApplication: public Magnum::Platform::Application {
     Magnum::Range2D _shortcutsTextRect;
     Magnum::Shaders::DistanceFieldVector2D _textShader;
 
-    Magnum::Shaders::Flat2D _haulderShader;
+    Magnum::Shaders::Flat2D _flatShader;
     Magnum::GL::Buffer _haulderBuffer;
     Magnum::GL::Mesh _haulder{Magnum::GL::MeshPrimitive::TriangleFan};
     void _defineHaulder();
@@ -116,6 +116,11 @@ class USApplication: public Magnum::Platform::Application {
     Magnum::GL::Mesh _selectRect{Magnum::GL::MeshPrimitive::Triangles};
     Navigation::SelectionRectState _srs;
     void _defineSelectionRect(const Magnum::Utility::Resource &rs);
+
+    Magnum::GL::Buffer _asBuffer;
+    Magnum::GL::Mesh _atomSelector{Magnum::GL::MeshPrimitive::Triangles};
+    Magnum::Matrix3 _asMatrix;
+    void _defineAtomSelector();
 
     Magnum::Matrix3 _transformationWorld,
                     _projectionWorld,

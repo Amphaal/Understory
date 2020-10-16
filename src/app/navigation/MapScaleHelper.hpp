@@ -110,7 +110,7 @@ class MapScaleHelper : public BaseUIPlayerHelper<ScrollAnimStateComponent> {
             state.current.translation = Magnum::Math::lerp(
                 state.from.translation,
                 state.to.translation,
-                Magnum::Animation::Easing::cubicOut(prc)
+                Magnum::Animation::Easing::exponentialOut(prc)
             );
         }
 

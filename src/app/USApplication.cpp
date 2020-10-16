@@ -47,6 +47,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _defineSelectionRect(rs);
     _defineGrid(rs);
     _defineHaulder();
+    _defineAtomSelector();
 
     /* Load a TrueTypeFont plugin and open the font */
     _font = _fontManager.loadAndInstantiate("TrueTypeFont");
@@ -150,6 +151,34 @@ void UnderStory::USApplication::_defineHaulder() {
             .addVertexBuffer(std::move(_haulderBuffer), 0, Magnum::Shaders::Flat2D::Position{});
 }
 
+void UnderStory::USApplication::_defineAtomSelector() {
+    // define indices
+    Magnum::GL::Buffer indices;
+    indices.setData({
+        0, 1, 2,
+        2, 3, 0
+    });
+
+    // define vertices
+    struct Vertex {
+        Magnum::Vector2 position;
+    };
+    const Vertex vertex[]{
+        {{-1.f, -1.f}},
+        {{ 1.f, -1.f}},
+        {{ 1.f,  1.f}},
+        {{-1.f,  1.f}}
+    };
+
+    // bind buffer
+    _asBuffer.setData(vertex, Magnum::GL::BufferUsage::StaticDraw);
+
+    // define mesh
+    _atomSelector.setCount(indices.size())
+            .setIndexBuffer (std::move(indices),        0, Magnum::MeshIndexType::UnsignedInt)
+            .addVertexBuffer(std::move(_asBuffer), 0, Magnum::Shaders::Flat2D::Position{});
+}
+
 void UnderStory::USApplication::_defineGrid(const Magnum::Utility::Resource &rs) {
     // load texture
     Corrade::PluginManager::Manager<Magnum::Trade::AbstractImporter> manager;
@@ -211,18 +240,22 @@ void UnderStory::USApplication::_updateProjections() {
     _transformationProjectionDebugText =
         Magnum::Matrix3::projection(ws) *
         Magnum::Matrix3::translation(ws * Magnum::Vector2::xAxis(-.495f)) *
-        Magnum::Matrix3::translation(ws * Magnum::Vector2::yAxis(.495f)
-    );
+        Magnum::Matrix3::translation(ws * Magnum::Vector2::yAxis(.495f));
 
     // stick to top right corner
     _transformationProjectionShortcutsText =
         Magnum::Matrix3::projection(ws) *
         Magnum::Matrix3::translation(ws * Magnum::Vector2::xAxis(.49f)) *
-        Magnum::Matrix3::translation(ws * Magnum::Vector2::yAxis(.49f)
-    );
+        Magnum::Matrix3::translation(ws * Magnum::Vector2::yAxis(.49f));
 
     //
     _shortcutsTextRect = Navigation::ShortcutsTextHelper::trNormalized(_shortcutsText->rectangle(), this->framebufferSize());
+
+    //
+    _asMatrix = Magnum::Matrix3::projection(ws) *
+    Magnum::Matrix3::translation(ws * Magnum::Vector2::xAxis(-.45f)) *
+    Magnum::Matrix3::translation(ws * Magnum::Vector2::yAxis(-.5f)) *
+    Magnum::Matrix3::scaling(Magnum::Vector2{20.f});
 
     //
     _srs.onFramebufferChange();
@@ -276,8 +309,15 @@ void UnderStory::USApplication::drawEvent() {
         .setTransformationProjectionMatrix(_transformationProjectionDebugText)
         .draw(_debugText->mesh());
 
+    // atom selector
+    _flatShader
+        .setTransformationProjectionMatrix(_asMatrix)
+        .setColor(0xFFFFFF_rgbf)
+        .draw(_atomSelector);
+
     // haulder
-    _haulderShader
+    _flatShader
+        .setTransformationProjectionMatrix({})
         .setColor(_sth.haulderColor())
         .draw(_haulder);
 
