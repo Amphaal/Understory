@@ -24,6 +24,7 @@ using namespace Magnum::Math::Literals;
 UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Platform::Application{
         arguments,
         Configuration{}.setTitle(APP_FULL_DENOM)
+                       .setSize(Magnum::Vector2i{800, 600})
                        .setWindowFlags(Configuration::WindowFlag::Resizable),
         GLConfiguration{}
     },
@@ -32,6 +33,9 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _msh(&_timeline, &_transformationWorld),
     _kmh(&_timeline, &_transformationWorld),
     _sth(&_timeline, &_scaleMatrixShortcutsText) {
+    // set minimum size
+    SDL_SetWindowMinimumSize(this->window(), 800, 600);
+
     //
     _updateChecker.start();
 
@@ -230,32 +234,44 @@ void UnderStory::USApplication::_defineGrid(const Magnum::Utility::Resource &rs)
 }
 
 void UnderStory::USApplication::_updateProjections() {
-    auto ws = Magnum::Vector2{windowSize()};
+    //
+    Magnum::Vector2 ws {windowSize()};
+    auto wsProj = Magnum::Matrix3::projection(ws);
+    auto pixelSize = Magnum::Vector2 {1.f} / ws;
 
     _projectionWorld = Magnum::Matrix3::projection(
         Magnum::Vector2::xScale(ws.aspectRatio())
     );
 
-    // stick to top left corner
-    _transformationProjectionDebugText =
-        Magnum::Matrix3::projection(ws) *
-        Magnum::Matrix3::translation(ws * Magnum::Vector2::xAxis(-.495f)) *
-        Magnum::Matrix3::translation(ws * Magnum::Vector2::yAxis(.495f));
+    // stick to top left corner + 5 pixels padding
+    _transformationProjectionDebugText = wsProj *
+        Magnum::Matrix3::translation(
+            ws *
+            (Magnum::Vector2 {-.5f, .5f} - pixelSize * 5 * Magnum::Vector2{-1.f, 1.f})
+        );
 
-    // stick to top right corner
-    _transformationProjectionShortcutsText =
-        Magnum::Matrix3::projection(ws) *
-        Magnum::Matrix3::translation(ws * Magnum::Vector2::xAxis(.49f)) *
-        Magnum::Matrix3::translation(ws * Magnum::Vector2::yAxis(.49f));
+    // stick to top right corner + 5 pixels padding
+    _transformationProjectionShortcutsText = wsProj *
+        Magnum::Matrix3::translation(
+            ws *
+            (Magnum::Vector2 {.5f} - pixelSize * 5)
+        );
 
-    //
-    _shortcutsTextRect = Navigation::ShortcutsTextHelper::trNormalized(_shortcutsText->rectangle(), this->framebufferSize());
+    // TODO(amphaal) include padding in rect calculation
+    _shortcutsTextRect = Navigation::ShortcutsTextHelper::trNormalized(
+        _shortcutsText->rectangle(),
+        this->framebufferSize()
+    );
 
-    //
-    _asMatrix = Magnum::Matrix3::projection(ws) *
-    Magnum::Matrix3::translation(ws * Magnum::Vector2::xAxis(-.45f)) *
-    Magnum::Matrix3::translation(ws * Magnum::Vector2::yAxis(-.5f)) *
-    Magnum::Matrix3::scaling(Magnum::Vector2{20.f});
+    // TODO(amphaal) stick to bottom right corner, being 10% of width as button size, with 15 pixels padding
+    _asMatrix = wsProj *
+        // Magnum::Matrix3::translation(
+        //     ws *
+        //     Magnum::Vector2{-.5f} - pixelSize * Magnum::Vector2{-5.f, 1.f}
+        // ) *
+        //
+        Magnum::Matrix3::scaling(Magnum::Vector2{20.f}) *
+        Magnum::Matrix3::translation(ws * (-.5f / 20.f));
 
     //
     _srs.onFramebufferChange();
