@@ -263,15 +263,12 @@ void UnderStory::USApplication::_updateProjections() {
         this->framebufferSize()
     );
 
-    // TODO(amphaal) stick to bottom right corner, being 10% of width as button size, with 15 pixels padding
+    // stick to bottom left corner, being 5% of width as button size, with 15 pixels padding
+    auto asSize = ws.x() * (.05f / 2);
+    auto asXPadding = 15.f;
     _asMatrix = wsProj *
-        // Magnum::Matrix3::translation(
-        //     ws *
-        //     Magnum::Vector2{-.5f} - pixelSize * Magnum::Vector2{-5.f, 1.f}
-        // ) *
-        //
-        Magnum::Matrix3::scaling(Magnum::Vector2{20.f}) *
-        Magnum::Matrix3::translation(ws * (-.5f / 20.f));
+        Magnum::Matrix3::translation(ws * (Magnum::Vector2{-.5f} + Magnum::Vector2{pixelSize.x() * (asSize + asXPadding), 0.f})) *
+        Magnum::Matrix3::scaling(Magnum::Vector2{asSize});
 
     //
     _srs.onFramebufferChange();
