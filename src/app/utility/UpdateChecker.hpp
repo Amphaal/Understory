@@ -28,11 +28,11 @@
 
 namespace UnderStory {
 
-namespace Widget {
+namespace Utility {
 
-class UpdateCheckerWidget {
+class UpdateChecker {
  public:
-    UpdateCheckerWidget() {}
+    UpdateChecker() {}
 
     void start() {
         // timer to check for completness
@@ -43,7 +43,7 @@ class UpdateCheckerWidget {
             });
 
         // invoke update check
-        _updateCheckResult = UpdateChecker::isNewerVersionAvailable();
+        _updateCheckResult = UnderStory::UpdateChecker::isNewerVersionAvailable();
     }
 
  private:
@@ -66,6 +66,6 @@ class UpdateCheckerWidget {
     }
 };
 
-}  // namespace Widget
+}  // namespace Utility
 
 }  // namespace UnderStory

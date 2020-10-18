@@ -44,13 +44,14 @@
 #include <Magnum/Trade/AbstractImporter.h>
 #include <Magnum/Trade/ImageData.h>
 #include <Magnum/GL/TextureFormat.h>
+#include <Magnum/GL/TransformFeedback.h>
 
 #include <utility>
 #include <string>
 
 #include "src/base/understory.h"
 
-#include "widgets/UpdateCheckerWidget.hpp"
+#include "utility/UpdateChecker.hpp"
 
 #include "navigation/MouseMoveHelper.hpp"
 #include "navigation/MapScaleHelper.hpp"
@@ -61,6 +62,8 @@
 
 #include "shaders/selectRect/SelectionRectState.h"
 #include "shaders/grid/Grid.hpp"
+
+#include "widgets/AtomSelectorButton.hpp"
 
 namespace UnderStory {
 
@@ -117,10 +120,8 @@ class USApplication: public Magnum::Platform::Application {
     Navigation::SelectionRectState _srs;
     void _defineSelectionRect(const Magnum::Utility::Resource &rs);
 
-    Magnum::GL::Buffer _asBuffer;
-    Magnum::GL::Mesh _atomSelector{Magnum::GL::MeshPrimitive::Triangles};
-    Magnum::Matrix3 _asMatrix;
-    void _defineAtomSelector();
+    Widget::AtomSelectorButton _atomSelector{Magnum::NoCreate};
+    Magnum::Vector2 _cursorPosition(const Sdl2Application::MouseMoveEvent& event) const;
 
     Magnum::Matrix3 _transformationWorld,
                     _projectionWorld,
@@ -138,7 +139,7 @@ class USApplication: public Magnum::Platform::Application {
     Navigation::KeyboardMoveHelper _kmh;
     Navigation::ShortcutsTextHelper _sth;
 
-    Widget::UpdateCheckerWidget _updateChecker;
+    Utility::UpdateChecker _updateChecker;
 };
 
 }  // namespace UnderStory

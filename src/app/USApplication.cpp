@@ -51,7 +51,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _defineSelectionRect(rs);
     _defineGrid(rs);
     _defineHaulder();
-    _defineAtomSelector();
+    _atomSelector = Widget::AtomSelectorButton{&_flatShader};
 
     /* Load a TrueTypeFont plugin and open the font */
     _font = _fontManager.loadAndInstantiate("TrueTypeFont");
@@ -155,34 +155,6 @@ void UnderStory::USApplication::_defineHaulder() {
             .addVertexBuffer(std::move(_haulderBuffer), 0, Magnum::Shaders::Flat2D::Position{});
 }
 
-void UnderStory::USApplication::_defineAtomSelector() {
-    // define indices
-    Magnum::GL::Buffer indices;
-    indices.setData({
-        0, 1, 2,
-        2, 3, 0
-    });
-
-    // define vertices
-    struct Vertex {
-        Magnum::Vector2 position;
-    };
-    const Vertex vertex[]{
-        {{-1.f, -1.f}},
-        {{ 1.f, -1.f}},
-        {{ 1.f,  1.f}},
-        {{-1.f,  1.f}}
-    };
-
-    // bind buffer
-    _asBuffer.setData(vertex, Magnum::GL::BufferUsage::StaticDraw);
-
-    // define mesh
-    _atomSelector.setCount(indices.size())
-            .setIndexBuffer (std::move(indices),        0, Magnum::MeshIndexType::UnsignedInt)
-            .addVertexBuffer(std::move(_asBuffer), 0, Magnum::Shaders::Flat2D::Position{});
-}
-
 void UnderStory::USApplication::_defineGrid(const Magnum::Utility::Resource &rs) {
     // load texture
     Corrade::PluginManager::Manager<Magnum::Trade::AbstractImporter> manager;
@@ -235,26 +207,25 @@ void UnderStory::USApplication::_defineGrid(const Magnum::Utility::Resource &rs)
 
 void UnderStory::USApplication::_updateProjections() {
     //
-    Magnum::Vector2 ws {windowSize()};
-    auto wsProj = Magnum::Matrix3::projection(ws);
-    auto pixelSize = Magnum::Vector2 {1.f} / ws;
+    Widget::Helper wh {windowSize()};
 
+    //
     _projectionWorld = Magnum::Matrix3::projection(
-        Magnum::Vector2::xScale(ws.aspectRatio())
+        Magnum::Vector2::xScale(wh.ws.aspectRatio())
     );
 
     // stick to top left corner + 5 pixels padding
-    _transformationProjectionDebugText = wsProj *
+    _transformationProjectionDebugText = wh.baseProjMatrix *
         Magnum::Matrix3::translation(
-            ws *
-            (Magnum::Vector2 {-.5f, .5f} - pixelSize * 5 * Magnum::Vector2{-1.f, 1.f})
+            wh.ws *
+            (Magnum::Vector2 {-.5f, .5f} - wh.pixelSize * 5 * Magnum::Vector2{-1.f, 1.f})
         );
 
     // stick to top right corner + 5 pixels padding
-    _transformationProjectionShortcutsText = wsProj *
+    _transformationProjectionShortcutsText = wh.baseProjMatrix *
         Magnum::Matrix3::translation(
-            ws *
-            (Magnum::Vector2 {.5f} - pixelSize * 5)
+            wh.ws *
+            (Magnum::Vector2 {.5f} - wh.pixelSize * 5)
         );
 
     // TODO(amphaal) include padding in rect calculation
@@ -263,15 +234,9 @@ void UnderStory::USApplication::_updateProjections() {
         this->framebufferSize()
     );
 
-    // stick to bottom left corner, being 5% of width as button size, with 15 pixels padding
-    auto asSize = ws.x() * (.05f / 2);
-    auto asXPadding = 15.f;
-    _asMatrix = wsProj *
-        Magnum::Matrix3::translation(ws * (Magnum::Vector2{-.5f} + Magnum::Vector2{pixelSize.x() * (asSize + asXPadding), 0.f})) *
-        Magnum::Matrix3::scaling(Magnum::Vector2{asSize});
-
     //
-    _srs.onFramebufferChange();
+    _atomSelector.onViewportChange(wh);
+    _srs.onViewportChange();
 }
 
 void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
@@ -323,10 +288,7 @@ void UnderStory::USApplication::drawEvent() {
         .draw(_debugText->mesh());
 
     // atom selector
-    _flatShader
-        .setTransformationProjectionMatrix(_asMatrix)
-        .setColor(0xFFFFFF_rgbf)
-        .draw(_atomSelector);
+    _atomSelector.draw();
 
     // haulder
     _flatShader
@@ -401,6 +363,11 @@ void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {
     }
 }
 
+Magnum::Vector2 UnderStory::USApplication::_cursorPosition(const Sdl2Application::MouseMoveEvent& event) const {
+    Magnum::Vector2 fs{this->framebufferSize()};
+    return (Magnum::Vector2{event.position()} - fs / 2.f) / fs * Magnum::Vector2{2.f, -2.f};
+}
+
 void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
     if (_lMousePressed) {
         //
@@ -413,9 +380,13 @@ void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
     } else if (_srs.isSelecting()) {
         // if selection, update rect
         _srs.update(event, this);
+
     } else {
         // test hovering
         _sth.mouseMoveEvent(event, this, _shortcutsTextRect);
+        //
+        auto cursorPos = _cursorPosition(event);
+        _atomSelector.onMouseMove(cursorPos);
     }
 }
 
