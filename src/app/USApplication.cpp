@@ -51,7 +51,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _defineSelectionRect(rs);
     _defineGrid(rs);
     _defineHaulder();
-    _atomSelector = Widget::AtomSelectorButton{&_flatShader};
+    _atomSelector = Widget::AtomSelectorButton{&_flatShader, &_timeline};
 
     /* Load a TrueTypeFont plugin and open the font */
     _font = _fontManager.loadAndInstantiate("TrueTypeFont");

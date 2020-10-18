@@ -42,7 +42,8 @@ using namespace Magnum::Math::Literals;
 class AtomSelectorButton {
  public:
     explicit AtomSelectorButton(Magnum::NoCreateT) {}
-    explicit AtomSelectorButton(Magnum::Shaders::Flat2D * shader) : _shader(shader) {
+    AtomSelectorButton(Magnum::Shaders::Flat2D* shader, Magnum::Timeline* timeline) :
+    _shader(shader), _timeline(timeline) {
         // define indices
         Magnum::GL::Buffer bIndices, bVertexes;
         bIndices.setData({
@@ -70,8 +71,11 @@ class AtomSelectorButton {
                 .addVertexBuffer(std::move(bVertexes), 0, Magnum::Shaders::Flat2D::Position{});
 
         // define animation
-
-
+        _track = Magnum::Animation::Track<Magnum::Float, Magnum::Vector2>({
+            {0.f, Magnum::Vector2::yAxis(0.0f)},
+            {.2f, Magnum::Vector2::yAxis(1.0f)}
+        }, Magnum::Math::lerp);
+        _player.add(_track, _moveAnim);
     }
 
     void onViewportChange(const Helper &wh) {
@@ -88,7 +92,7 @@ class AtomSelectorButton {
         };
     }
 
-    void onMouseMove(const Magnum::Vector2 &cursorPos) {
+    void onMouseMove(const Magnum::Vector2 &cursorPos) {        
         if(!_pos.contains(cursorPos)) {
             _color = {0xFFFFFF_rgbf};
             return;
@@ -98,32 +102,26 @@ class AtomSelectorButton {
     }
 
     void advance() {
-        const Magnum::Animation::TrackView<Magnum::Float, Magnum::Vector3> translation;
-        const Magnum::Animation::TrackView<Magnum::Float, Magnum::Quaternion> rotation;
-        const Magnum::Animation::TrackView<Magnum::Float, Magnum::Vector3> scaling;
-
-        Magnum::Vector3 objectScaling;
-        Magnum::Vector3 objectTranslation;
-
-        Magnum::Animation::Player<Magnum::Float> player;
-        player.
-        player.add(scaling, objectScaling)
-            .add(translation, objectTranslation);
+        _player.advance(_timeline->previousFrameTime());
     }
 
     void draw() {
-        _shader->setTransformationProjectionMatrix(_matrix)
+        Magnum::Debug{} << _moveAnim;
+        _shader->setTransformationProjectionMatrix(_matrix * Magnum::Matrix3::translation(_moveAnim))
             .setColor(_color)
             .draw(_mesh);
     }
 
  private:
+    Magnum::Animation::Track<Magnum::Float, Magnum::Vector2> _track;
     Magnum::Animation::Player<Magnum::Float> _player;
+    Magnum::Vector2 _moveAnim;
     Magnum::Range2D _pos;
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
     Magnum::Matrix3 _matrix;
     Magnum::Color4 _color{0xFFFFFF_rgbf};
     Magnum::Shaders::Flat2D* _shader = nullptr;
+    Magnum::Timeline* _timeline = nullptr;
 };
 
 }  // namespace Widget
