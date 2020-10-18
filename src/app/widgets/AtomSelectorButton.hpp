@@ -25,6 +25,10 @@
 #include <Magnum/Math/Vector2.h>
 #include <Magnum/Mesh.h>
 
+#include <Magnum/Animation/Track.h>
+#include <Magnum/Animation/Easing.h>
+#include <Magnum/Animation/Player.h>
+
 #include <utility>
 
 #include "WidgetHelper.hpp"
@@ -64,6 +68,10 @@ class AtomSelectorButton {
         _mesh.setCount(bIndices.size())
                 .setIndexBuffer (std::move(bIndices),  0, Magnum::MeshIndexType::UnsignedInt)
                 .addVertexBuffer(std::move(bVertexes), 0, Magnum::Shaders::Flat2D::Position{});
+
+        // define animation
+
+
     }
 
     void onViewportChange(const Helper &wh) {
@@ -73,24 +81,48 @@ class AtomSelectorButton {
         _matrix = wh.baseProjMatrix *
             Magnum::Matrix3::translation(wh.ws * (Magnum::Vector2{-.5f} + Magnum::Vector2{wh.pixelSize.x() * (asSize + asXPadding), 0.f})) *
             Magnum::Matrix3::scaling(Magnum::Vector2{asSize});
-    }
 
-    void onMouseMove(const Magnum::Vector2 &cursorPos) {
-        Magnum::Range2D d {
+        _pos = Magnum::Range2D {
             _matrix.transformPoint({-1.f, -1.f}),
             _matrix.transformPoint({1.f, 1.f})
         };
     }
 
+    void onMouseMove(const Magnum::Vector2 &cursorPos) {
+        if(!_pos.contains(cursorPos)) {
+            _color = {0xFFFFFF_rgbf};
+            return;
+        }
+
+        _color = {0x000000_rgbf};
+    }
+
+    void advance() {
+        const Magnum::Animation::TrackView<Magnum::Float, Magnum::Vector3> translation;
+        const Magnum::Animation::TrackView<Magnum::Float, Magnum::Quaternion> rotation;
+        const Magnum::Animation::TrackView<Magnum::Float, Magnum::Vector3> scaling;
+
+        Magnum::Vector3 objectScaling;
+        Magnum::Vector3 objectTranslation;
+
+        Magnum::Animation::Player<Magnum::Float> player;
+        player.
+        player.add(scaling, objectScaling)
+            .add(translation, objectTranslation);
+    }
+
     void draw() {
         _shader->setTransformationProjectionMatrix(_matrix)
-            .setColor(0xFFFFFF_rgbf)
+            .setColor(_color)
             .draw(_mesh);
     }
 
  private:
+    Magnum::Animation::Player<Magnum::Float> _player;
+    Magnum::Range2D _pos;
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
     Magnum::Matrix3 _matrix;
+    Magnum::Color4 _color{0xFFFFFF_rgbf};
     Magnum::Shaders::Flat2D* _shader = nullptr;
 };
 

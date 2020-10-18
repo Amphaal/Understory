@@ -252,6 +252,7 @@ void UnderStory::USApplication::drawEvent() {
     _msh.advance();
     _kmh.advance();
     _sth.advance();
+    _atomSelector.advance();
 
     // world
     _textShader.bindVectorTexture(_cache.texture());
