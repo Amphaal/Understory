@@ -153,7 +153,7 @@ class MapScaleHelper : public BaseUIPlayerHelper<ScrollAnimStateComponent> {
         _multiplyWithMainMatrix(Magnum::Matrix3::scaling(scaleFactor));
     }
 
-    void _mayUpdateMainMatrix() final {
+    void _onAnimationProgress() final {
         // scaling
         auto currentAnimSc = currentAnim().scaling;
         if (!currentAnimSc.isZero()) {

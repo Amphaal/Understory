@@ -60,10 +60,10 @@
 
 #include "navigation/base/states/MouseMovements.h"
 
-#include "shaders/selectRect/SelectionRectState.h"
 #include "shaders/grid/Grid.hpp"
 
-#include "widgets/AtomSelectorButton.hpp"
+#include "navigation/widgets/AtomSelectorButton.hpp"
+#include "navigation/widgets/SelectionRectangle.hpp"
 
 namespace UnderStory {
 
@@ -114,13 +114,6 @@ class USApplication: public Magnum::Platform::Application {
     Magnum::GL::Mesh _grid{Magnum::GL::MeshPrimitive::Triangles};
     void _defineGrid(const Magnum::Utility::Resource &rs);
 
-    Shader::SelectionRect _selectRectShader{Magnum::NoCreate};
-    Magnum::GL::Buffer _selectRectBuffer;
-    Magnum::GL::Mesh _selectRect{Magnum::GL::MeshPrimitive::Triangles};
-    Navigation::SelectionRectState _srs;
-    void _defineSelectionRect(const Magnum::Utility::Resource &rs);
-
-    Widget::AtomSelectorButton _atomSelector{Magnum::NoCreate};
     Magnum::Vector2 _cursorPosition(const Sdl2Application::MouseMoveEvent& event) const;
 
     Magnum::Matrix3 _transformationWorld,
@@ -138,6 +131,10 @@ class USApplication: public Magnum::Platform::Application {
     Navigation::MapScaleHelper _msh;
     Navigation::KeyboardMoveHelper _kmh;
     Navigation::ShortcutsTextHelper _sth;
+
+    Magnum::Utility::Resource _rs;
+    Widget::AtomSelectorButton _atomSelector;
+    Widget::SelectionRectangle _selectionRect;
 
     Utility::UpdateChecker _updateChecker;
 };

@@ -29,10 +29,13 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
         GLConfiguration{}
     },
     _cache{Magnum::Vector2i{2048}, Magnum::Vector2i{512}, 22},
+    _rs("data"),
     _mmh(&_timeline, &_transformationWorld),
     _msh(&_timeline, &_transformationWorld),
     _kmh(&_timeline, &_transformationWorld),
-    _sth(&_timeline, &_scaleMatrixShortcutsText) {
+    _sth(&_timeline, &_scaleMatrixShortcutsText),
+    _atomSelector(&_timeline, &_flatShader),
+    _selectionRect(_rs) {
     // set minimum size
     SDL_SetWindowMinimumSize(this->window(), 800, 600);
 
@@ -47,15 +50,12 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     setSwapInterval(-1);
 
     // define
-    Magnum::Utility::Resource rs("data");
-    _defineSelectionRect(rs);
-    _defineGrid(rs);
+    _defineGrid(_rs);
     _defineHaulder();
-    _atomSelector = Widget::AtomSelectorButton{&_flatShader, &_timeline};
 
     /* Load a TrueTypeFont plugin and open the font */
     _font = _fontManager.loadAndInstantiate("TrueTypeFont");
-    if(!_font || !_font->openData(rs.getRaw("SourceSansPro-Regular.ttf"), 180.0f))
+    if(!_font || !_font->openData(_rs.getRaw("SourceSansPro-Regular.ttf"), 180.0f))
         Magnum::Fatal{} << "Cannot open font file";
 
     /* Glyphs we need to render everything */
@@ -102,29 +102,6 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
 
     //
     _timeline.start();
-}
-
-void UnderStory::USApplication::_defineSelectionRect(const Magnum::Utility::Resource &rs) {
-    // compile shader
-    _selectRectShader = Shader::SelectionRect{rs};
-
-    // define indices
-    Magnum::GL::Buffer indices;
-    indices.setData({
-        0, 1, 2,
-        0, 2, 3
-    });
-
-    // set state tracker
-    _srs = Navigation::SelectionRectState(&_selectRectShader, &_selectRectBuffer);
-
-    // bind buffer
-    _selectRectBuffer.setData(_srs.vertexes(), Magnum::GL::BufferUsage::DynamicDraw);
-
-    // define mesh
-    _selectRect.setCount(indices.size())
-            .addVertexBuffer(_selectRectBuffer, 0, Magnum::Shaders::Flat2D::Position{})
-            .setIndexBuffer(std::move(indices), 0, Magnum::MeshIndexType::UnsignedInt);
 }
 
 void UnderStory::USApplication::_defineHaulder() {
@@ -236,7 +213,7 @@ void UnderStory::USApplication::_updateProjections() {
 
     //
     _atomSelector.onViewportChange(wh);
-    _srs.onViewportChange();
+    _selectionRect.onViewportChange();
 }
 
 void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
@@ -272,11 +249,7 @@ void UnderStory::USApplication::drawEvent() {
         .draw(_grid);
 
     // selection rect
-    if (_srs.isSelecting()) {
-        _selectRectShader
-            .setProjectionMatrix(_projectionWorld)
-            .draw(_selectRect);
-    }
+    _selectionRect.mayDraw(_projectionWorld);
 
     // debug text
     _updateDebugText();
@@ -355,7 +328,7 @@ void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {
 
         case MouseEvent::Button::Right: {
             _rMousePressed = true;
-            _srs.init(event, this);
+            _selectionRect.init(event, this);
         }
         break;
 
@@ -371,23 +344,23 @@ Magnum::Vector2 UnderStory::USApplication::_cursorPosition(const Sdl2Application
 
 void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
     if (_lMousePressed) {
-        //
+        // TODO(amphaal) check context
         this->setCursor(Cursor::ResizeAll);
 
         //
         _lMousePressedMoved = true;
         _mmh.mouseMoveEvent(event, this);
 
-    } else if (_srs.isSelecting()) {
+    } else if (_selectionRect.isSelecting()) {
         // if selection, update rect
-        _srs.update(event, this);
+        _selectionRect.update(event, this);
 
     } else {
         // test hovering
         _sth.mouseMoveEvent(event, this, _shortcutsTextRect);
         //
         auto cursorPos = _cursorPosition(event);
-        _atomSelector.onMouseMove(cursorPos);
+        _atomSelector.onMouseMove(cursorPos, this);
     }
 }
 
@@ -395,19 +368,20 @@ void UnderStory::USApplication::mouseReleaseEvent(MouseEvent& event) {
     //
     switch (event.button()) {
         case MouseEvent::Button::Left: {
-            //
+            // TODO(amphaal) check context
             this->setCursor(Cursor::Arrow);
 
             //
             _lMousePressed = false;
             if (_lMousePressedMoved) _mmh.mouseMoveReleaseEvent();
+            _atomSelector.onMouseClick();
         }
         break;
 
         case MouseEvent::Button::Right: {
-            if (_srs.isSelecting()) {
-                _srs.end(event, this);
-                _msh.snapshotZoom(_srs.asRectangle());
+            if (_selectionRect.isSelecting()) {
+                _selectionRect.end(event, this);
+                _msh.snapshotZoom(_selectionRect.asRectangle());
             }
 
             //

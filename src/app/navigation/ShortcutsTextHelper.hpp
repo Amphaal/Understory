@@ -107,7 +107,7 @@ class ShortcutsTextHelper : public BaseUIPlayerHelper<STHStateComponent> {
         _updateAnimationAndPlay(currentAnim(), to);
     }
 
-    void _mayUpdateMainMatrix() final {
+    void _onAnimationProgress() final {
         _replaceMainMatrix(Magnum::Matrix3::scaling(currentAnim().scaling));
         _updateColors();
     }

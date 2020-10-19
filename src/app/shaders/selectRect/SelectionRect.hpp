@@ -40,6 +40,7 @@ namespace Shader {
 
 class SelectionRect : public Magnum::GL::AbstractShaderProgram {
  public:
+    typedef Magnum::GL::Attribute<0, Magnum::Vector2> Position;
     struct Vertex {
         Magnum::Vector2 position;
     };

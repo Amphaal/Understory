@@ -106,6 +106,8 @@
         "stop_token": "cpp",
         "*.inc": "cpp",
         "__functional_03": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "any": "cpp",
+        "source_location": "cpp"
     }
 }

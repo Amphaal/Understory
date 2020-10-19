@@ -62,7 +62,7 @@ class MouseMoveHelper : public BaseUIPlayerHelper<> {
  private:
     MouseMovements _mm;
 
-    void _mayUpdateMainMatrix() final {
+    void _onAnimationProgress() final {
          _translateTo(currentAnim());
     }
 
