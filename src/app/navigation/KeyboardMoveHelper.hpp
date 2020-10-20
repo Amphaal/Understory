@@ -24,7 +24,7 @@
 #include <Magnum/Platform/Sdl2Application.h>
 
 #include "base/BaseUIHelper.hpp"
-#include "base/states/KeyboardMovements.h"
+#include "base/states/KeyboardMovements.hpp"
 
 using Magnum::Platform::Sdl2Application;
 

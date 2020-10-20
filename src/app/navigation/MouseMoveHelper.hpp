@@ -22,7 +22,7 @@
 #include <Magnum/Platform/Sdl2Application.h>
 
 #include "base/BaseUIPlayerHelper.hpp"
-#include "base/states/MouseMovements.h"
+#include "base/states/MouseMovements.hpp"
 
 using Magnum::Platform::Sdl2Application;
 

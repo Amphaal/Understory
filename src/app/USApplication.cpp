@@ -252,31 +252,73 @@ void UnderStory::USApplication::keyPressEvent(KeyEvent& event) {
     }
 }
 
+void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
+    // check if locked context
+    if(_lockContext == this) {
+        if (_mouseState.dragging()) {
+            //
+            this->setCursor(Cursor::ResizeAll);
+
+            //
+            _mmh.mouseMoveEvent(event, this);
+
+        } else if (_selectionRect.isSelecting()) {
+            // if selection, update rect
+            _selectionRect.update(event, this);
+        }
+
+    // no locked context, update hover context
+    } else if(!_lockContext) {
+        _updateHoverContext(event);
+    }
+}
+
+void UnderStory::USApplication::_updateHoverContext(MouseMoveEvent& event) {
+    //
+    auto cursorPos = _cursorPosition(event);
+
+    // check if on atomSelector
+    auto isASHovered = _atomSelector.onMouseMove(cursorPos, this);
+    if(isASHovered) {
+        _hoverContext = &_atomSelector;
+        return;
+    }
+
+    // check if on shortcuts text
+    _sth.mouseMoveEvent(event, this, _shortcutsTextRect);
+
+    // define app as context by default
+    _hoverContext = this;
+}
+
 void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {
+    //
+    _lockContext = _hoverContext;
+
     //
     switch (event.button()) {
         case MouseEvent::Button::Left: {
             //
-            _lMousePressed = true;
+            auto isDoubleClick = _mouseState.leftPressed();
 
             //
-            auto now = std::chrono::system_clock::now();
-            auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(now - _lMousePressedT);
-            _lMousePressedT = now;
-            _lMousePressedMoved = false;
+            if(_lockContext == this) {
+                _mmh.mousePressEvent();
+            }
 
             //
-            _mmh.mousePressEvent();
-
-            //
-            if (elapsedMs.count() < DOUBLE_CLICK_DELAY_MS)
-                _mmh.mouseDoubleClickEvent(event, this);
+            if (isDoubleClick) leftMouseDoubleClickEvent(event);
         }
         break;
 
         case MouseEvent::Button::Right: {
-            _rMousePressed = true;
-            _selectionRect.init(event, this);
+            //
+            _mouseState.rightPressed();
+
+            //
+            if(_lockContext == this) {
+                _selectionRect.init(event, this);
+            }
         }
         break;
 
@@ -285,30 +327,9 @@ void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {
     }
 }
 
-Magnum::Vector2 UnderStory::USApplication::_cursorPosition(const Sdl2Application::MouseMoveEvent& event) const {
-    Magnum::Vector2 fs{this->framebufferSize()};
-    return (Magnum::Vector2{event.position()} - fs / 2.f) / fs * Magnum::Vector2{2.f, -2.f};
-}
-
-void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
-    if (_lMousePressed) {
-        // TODO(amphaal) check context
-        this->setCursor(Cursor::ResizeAll);
-
-        //
-        _lMousePressedMoved = true;
-        _mmh.mouseMoveEvent(event, this);
-
-    } else if (_selectionRect.isSelecting()) {
-        // if selection, update rect
-        _selectionRect.update(event, this);
-
-    } else {
-        // test hovering
-        _sth.mouseMoveEvent(event, this, _shortcutsTextRect);
-        //
-        auto cursorPos = _cursorPosition(event);
-        _atomSelector.onMouseMove(cursorPos, this);
+void UnderStory::USApplication::leftMouseDoubleClickEvent(MouseEvent& event) {
+    if(_lockContext == this) {
+        _mmh.mouseDoubleClickEvent(event, this);
     }
 }
 
@@ -316,30 +337,41 @@ void UnderStory::USApplication::mouseReleaseEvent(MouseEvent& event) {
     //
     switch (event.button()) {
         case MouseEvent::Button::Left: {
-            // TODO(amphaal) check context
-            this->setCursor(Cursor::Arrow);
+            //
+            auto dragged = _mouseState.leftReleased();
 
             //
-            _lMousePressed = false;
-            if (_lMousePressedMoved) _mmh.mouseMoveReleaseEvent();
-            _atomSelector.onMouseClick();
+            if(_lockContext == this) {
+                if (dragged) {
+                    _mmh.mouseMoveReleaseEvent();
+                    this->setCursor(Cursor::Arrow);
+                }
+
+            } else if (_lockContext == &_atomSelector) {
+                _atomSelector.onMouseClick();
+            }
         }
         break;
 
         case MouseEvent::Button::Right: {
-            if (_selectionRect.isSelecting()) {
-                _selectionRect.end(event, this);
-                _msh.snapshotZoom(_selectionRect.asRectangle());
+            if(_lockContext == this) {
+                if (_selectionRect.isSelecting()) {
+                    _selectionRect.end(event, this);
+                    _msh.snapshotZoom(_selectionRect.asRectangle());
+                }
             }
 
             //
-            _rMousePressed = false;
+            _mouseState.rightReleased();
         }
         break;
 
         default:
         break;
     }
+
+    //
+    _lockContext = nullptr;
 }
 
 void UnderStory::USApplication::_resetWorldMatrix() {
@@ -360,6 +392,11 @@ void UnderStory::USApplication::_updateDebugText() {
     );
 
     _debugText->render(formatedText);
+}
+
+Magnum::Vector2 UnderStory::USApplication::_cursorPosition(const Sdl2Application::MouseMoveEvent& event) const {
+    Magnum::Vector2 fs{this->framebufferSize()};
+    return (Magnum::Vector2{event.position()} - fs / 2.f) / fs * Magnum::Vector2{2.f, -2.f};
 }
 
 MAGNUM_APPLICATION_MAIN(UnderStory::USApplication)

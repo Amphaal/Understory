@@ -53,7 +53,8 @@
 #include "navigation/KeyboardMoveHelper.hpp"
 #include "navigation/ShortcutsTextHelper.hpp"
 
-#include "navigation/base/states/MouseMovements.h"
+#include "navigation/base/states/MouseMovements.hpp"
+#include "navigation/base/states/MouseState.hpp"
 
 #include "navigation/widgets/AtomSelectorButton.hpp"
 #include "navigation/widgets/SelectionRectangle.hpp"
@@ -66,8 +67,8 @@ class USApplication : public Magnum::Platform::Application {
     explicit USApplication(const Arguments& arguments);
 
  private:
-    void viewportEvent(ViewportEvent& event) override;
     void drawEvent() override;
+    void viewportEvent(ViewportEvent& event) override;
     void mouseScrollEvent(MouseScrollEvent& event) override;
     void keyPressEvent(KeyEvent& event) override;
     void keyReleaseEvent(KeyEvent& event) override;
@@ -75,14 +76,7 @@ class USApplication : public Magnum::Platform::Application {
     void mousePressEvent(MouseEvent& event) override;
     void mouseReleaseEvent(MouseEvent& event) override;
     void mouseMoveEvent(MouseMoveEvent& event) override;
-
-    // left click
-      bool _lMousePressed = false;
-      bool _lMousePressedMoved = false;
-      std::chrono::system_clock::time_point _lMousePressedT;
-
-    // right click
-      bool _rMousePressed = false;
+    void leftMouseDoubleClickEvent(MouseEvent& event);
 
     void _updateProjections();
     void _updateDebugText();
@@ -116,6 +110,14 @@ class USApplication : public Magnum::Platform::Application {
     static constexpr Magnum::Color4 DEBUG_TEXT_COLOR {1.f, .7f, .3f};
     static constexpr int MINIMUM_HEIGHT = 600;
     static constexpr int MINIMUM_WIDTH = 800;
+
+    // mouse state
+    Navigation::MouseState _mouseState {DOUBLE_CLICK_DELAY_MS};
+
+    // mouse context
+    void* _hoverContext = nullptr;
+    void* _lockContext = nullptr;
+    void _updateHoverContext(MouseMoveEvent& event);
 
     Magnum::Timeline _timeline;
     Navigation::MouseMoveHelper _mmh;

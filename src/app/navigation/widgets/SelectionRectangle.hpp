@@ -26,7 +26,7 @@
 
 #include <utility>
 
-#include "src/app/shaders/selectRect/SelectionRectState.h"
+#include "src/app/shaders/selectRect/SelectionRectState.hpp"
 
 namespace UnderStory {
 

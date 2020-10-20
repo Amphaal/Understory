@@ -68,10 +68,10 @@ class AtomSelectorButton : public Navigation::BaseUIPlayerHelper<> {
         _updatePos();
     }
 
-    void onMouseMove(const Magnum::Vector2 &cursorPos, Magnum::Platform::Application* app) {
+    bool onMouseMove(const Magnum::Vector2 &cursorPos, Magnum::Platform::Application* app) {
         // prevent updating if state did not change
         auto hovered = _pos.contains(cursorPos);
-        if(_isHovered == hovered) return;
+        if(_isHovered == hovered) return _isHovered;
 
         // update state
         _isHovered = hovered;
@@ -85,7 +85,11 @@ class AtomSelectorButton : public Navigation::BaseUIPlayerHelper<> {
             app->setCursor(Magnum::Platform::Sdl2Application::Cursor::Arrow);
         }
 
+        //
         _updateAnimationYTarget();
+
+        //
+        return _isHovered;
     }
 
     void onMouseClick() {
