@@ -41,11 +41,6 @@
 #include <Magnum/Math/Matrix3.h>
 #include <Magnum/Math/Color.h>
 
-#include <Magnum/Trade/AbstractImporter.h>
-#include <Magnum/Trade/ImageData.h>
-#include <Magnum/GL/TextureFormat.h>
-#include <Magnum/GL/TransformFeedback.h>
-
 #include <utility>
 #include <string>
 
@@ -60,14 +55,13 @@
 
 #include "navigation/base/states/MouseMovements.h"
 
-#include "shaders/grid/Grid.hpp"
-
 #include "navigation/widgets/AtomSelectorButton.hpp"
 #include "navigation/widgets/SelectionRectangle.hpp"
+#include "navigation/widgets/Grid.hpp"
 
 namespace UnderStory {
 
-class USApplication: public Magnum::Platform::Application {
+class USApplication : public Magnum::Platform::Application {
  public:
     explicit USApplication(const Arguments& arguments);
 
@@ -109,11 +103,6 @@ class USApplication: public Magnum::Platform::Application {
     Magnum::GL::Mesh _haulder{Magnum::GL::MeshPrimitive::TriangleFan};
     void _defineHaulder();
 
-    Magnum::GL::Texture2D _gridTexture;
-    Shader::Grid _gridShader{Magnum::NoCreate};
-    Magnum::GL::Mesh _grid{Magnum::GL::MeshPrimitive::Triangles};
-    void _defineGrid(const Magnum::Utility::Resource &rs);
-
     Magnum::Vector2 _cursorPosition(const Sdl2Application::MouseMoveEvent& event) const;
 
     Magnum::Matrix3 _transformationWorld,
@@ -125,6 +114,8 @@ class USApplication: public Magnum::Platform::Application {
     static constexpr int DOUBLE_CLICK_DELAY_MS = 200;
     static constexpr float MAP_SIZE = 1000.f;  // CAREFUL, higher need a better precision
     static constexpr Magnum::Color4 DEBUG_TEXT_COLOR {1.f, .7f, .3f};
+    static constexpr int MINIMUM_HEIGHT = 600;
+    static constexpr int MINIMUM_WIDTH = 800;
 
     Magnum::Timeline _timeline;
     Navigation::MouseMoveHelper _mmh;
@@ -135,6 +126,7 @@ class USApplication: public Magnum::Platform::Application {
     Magnum::Utility::Resource _rs;
     Widget::AtomSelectorButton _atomSelector;
     Widget::SelectionRectangle _selectionRect;
+    Widget::Grid _grid;
 
     Utility::UpdateChecker _updateChecker;
 };

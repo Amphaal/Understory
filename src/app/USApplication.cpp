@@ -24,7 +24,7 @@ using namespace Magnum::Math::Literals;
 UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Platform::Application{
         arguments,
         Configuration{}.setTitle(APP_FULL_DENOM)
-                       .setSize(Magnum::Vector2i{800, 600})
+                       .setSize(Magnum::Vector2i{MINIMUM_WIDTH, MINIMUM_HEIGHT})
                        .setWindowFlags(Configuration::WindowFlag::Resizable),
         GLConfiguration{}
     },
@@ -35,9 +35,10 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _kmh(&_timeline, &_transformationWorld),
     _sth(&_timeline, &_scaleMatrixShortcutsText),
     _atomSelector(&_timeline, &_flatShader),
-    _selectionRect(_rs) {
+    _selectionRect(_rs),
+    _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT) {
     // set minimum size
-    SDL_SetWindowMinimumSize(this->window(), 800, 600);
+    SDL_SetWindowMinimumSize(this->window(), MINIMUM_WIDTH, MINIMUM_HEIGHT);
 
     //
     _updateChecker.start();
@@ -50,7 +51,6 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     setSwapInterval(-1);
 
     // define
-    _defineGrid(_rs);
     _defineHaulder();
 
     /* Load a TrueTypeFont plugin and open the font */
@@ -132,56 +132,6 @@ void UnderStory::USApplication::_defineHaulder() {
             .addVertexBuffer(std::move(_haulderBuffer), 0, Magnum::Shaders::Flat2D::Position{});
 }
 
-void UnderStory::USApplication::_defineGrid(const Magnum::Utility::Resource &rs) {
-    // load texture
-    Corrade::PluginManager::Manager<Magnum::Trade::AbstractImporter> manager;
-    auto importer = manager.loadAndInstantiate("PngImporter");
-    if(!importer) std::exit(1);
-    if(!importer->openData(rs.getRaw("grid.png"))) std::exit(2);
-
-    // set texture
-    auto image = importer->image2D(0);
-    auto levels = Magnum::Math::log2(image->size().x()) + 1;
-    CORRADE_INTERNAL_ASSERT(image);
-    _gridTexture
-        .setWrapping(Magnum::GL::SamplerWrapping::Repeat)
-        .setMagnificationFilter(Magnum::GL::SamplerFilter::Nearest)
-        .setMinificationFilter(Magnum::GL::SamplerFilter::Nearest)
-        .setMaxAnisotropy(Magnum::GL::Sampler::maxMaxAnisotropy())
-        .setStorage(levels, Magnum::GL::textureFormat(image->format()), image->size())
-        .setSubImage(0, {}, *image)
-        .generateMipmap();
-
-    // compile shader
-    _gridShader = Shader::Grid{rs};
-
-    // define indices
-    Magnum::GL::Buffer indices;
-    indices.setData({
-        0, 1, 2,
-        2, 3, 0
-    });
-
-    // define data and structure
-    auto squareSize = Magnum::Vector2 {image->size()} * (1.f / static_cast<float>(framebufferSize().y()));
-    auto gridRadius = squareSize * MAP_SIZE / 2.f;
-    const Shader::Grid::Vertex gridVData[]{
-        { {-gridRadius.x(),  gridRadius.y()}, {.0f,         MAP_SIZE} },
-        { { gridRadius.x(),  gridRadius.y()}, {MAP_SIZE,    MAP_SIZE} },
-        { { gridRadius.x(), -gridRadius.y()}, {MAP_SIZE,    .0f} },
-        { {-gridRadius.x(), -gridRadius.y()}, {.0f,         .0f} }
-    };
-
-    // bind to buffer
-    Magnum::GL::Buffer gridVertices;
-    gridVertices.setData(gridVData);
-
-    // define mesh
-    _grid.setCount(indices.size())
-        .addVertexBuffer(std::move(gridVertices), 0, Shader::Grid::Position{}, Shader::Grid::TextureCoordinates{})
-        .setIndexBuffer (std::move(indices),      0, Magnum::MeshIndexType::UnsignedInt);
-}
-
 void UnderStory::USApplication::_updateProjections() {
     //
     Widget::Helper wh {windowSize()};
@@ -232,21 +182,19 @@ void UnderStory::USApplication::drawEvent() {
     _atomSelector.advance();
 
     // world
+    auto worldMatrix = _projectionWorld * _transformationWorld;
+    auto scale = _transformationWorld.uniformScaling();
     _textShader.bindVectorTexture(_cache.texture());
     _textShader
-        .setTransformationProjectionMatrix(_projectionWorld * _transformationWorld)
+        .setTransformationProjectionMatrix(worldMatrix)
         .setColor(0x2f83cc_rgbf)
         .setOutlineColor(0xdcdcdc_rgbf)
         .setOutlineRange(0.45f, 0.35f)
-        .setSmoothness(0.015f/ _transformationWorld.uniformScaling())
+        .setSmoothness(0.015f/ scale)
         .draw(_worldText);
 
     // grid
-    _gridShader.bindTexture(_gridTexture);
-    _gridShader
-        .setProjectionMatrix(_projectionWorld * _transformationWorld)
-        .setScale(_transformationWorld.uniformScaling())
-        .draw(_grid);
+    _grid.draw(worldMatrix, scale);
 
     // selection rect
     _selectionRect.mayDraw(_projectionWorld);
