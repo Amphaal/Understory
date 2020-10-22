@@ -27,9 +27,9 @@ namespace UnderStory {
 
 namespace Widget {
 
-struct Helper {
+struct Constraints {
  public:
-    explicit Helper(const Magnum::Vector2i &windowSize) :
+    explicit Constraints(const Magnum::Vector2i &windowSize) :
     ws(windowSize),
     baseProjMatrix(Magnum::Matrix3::projection(ws)),
     pixelSize(Magnum::Vector2 {1.f} / ws) {}

@@ -57,8 +57,11 @@
 #include "navigation/base/states/MouseState.hpp"
 
 #include "navigation/widgets/AtomSelectorButton.hpp"
-#include "navigation/widgets/SelectionRectangle.hpp"
-#include "navigation/widgets/Grid.hpp"
+#include "navigation/widgets/Panel.hpp"
+
+#include "navigation/widgets/helpers/SelectionRectangle.hpp"
+#include "navigation/widgets/helpers/Grid.hpp"
+
 
 namespace UnderStory {
 
@@ -119,16 +122,18 @@ class USApplication : public Magnum::Platform::Application {
     void* _lockContext = nullptr;
     void _updateHoverContext(MouseMoveEvent& event);
 
+    Magnum::Utility::Resource _rs;
     Magnum::Timeline _timeline;
+
     Navigation::MouseMoveHelper _mmh;
     Navigation::MapScaleHelper _msh;
     Navigation::KeyboardMoveHelper _kmh;
     Navigation::ShortcutsTextHelper _sth;
 
-    Magnum::Utility::Resource _rs;
+    Widget::Helper::SelectionRectangle _selectionRect;
+    Widget::Helper::Grid _grid;
     Widget::AtomSelectorButton _atomSelector;
-    Widget::SelectionRectangle _selectionRect;
-    Widget::Grid _grid;
+    Widget::Panel _panel;
 
     Utility::UpdateChecker _updateChecker;
 };

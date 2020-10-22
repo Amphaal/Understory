@@ -99,8 +99,8 @@ class MapScaleHelper : public BaseUIPlayerHelper<ScrollAnimStateComponent> {
 
  private:
     static constexpr float DELTA_BY_OFFLINE = 2.f;
-    static constexpr float MAX_SCALE = 32;
-    static constexpr float MIN_SCALE = 0.03125;
+    static constexpr float MAX_SCALE = 32.f;
+    static constexpr float MIN_SCALE = .03125f;
     static constexpr float SMOOTHING_AS_SECONDS = .2f;
 
     static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, AnimationState<ScrollAnimStateComponent>& state) {
@@ -123,7 +123,7 @@ class MapScaleHelper : public BaseUIPlayerHelper<ScrollAnimStateComponent> {
     }
 
     Magnum::Vector2 _getScrollDeltaVector(Magnum::Float direction) {
-        auto delta = direction < 0 ? 1.0f / DELTA_BY_OFFLINE : DELTA_BY_OFFLINE;
+        auto delta = direction < 0 ? 1.f / DELTA_BY_OFFLINE : DELTA_BY_OFFLINE;
         return Magnum::Vector2{delta};
     }
 

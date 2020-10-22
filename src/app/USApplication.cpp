@@ -34,7 +34,8 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _msh(&_timeline, &_transformationWorld),
     _kmh(&_timeline, &_transformationWorld),
     _sth(&_timeline, &_scaleMatrixShortcutsText),
-    _atomSelector(&_timeline, &_flatShader),
+    _atomSelector(&_timeline, &_flatShader, this),
+    _panel(&_timeline, &_flatShader, this),
     _selectionRect(_rs),
     _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT) {
     // set minimum size
@@ -55,7 +56,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
 
     /* Load a TrueTypeFont plugin and open the font */
     _font = _fontManager.loadAndInstantiate("TrueTypeFont");
-    if(!_font || !_font->openData(_rs.getRaw("SourceSansPro-Regular.ttf"), 180.0f))
+    if(!_font || !_font->openData(_rs.getRaw("SourceSansPro-Regular.ttf"), 180.f))
         Magnum::Fatal{} << "Cannot open font file";
 
     /* Glyphs we need to render everything */
@@ -66,7 +67,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
 
     /* Text that rotates using mouse wheel. Size relative to the window size
        (1/10 of it) -- if you resize the window, it gets bigger */
-    std::tie(_worldText, std::ignore) = Magnum::Text::Renderer2D::render(*_font, _cache, 0.2f,
+    std::tie(_worldText, std::ignore) = Magnum::Text::Renderer2D::render(*_font, _cache, .2f,
         "Welcome to the Understory developper early demo !\n"
         "This is a placeholder meant to showcase the text displaying capabilities.\n"
         "Thank you for trying this early stage build and supporting our efforts !\n"
@@ -74,7 +75,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
         _textVertices, _textIndices, Magnum::GL::BufferUsage::StaticDraw, Magnum::Text::Alignment::MiddleCenter);
 
     // define debug text as dynamic
-    _debugText.reset(new Magnum::Text::Renderer2D(*_font, _cache, 14.0f, Magnum::Text::Alignment::TopLeft));
+    _debugText.reset(new Magnum::Text::Renderer2D(*_font, _cache, 14.f, Magnum::Text::Alignment::TopLeft));
     _debugText->reserve(100, Magnum::GL::BufferUsage::DynamicDraw, Magnum::GL::BufferUsage::StaticDraw);
 
     // define shortcut text as static
@@ -86,7 +87,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
                 "[Esc]                       Reset camera\n"
                 "[MouseScroll]                                       Zoom\n"
                 "[NumPad +/-]                                       Zoom";
-    _shortcutsText.reset(new Magnum::Text::Renderer2D(*_font, _cache, 14.0f, Magnum::Text::Alignment::TopRight));
+    _shortcutsText.reset(new Magnum::Text::Renderer2D(*_font, _cache, 14.f, Magnum::Text::Alignment::TopRight));
     _shortcutsText->reserve(sText.size(), Magnum::GL::BufferUsage::StaticDraw, Magnum::GL::BufferUsage::StaticDraw);
     _shortcutsText->render(sText);
 
@@ -134,7 +135,7 @@ void UnderStory::USApplication::_defineHaulder() {
 
 void UnderStory::USApplication::_updateProjections() {
     //
-    Widget::Helper wh {windowSize()};
+    Widget::Constraints wh {windowSize()};
 
     //
     _projectionWorld = Magnum::Matrix3::projection(
@@ -163,6 +164,7 @@ void UnderStory::USApplication::_updateProjections() {
 
     //
     _atomSelector.onViewportChange(wh);
+    _panel.onViewportChange(wh);
     _selectionRect.onViewportChange();
 }
 
@@ -180,6 +182,7 @@ void UnderStory::USApplication::drawEvent() {
     _kmh.advance();
     _sth.advance();
     _atomSelector.advance();
+    _panel.advance();
 
     // world
     auto worldMatrix = _projectionWorld * _transformationWorld;
@@ -189,8 +192,8 @@ void UnderStory::USApplication::drawEvent() {
         .setTransformationProjectionMatrix(worldMatrix)
         .setColor(0x2f83cc_rgbf)
         .setOutlineColor(0xdcdcdc_rgbf)
-        .setOutlineRange(0.45f, 0.35f)
-        .setSmoothness(0.015f/ scale)
+        .setOutlineRange(.45f, .35f)
+        .setSmoothness(.015f/ scale)
         .draw(_worldText);
 
     // grid
@@ -204,10 +207,13 @@ void UnderStory::USApplication::drawEvent() {
     _textShader
         .setColor(DEBUG_TEXT_COLOR)
         .setOutlineColor(DEBUG_TEXT_COLOR)
-        .setOutlineRange(0.47f, 0.44f)
-        .setSmoothness(0.33f)
+        .setOutlineRange(.47f, .44f)
+        .setSmoothness(.33f)
         .setTransformationProjectionMatrix(_transformationProjectionDebugText)
         .draw(_debugText->mesh());
+
+    // panel
+    _panel.mayDraw();
 
     // atom selector
     _atomSelector.draw();
@@ -278,9 +284,16 @@ void UnderStory::USApplication::_updateHoverContext(MouseMoveEvent& event) {
     auto cursorPos = _cursorPosition(event);
 
     // check if on atomSelector
-    auto isASHovered = _atomSelector.onMouseMove(cursorPos, this);
-    if(isASHovered) {
+    _atomSelector.onMouseMove(cursorPos);
+    if(_atomSelector.isHovered()) {
         _hoverContext = &_atomSelector;
+        return;
+    }
+
+    // check if on panel
+    _panel.onMouseMove(cursorPos);
+    if(_panel.isHovered()) {
+        _hoverContext = &_panel;
         return;
     }
 
@@ -348,7 +361,8 @@ void UnderStory::USApplication::mouseReleaseEvent(MouseEvent& event) {
                 }
 
             } else if (_lockContext == &_atomSelector) {
-                _atomSelector.onMouseClick();
+                _atomSelector.toggle();
+                _panel.toggle();
             }
         }
         break;

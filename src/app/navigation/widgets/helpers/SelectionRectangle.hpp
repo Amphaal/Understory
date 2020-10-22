@@ -32,6 +32,8 @@ namespace UnderStory {
 
 namespace Widget {
 
+namespace Helper {
+
 class SelectionRectangle : public Navigation::SelectionRectState {
  public:
     explicit SelectionRectangle(const Magnum::Utility::Resource &rs) :
@@ -54,6 +56,7 @@ class SelectionRectangle : public Navigation::SelectionRectState {
     }
 
     void mayDraw(const Magnum::Matrix3 &projectionMatrix) {
+        //
         if(!isSelecting()) return;
 
         // draw
@@ -67,6 +70,8 @@ class SelectionRectangle : public Navigation::SelectionRectState {
     Magnum::GL::Buffer _selectRectBuffer;
     Magnum::GL::Mesh _selectRect{Magnum::GL::MeshPrimitive::Triangles};
 };
+
+}  // namespace Helper
 
 }  // namespace Widget
 

@@ -39,6 +39,8 @@ namespace UnderStory {
 
 namespace Widget {
 
+namespace Helper {
+
 // TODO(amphaal) grid sized to DPI
 class Grid {
  public:
@@ -105,6 +107,8 @@ class Grid {
     Shader::Grid _shader{Magnum::NoCreate};
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
 };
+
+}  // namespace Helper
 
 }  // namespace Widget
 

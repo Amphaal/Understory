@@ -53,8 +53,12 @@ class BaseUIPlayerHelper : public BaseUIHelper {
 
     void advance() final {
         _player.advance(_timeline->previousFrameTime());
-        if(_player.state() != Magnum::Animation::State::Playing) return;
+        if(!isAnimationPlaying()) return;
         _onAnimationProgress();
+    }
+
+    bool isAnimationPlaying() const {
+        return _player.state() == Magnum::Animation::State::Playing;
     }
 
  protected:
