@@ -68,7 +68,7 @@ class Panel : public Navigation::BaseUIPlayerHelper<Magnum::Float>, public Hover
 
  private:
     static constexpr float X_PANEL_SIZE = .8f;
-    static constexpr float Y_PANEL_SIZE = 1.9f;
+    static constexpr float Y_PANEL_SIZE = 2.f;
     static constexpr Magnum::Vector2 BL_START {-1.f};
     static constexpr Magnum::Vector2 BL_END {BL_START.x() + X_PANEL_SIZE, BL_START.y() + Y_PANEL_SIZE};
 

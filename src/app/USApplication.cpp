@@ -202,6 +202,12 @@ void UnderStory::USApplication::drawEvent() {
     // selection rect
     _selectionRect.mayDraw(_projectionWorld);
 
+    // panel
+    _panel.mayDraw();
+
+    // atom selector
+    _atomSelector.draw();
+
     // debug text
     _updateDebugText();
     _textShader
@@ -211,12 +217,6 @@ void UnderStory::USApplication::drawEvent() {
         .setSmoothness(.33f)
         .setTransformationProjectionMatrix(_transformationProjectionDebugText)
         .draw(_debugText->mesh());
-
-    // panel
-    _panel.mayDraw();
-
-    // atom selector
-    _atomSelector.draw();
 
     // haulder
     _flatShader
