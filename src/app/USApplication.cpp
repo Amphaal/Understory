@@ -28,7 +28,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
                        .setWindowFlags(Configuration::WindowFlag::Resizable),
         GLConfiguration{}
     },
-    _cache{Magnum::Vector2i{2048}, Magnum::Vector2i{512}, 22},
+    _worldCache{Magnum::Vector2i{2048}, Magnum::Vector2i{512}, 22},
     _rs("data"),
     _mmh(&_timeline, &_transformationWorld),
     _msh(&_timeline, &_transformationWorld),
@@ -55,50 +55,54 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _defineHaulder();
 
     /* Load a TrueTypeFont plugin and open the font */
-    _font = _fontManager.loadAndInstantiate("TrueTypeFont");
-    if(!_font || !_font->openData(_rs.getRaw("SourceSansPro-Regular.ttf"), 180.f))
+    _defaultFont = _fontManager.loadAndInstantiate("TrueTypeFont");
+    if(!_defaultFont || !_defaultFont->openData(_rs.getRaw("SourceSansPro-Regular.ttf"), 180.f))
         Magnum::Fatal{} << "Cannot open font file";
 
     /* Glyphs we need to render everything */
-    _font->fillGlyphCache(_cache,
+    _defaultFont->fillGlyphCache(
+        _worldCache,
         "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "0123456789:-+,.!°()/[] ");
+        "0123456789:-+,.!°()/[] "
+    );
 
-    /* Text that rotates using mouse wheel. Size relative to the window size
-       (1/10 of it) -- if you resize the window, it gets bigger */
-    std::tie(_worldText, std::ignore) = Magnum::Text::Renderer2D::render(*_font, _cache, .2f,
-        "Welcome to the Understory developper early demo !\n"
-        "This is a placeholder meant to showcase the text displaying capabilities.\n"
-        "Thank you for trying this early stage build and supporting our efforts !\n"
-        "More infos available on our Discord server and Github page (https://github.com/Amphaal/Understory)",
-        _textVertices, _textIndices, Magnum::GL::BufferUsage::StaticDraw, Magnum::Text::Alignment::MiddleCenter);
-
-    // define debug text as dynamic
-    _debugText.reset(new Magnum::Text::Renderer2D(*_font, _cache, 14.f, Magnum::Text::Alignment::TopLeft));
-    _debugText->reserve(100, Magnum::GL::BufferUsage::DynamicDraw, Magnum::GL::BufferUsage::StaticDraw);
+    // define world text as static
+    {
+        Widget::StaticTextFactory textFactory(*_defaultFont, _worldCache, .2f);
+        _worldText = textFactory.generate("Welcome to the Understory developper early demo !\n"
+            "This is a placeholder meant to showcase the text displaying capabilities.\n"
+            "Thank you for trying this early stage build and supporting our efforts !\n"
+            "More infos available on our Discord server and Github page (https://github.com/Amphaal/Understory)"
+        );
+    }
 
     // define shortcut text as static
-    const std::string sText =
+    {
+        Widget::StaticTextFactory textFactory(*_defaultFont, _worldCache, 14.f);
+        _shortcutsText = textFactory.generate(
                 "[LeftClick  (DoubleClick)] Center screen on cursor\n"
                 "[LeftClick  (Maintain)]                       Move camera\n"
                 "[RightClick (Maintain / Release)]             Snapshot zoom-in\n"
                 "[D-Pad]                       Move camera\n"
                 "[Esc]                       Reset camera\n"
                 "[MouseScroll]                                       Zoom\n"
-                "[NumPad +/-]                                       Zoom";
-    _shortcutsText.reset(new Magnum::Text::Renderer2D(*_font, _cache, 14.f, Magnum::Text::Alignment::TopRight));
-    _shortcutsText->reserve(sText.size(), Magnum::GL::BufferUsage::StaticDraw, Magnum::GL::BufferUsage::StaticDraw);
-    _shortcutsText->render(sText);
+                "[NumPad +/-]                                       Zoom",
+            Magnum::Text::Alignment::TopRight
+        );
+    }
 
-    /* Set up premultiplied alpha blending to avoid overlapping text characters
-       to cut into each other */
+    /* Set up premultiplied alpha blending to avoid overlapping text characters to cut into each other */
     Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::Blending);
     Magnum::GL::Renderer::setBlendFunction(Magnum::GL::Renderer::BlendFunction::SourceAlpha, Magnum::GL::Renderer::BlendFunction::OneMinusSourceAlpha);
     Magnum::GL::Renderer::setBlendEquation(Magnum::GL::Renderer::BlendEquation::Add, Magnum::GL::Renderer::BlendEquation::Add);
 
     //
     _updateProjections();
+
+    // define debug text as dynamic
+    _debugText.reset(new Magnum::Text::Renderer2D(*_defaultFont, _worldCache, 14.f, Magnum::Text::Alignment::TopLeft));
+    _debugText->reserve(100, Magnum::GL::BufferUsage::DynamicDraw, Magnum::GL::BufferUsage::StaticDraw);
     _updateDebugText();
 
     //
@@ -157,8 +161,8 @@ void UnderStory::USApplication::_updateProjections() {
         );
 
     // TODO(amphaal) include padding in rect calculation
-    _shortcutsTextRect = Navigation::ShortcutsTextHelper::trNormalized(
-        _shortcutsText->rectangle(),
+    _shortcutsTextRect = Widget::ShortcutsText::trNormalized(
+        _shortcutsText.geometry(),
         this->framebufferSize()
     );
 
@@ -187,7 +191,7 @@ void UnderStory::USApplication::drawEvent() {
     // world
     auto worldMatrix = _projectionWorld * _transformationWorld;
     auto scale = _transformationWorld.uniformScaling();
-    _textShader.bindVectorTexture(_cache.texture());
+    _textShader.bindVectorTexture(_worldCache.texture());
     _textShader
         .setTransformationProjectionMatrix(worldMatrix)
         .setColor(0x2f83cc_rgbf)
@@ -229,7 +233,7 @@ void UnderStory::USApplication::drawEvent() {
         .setColor(_sth.textColor())
         .setOutlineColor(0xffffffAA_rgbaf)
         .setTransformationProjectionMatrix(_transformationProjectionShortcutsText * _scaleMatrixShortcutsText)
-        .draw(_shortcutsText->mesh());
+        .draw(_shortcutsText);
 
     // buffers swap, automatic redrawing and timeline frame check
     swapBuffers();
@@ -396,13 +400,14 @@ void UnderStory::USApplication::_resetWorldMatrix() {
 }
 
 void UnderStory::USApplication::_updateDebugText() {
-    auto tr = _transformationWorld.translation();
+    auto us = _transformationWorld.uniformScaling();
+    auto tr = _transformationWorld.translation() / Magnum::Vector2 {us};
 
     auto formatedText = Magnum::Utility::formatString(
         "x: {:.2}\ny: {:.2}\nZoom: x{:.2}",
-        tr[0] / _transformationWorld.uniformScaling(),
-        tr[1] / _transformationWorld.uniformScaling(),
-        _transformationWorld.uniformScaling()
+        tr[0],
+        tr[1],
+        us
     );
 
     _debugText->render(formatedText);

@@ -23,8 +23,8 @@
 
 #include <Magnum/Platform/Sdl2Application.h>
 
-#include "base/BaseUIHelper.hpp"
-#include "base/states/KeyboardMovements.hpp"
+#include "../animation/BaseUIHelper.hpp"
+#include "KeyboardMovements.hpp"
 
 using Magnum::Platform::Sdl2Application;
 
@@ -32,7 +32,7 @@ namespace UnderStory {
 
 namespace Navigation {
 
-class KeyboardMoveHelper : public BaseUIHelper {
+class KeyboardMoveHelper : public Animation::BaseUIHelper {
  public:
      KeyboardMoveHelper(Magnum::Timeline* timeline, Magnum::Matrix3* mainMatrix) : BaseUIHelper(timeline, mainMatrix) {}
 

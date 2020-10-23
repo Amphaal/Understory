@@ -23,7 +23,7 @@
 
 #include <utility>
 
-#include "base/BaseUIPlayerHelper.hpp"
+#include "../animation/BaseUIPlayerHelper.hpp"
 
 using Magnum::Platform::Sdl2Application;
 
@@ -36,7 +36,7 @@ struct ScrollAnimStateComponent {
     Magnum::Vector2 scaling;
 };
 
-class MapScaleHelper : public BaseUIPlayerHelper<ScrollAnimStateComponent> {
+class MapScaleHelper : public Animation::BaseUIPlayerHelper<ScrollAnimStateComponent> {
  public:
     explicit MapScaleHelper(Magnum::Timeline* timeline, Magnum::Matrix3* mainMatrix)
     : BaseUIPlayerHelper(timeline, mainMatrix, SMOOTHING_AS_SECONDS, &_defaultAnimationCallback) {}
@@ -103,7 +103,7 @@ class MapScaleHelper : public BaseUIPlayerHelper<ScrollAnimStateComponent> {
     static constexpr float MIN_SCALE = .03125f;
     static constexpr float SMOOTHING_AS_SECONDS = .2f;
 
-    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, AnimationState<ScrollAnimStateComponent>& state) {
+    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<ScrollAnimStateComponent>& state) {
         //
         if(!state.to.translation.isZero()) {
             state.previous.translation = state.current.translation;

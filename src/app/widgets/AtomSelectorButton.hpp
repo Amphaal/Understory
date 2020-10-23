@@ -29,14 +29,11 @@
 #include <Magnum/Math/Color.h>
 #include <Magnum/Timeline.h>
 
-#include <Magnum/Animation/Track.h>
-#include <Magnum/Animation/Easing.h>
-#include <Magnum/Animation/Player.h>
-
 #include <utility>
 
+#include "animation/BaseUIPlayerHelper.hpp"
+
 #include "base/Constraints.hpp"
-#include "src/app/navigation/base/BaseUIPlayerHelper.hpp"
 #include "base/Hoverable.hpp"
 #include "base/Toggleable.hpp"
 
@@ -46,38 +43,46 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class Panel : public Navigation::BaseUIPlayerHelper<Magnum::Float>, public Hoverable<>, public Toggleable {
+class AtomSelectorButton : public Animation::BaseUIPlayerHelper<>, public Hoverable<>, public Toggleable {
  public:
-    Panel(Magnum::Timeline* timeline, Magnum::Shaders::Flat2D* shader, Magnum::Platform::Application* app) :
+    AtomSelectorButton(Magnum::Timeline* timeline, Magnum::Shaders::Flat2D* shader, Magnum::Platform::Application* app) :
         BaseUIPlayerHelper(timeline, &_moveAnim, .2f, &_defaultAnimationCallback),
         Hoverable(app),
         _shader(shader) {
-        _definePanelPosition(-X_PANEL_SIZE);
         _setup();
     }
 
-    void mayDraw() {
-        //
-        if(!isToggled() && !isAnimationPlaying()) return;
+    void onViewportChange(const Constraints &wh) {
+        auto asXPadding = 15.f;
+        auto targetPrcXSize = .025f;
 
-        //
-        _shader->setTransformationProjectionMatrix(_moveAnim)
-            .setColor(0x000000AA_rgbaf)
+        // update responsive matrix
+        auto asSize = wh.ws.x() * (targetPrcXSize / 2);
+        _responsiveMatrix = wh.baseProjMatrix *
+            Magnum::Matrix3::translation(
+                wh.ws * (Magnum::Vector2{-.5f} + Magnum::Vector2{wh.pixelSize.x() * (asSize + asXPadding), 0.f})
+            ) *
+            Magnum::Matrix3::scaling(Magnum::Vector2{asSize});
+
+        // update geometry
+        Hoverable::onViewportChange(wh);
+    }
+
+    void draw() {
+        _shader->setTransformationProjectionMatrix(_matrix)
+            .setColor(isHovered() || isToggled() ? 0xFFFFFF_rgbf : 0x000000_rgbf)
             .draw(_mesh);
     }
 
  private:
-    static constexpr float X_PANEL_SIZE = .8f;
-    static constexpr float Y_PANEL_SIZE = 2.f;
-    static constexpr Magnum::Vector2 BL_START {-1.f};
-    static constexpr Magnum::Vector2 BL_END {BL_START.x() + X_PANEL_SIZE, BL_START.y() + Y_PANEL_SIZE};
-
+    Magnum::Matrix3 _responsiveMatrix;
     Magnum::Matrix3 _moveAnim;
+    Magnum::Matrix3 _matrix;
 
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
     Magnum::Shaders::Flat2D* _shader = nullptr;
 
-    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Navigation::AnimationState<Magnum::Float>& state) {
+    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<Magnum::Vector2>& state) {
         //
         state.current = Magnum::Math::lerp(
             state.from,
@@ -86,32 +91,48 @@ class Panel : public Navigation::BaseUIPlayerHelper<Magnum::Float>, public Hover
         );
     }
 
-    void _onAnimationProgress() final {
-        _definePanelPosition(currentAnim());
-        _updateGeometry();
+    void _onHoverChanged(bool isHovered) final {
+        // apply changes
+        if(isHovered) {
+            _app->setCursor(Magnum::Platform::Sdl2Application::Cursor::Hand);
+        } else {
+            _app->setCursor(Magnum::Platform::Sdl2Application::Cursor::Arrow);
+        }
+
+        //
+        _updateAnimationYTarget();
     }
 
     void _onToggled(bool isToggled) final {
-        if(isToggled)
-            _updateAnimationAndPlay(-X_PANEL_SIZE, 0.f);
-        else
-            _updateAnimationAndPlay(0.f, -X_PANEL_SIZE);
+        //
+        _updateAnimationYTarget();
     }
 
-    // no geometry to update
+    void _onAnimationProgress() final {
+        _replaceMainMatrix(Magnum::Matrix3::translation(currentAnim()));
+        _updateGeometry();
+    }
+
+    void _updateAnimationYTarget() {
+        //
+        Magnum::Vector2 target;
+        if(isToggled()) {
+            target = Magnum::Vector2::yAxis(2.f);
+        } else if(isHovered()) {
+            target = Magnum::Vector2::yAxis(.5f);
+        }
+
+        //
+        _updateAnimationAndPlay(_moveAnim.translation(), target);
+    }
+
     void _updateGeometry() final {
-        _geometry = Magnum::Range2D {
-            _moveAnim.transformPoint(BL_START),
-            _moveAnim.transformPoint(BL_END)
-        };
-    }
+        _matrix = _responsiveMatrix * _moveAnim;
 
-    void _definePanelPosition(const Magnum::Float &xPos) {
-        _replaceMainMatrix(
-            Magnum::Matrix3::translation(
-                Magnum::Vector2::xAxis(xPos)
-            )
-        );
+        _geometry = Magnum::Range2D {
+            _matrix.transformPoint({-1.f, -1.f}),
+            _matrix.transformPoint({1.f, 1.f})
+        };
     }
 
     void _setup() {
@@ -127,10 +148,10 @@ class Panel : public Navigation::BaseUIPlayerHelper<Magnum::Float>, public Hover
             Magnum::Vector2 position;
         };
         const Vertex vertexes[]{
-            {BL_START},
-            {{ BL_END.x(),   BL_START.y() }},
-            {BL_END},
-            {{ BL_START.x(),  BL_END.y() }}
+            {{-1.f, -1.f}},
+            {{ 1.f, -1.f}},
+            {{ 1.f,  1.f}},
+            {{-1.f,  1.f}}
         };
 
         // bind buffer

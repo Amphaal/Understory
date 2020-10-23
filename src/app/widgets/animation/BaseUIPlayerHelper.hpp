@@ -24,17 +24,17 @@
 #include <Magnum/Animation/Player.h>
 
 #include "BaseUIHelper.hpp"
-#include "states/AnimationState.hpp"
+#include "State.hpp"
 
 namespace UnderStory {
 
-namespace Navigation {
+namespace Animation {
 
 template<class T = Magnum::Vector2>
 class BaseUIPlayerHelper : public BaseUIHelper {
  public:
     //
-    using AnimationCallback = void(*)(Magnum::Float, const float &, AnimationState<T>&);
+    using AnimationCallback = void(*)(Magnum::Float, const float &, State<T>&);
 
     //
     BaseUIPlayerHelper(Magnum::Timeline* timeline, Magnum::Matrix3* mainMatrix, float animDurationInSecs, AnimationCallback animCb = &_defaultAnimationCallback)
@@ -66,7 +66,7 @@ class BaseUIPlayerHelper : public BaseUIHelper {
 
     const Magnum::Matrix3* mainMatrix() const { return _mainMatrix; }
     const T& currentAnim() const { return _animState.current; }
-    const AnimationState<T>& animState() const { return _animState; }
+    const State<T>& animState() const { return _animState; }
 
     void _multiplyWithMainMatrix(const Magnum::Matrix3& factorMatrix) {
         (*_mainMatrix) = factorMatrix * (*_mainMatrix);
@@ -84,14 +84,14 @@ class BaseUIPlayerHelper : public BaseUIHelper {
     }
 
  private:
-    AnimationState<T> _animState;
+    State<T> _animState;
 
     void _startAnim() final {
         BaseUIHelper::_startAnim();
         _player.play(_timeline->previousFrameTime());
     }
 
-    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, AnimationState<T>& state) {
+    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, State<T>& state) {
         state.current = Magnum::Math::lerp(
             state.from,
             state.to,
@@ -103,6 +103,6 @@ class BaseUIPlayerHelper : public BaseUIHelper {
     Magnum::Animation::Track<Magnum::Float, float> _track;
 };
 
-}  // namespace Navigation
+}  // namespace Animation
 
 }  // namespace UnderStory

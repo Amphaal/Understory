@@ -21,8 +21,8 @@
 
 #include <Magnum/Platform/Sdl2Application.h>
 
-#include "base/BaseUIPlayerHelper.hpp"
-#include "base/states/MouseMovements.hpp"
+#include "../animation/BaseUIPlayerHelper.hpp"
+#include "MouseMovements.hpp"
 
 using Magnum::Platform::Sdl2Application;
 
@@ -30,7 +30,7 @@ namespace UnderStory {
 
 namespace Navigation {
 
-class MouseMoveHelper : public BaseUIPlayerHelper<> {
+class MouseMoveHelper : public Animation::BaseUIPlayerHelper<> {
  public:
      MouseMoveHelper(Magnum::Timeline* timeline, Magnum::Matrix3* mainMatrix) : BaseUIPlayerHelper(timeline, mainMatrix, .2f) {}
 

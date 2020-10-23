@@ -22,13 +22,13 @@
 #include <Magnum/Platform/Sdl2Application.h>
 #include <Magnum/Math/Color.h>
 
-#include "base/BaseUIPlayerHelper.hpp"
+#include "../animation/BaseUIPlayerHelper.hpp"
 
 using Magnum::Platform::Sdl2Application;
 
 namespace UnderStory {
 
-namespace Navigation {
+namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
@@ -38,9 +38,9 @@ struct STHStateComponent {
     float haulerOpacity = .0f;
 };
 
-class ShortcutsTextHelper : public BaseUIPlayerHelper<STHStateComponent> {
+class ShortcutsText : public Animation::BaseUIPlayerHelper<STHStateComponent> {
  public:
-     ShortcutsTextHelper(Magnum::Timeline* timeline, Magnum::Matrix3* mainMatrix) : BaseUIPlayerHelper(timeline, mainMatrix, .2f, &_defaultAnimationCallback) {
+     ShortcutsText(Magnum::Timeline* timeline, Magnum::Matrix3* mainMatrix) : BaseUIPlayerHelper(timeline, mainMatrix, .2f, &_defaultAnimationCallback) {
          _updateColors();
      }
 
@@ -72,7 +72,7 @@ class ShortcutsTextHelper : public BaseUIPlayerHelper<STHStateComponent> {
     Magnum::Color4 _textColor;
     bool _isCursorInRect = false;
 
-    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, AnimationState<STHStateComponent>& state) {
+    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<STHStateComponent>& state) {
         //
         state.current.scaling = Magnum::Math::lerp(
             state.from.scaling,
@@ -129,6 +129,6 @@ class ShortcutsTextHelper : public BaseUIPlayerHelper<STHStateComponent> {
     }
 };
 
-}  // namespace Navigation
+}  // namespace Widget
 
 }  // namespace UnderStory

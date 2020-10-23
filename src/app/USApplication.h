@@ -48,20 +48,19 @@
 
 #include "utility/UpdateChecker.hpp"
 
-#include "navigation/MouseMoveHelper.hpp"
-#include "navigation/MapScaleHelper.hpp"
-#include "navigation/KeyboardMoveHelper.hpp"
-#include "navigation/ShortcutsTextHelper.hpp"
+#include "widgets/navigation/MouseMoveHelper.hpp"
+#include "widgets/navigation/MapScaleHelper.hpp"
+#include "widgets/navigation/KeyboardMoveHelper.hpp"
+#include "widgets/navigation/MouseState.hpp"
 
-#include "navigation/base/states/MouseMovements.hpp"
-#include "navigation/base/states/MouseState.hpp"
+#include "widgets/AtomSelectorButton.hpp"
+#include "widgets/Panel.hpp"
 
-#include "navigation/widgets/AtomSelectorButton.hpp"
-#include "navigation/widgets/Panel.hpp"
+#include "widgets/helpers/SelectionRectangle.hpp"
+#include "widgets/helpers/Grid.hpp"
 
-#include "navigation/widgets/helpers/SelectionRectangle.hpp"
-#include "navigation/widgets/helpers/Grid.hpp"
-
+#include "widgets/text/ShortcutsText.hpp"
+#include "widgets/text/StaticText.hpp"
 
 namespace UnderStory {
 
@@ -86,12 +85,11 @@ class USApplication : public Magnum::Platform::Application {
     void _resetWorldMatrix();
 
     Magnum::PluginManager::Manager<Magnum::Text::AbstractFont> _fontManager;
-    Magnum::Containers::Pointer<Magnum::Text::AbstractFont> _font;
+    Magnum::Containers::Pointer<Magnum::Text::AbstractFont> _defaultFont;
+    Magnum::Text::DistanceFieldGlyphCache _worldCache;
 
-    Magnum::Text::DistanceFieldGlyphCache _cache;
-    Magnum::GL::Mesh _worldText{Magnum::NoCreate};
-    Magnum::GL::Buffer _textVertices, _textIndices;
-    Magnum::Containers::Pointer<Magnum::Text::Renderer2D> _debugText, _shortcutsText;
+    Widget::StaticText _worldText, _shortcutsText;
+    Magnum::Containers::Pointer<Magnum::Text::Renderer2D> _debugText;
     Magnum::Range2D _shortcutsTextRect;
     Magnum::Shaders::DistanceFieldVector2D _textShader;
 
@@ -128,8 +126,8 @@ class USApplication : public Magnum::Platform::Application {
     Navigation::MouseMoveHelper _mmh;
     Navigation::MapScaleHelper _msh;
     Navigation::KeyboardMoveHelper _kmh;
-    Navigation::ShortcutsTextHelper _sth;
 
+    Widget::ShortcutsText _sth;
     Widget::Helper::SelectionRectangle _selectionRect;
     Widget::Helper::Grid _grid;
     Widget::AtomSelectorButton _atomSelector;
