@@ -19,10 +19,15 @@
 
 #pragma once
 
+
 #include <Magnum/Platform/Sdl2Application.h>
 #include <Magnum/Math/Color.h>
 
+#include <utility>
+
 #include "../animation/BaseUIPlayerHelper.hpp"
+#include "../base/Hoverable.hpp"
+#include "StaticText.hpp"
 
 using Magnum::Platform::Sdl2Application;
 
@@ -38,39 +43,50 @@ struct STHStateComponent {
     float haulerOpacity = .0f;
 };
 
-class ShortcutsText : public Animation::BaseUIPlayerHelper<STHStateComponent> {
+class ShortcutsText : public Animation::BaseUIPlayerHelper<STHStateComponent>, public Hoverable<> {
  public:
-     ShortcutsText(Magnum::Timeline* timeline, Magnum::Matrix3* mainMatrix) : BaseUIPlayerHelper(timeline, mainMatrix, .2f, &_defaultAnimationCallback) {
+    ShortcutsText(StaticText&& associatedText, Magnum::Timeline* timeline, Magnum::Shaders::DistanceFieldVector2D* shader, Magnum::Platform::Application* app) :
+        BaseUIPlayerHelper(timeline, &_moveAnim, .2f, &_defaultAnimationCallback),
+        Hoverable(app),
+        _text(std::move(associatedText)),
+        _shader(shader) {
          _updateColors();
-     }
-
-    void mouseMoveEvent(const Sdl2Application::MouseMoveEvent& event, const Magnum::Platform::Application* app, const Magnum::Range2D &hoverRect) {
-        //
-        auto normalizedPoint = _trNormalized(event.position(), app->framebufferSize());
-        auto isCursorInRect = hoverRect.contains(normalizedPoint);
-        auto mustRenewAnim = isCursorInRect != _isCursorInRect;
-        _isCursorInRect = isCursorInRect;
-
-        //
-        if(mustRenewAnim) _renewAnim();
     }
 
-    static Magnum::Range2D trNormalized(const Magnum::Range2D& rect, const Magnum::Vector2i& framebufferSize) {
-        return { rect.min() / Magnum::Vector2{framebufferSize}, rect.max() };
+    void onViewportChange(const Constraints &wh) final {
+        // stick to top right corner + 5 pixels padding
+        _responsiveMatrix = wh.baseProjMatrix *
+            Magnum::Matrix3::translation(
+                wh.ws *
+                (Magnum::Vector2 {.5f} - wh.pixelSize * 5)
+            );
+
+        // update geometry
+        Hoverable::onViewportChange(wh);
     }
 
-    const Magnum::Color4& textColor() const {
-        return _textColor;
+    void draw() {
+        _shader
+            ->setColor(_textColor)
+            .setOutlineColor(0xffffffAA_rgbaf)
+            .setTransformationProjectionMatrix(_matrix)
+            .draw(_text);
     }
 
-    const Magnum::Color4& haulderColor() const {
-        return _haulderColor;
+    const Magnum::Color4& enlighterColor() const {
+        return _enlighterColor;
     }
 
  private:
-    Magnum::Color4 _haulderColor;
+    Magnum::Color4 _enlighterColor;
     Magnum::Color4 _textColor;
-    bool _isCursorInRect = false;
+
+    Magnum::Matrix3 _matrix;
+    Magnum::Matrix3 _moveAnim;
+    Magnum::Matrix3 _responsiveMatrix;
+
+    StaticText _text;
+    Magnum::Shaders::DistanceFieldVector2D* _shader;
 
     static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<STHStateComponent>& state) {
         //
@@ -95,10 +111,15 @@ class ShortcutsText : public Animation::BaseUIPlayerHelper<STHStateComponent> {
         );
     }
 
-    void _renewAnim() {
+    void _updateGeometry() final {
+        _matrix = _responsiveMatrix * _moveAnim;
+        _geometry = _text.geometryFromMatrix(_matrix);
+    }
+
+    void _onHoverChanged(bool isHovered) final {
         STHStateComponent to;
 
-        if(_isCursorInRect) {
+        if(isHovered) {
             to.scaling = Magnum::Vector2{2.f};
             to.haulerOpacity = .85f;
             to.textOpacity = 1.f;
@@ -110,22 +131,12 @@ class ShortcutsText : public Animation::BaseUIPlayerHelper<STHStateComponent> {
     void _onAnimationProgress() final {
         _replaceMainMatrix(Magnum::Matrix3::scaling(currentAnim().scaling));
         _updateColors();
+        _updateGeometry();
     }
 
     void _updateColors() {
-        _haulderColor = {0x00000_rgbf, currentAnim().haulerOpacity};
+        _enlighterColor = {0x00000_rgbf, currentAnim().haulerOpacity};
         _textColor = {0xffffff_rgbf, currentAnim().textOpacity};
-    }
-
-    static Magnum::Vector2 _trNormalized(const Magnum::Vector2i& moveCoords, const Magnum::Vector2i& framebufferSize) {
-        auto originTopRight = Magnum::Vector2 {
-            static_cast<float>(framebufferSize.x()) - moveCoords.x(),
-            static_cast<float>(moveCoords.y())
-        };
-        return Magnum::Vector2 {
-            originTopRight.x() / framebufferSize.x(),
-            originTopRight.y() / framebufferSize.y()
-        } * Magnum::Vector2 {-1.f};
     }
 };
 

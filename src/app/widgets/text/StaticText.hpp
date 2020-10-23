@@ -40,8 +40,11 @@ class StaticText : public Magnum::GL::Mesh {
         _vertices(std::move(vertices)),
         _geometry(std::move(geometry)) {}
 
-    const Magnum::Range2D& geometry() const {
-        return _geometry;
+    Magnum::Range2D geometryFromMatrix(const Magnum::Matrix3 &matrix) const {
+        return {
+            matrix.transformPoint(_geometry.min()),
+            matrix.transformPoint(_geometry.max())
+        };
     }
 
  private:

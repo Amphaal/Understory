@@ -52,7 +52,7 @@ class AtomSelectorButton : public Animation::BaseUIPlayerHelper<>, public Hovera
         _setup();
     }
 
-    void onViewportChange(const Constraints &wh) {
+    void onViewportChange(const Constraints &wh) final {
         auto asXPadding = 15.f;
         auto targetPrcXSize = .025f;
 

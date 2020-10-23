@@ -95,7 +95,6 @@ class Panel : public Animation::BaseUIPlayerHelper<Magnum::Float>, public Hovera
             _updateAnimationAndPlay(0.f, -X_PANEL_SIZE);
     }
 
-    // no geometry to update
     void _updateGeometry() final {
         _geometry = Magnum::Range2D {
             _moveAnim.transformPoint(BL_START),

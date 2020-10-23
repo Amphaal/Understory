@@ -58,6 +58,7 @@
 
 #include "widgets/helpers/SelectionRectangle.hpp"
 #include "widgets/helpers/Grid.hpp"
+#include "widgets/helpers/Enlighter.hpp"
 
 #include "widgets/text/ShortcutsText.hpp"
 #include "widgets/text/StaticText.hpp"
@@ -80,7 +81,7 @@ class USApplication : public Magnum::Platform::Application {
     void mouseMoveEvent(MouseMoveEvent& event) override;
     void leftMouseDoubleClickEvent(MouseEvent& event);
 
-    void _updateProjections();
+    void _onViewportChange();
     void _updateDebugText();
     void _resetWorldMatrix();
 
@@ -88,22 +89,17 @@ class USApplication : public Magnum::Platform::Application {
     Magnum::Containers::Pointer<Magnum::Text::AbstractFont> _defaultFont;
     Magnum::Text::DistanceFieldGlyphCache _worldCache;
 
-    Widget::StaticText _worldText, _shortcutsText;
+    Widget::StaticText _worldText;
+
     Magnum::Containers::Pointer<Magnum::Text::Renderer2D> _debugText;
-    Magnum::Range2D _shortcutsTextRect;
     Magnum::Shaders::DistanceFieldVector2D _textShader;
 
     Magnum::Shaders::Flat2D _flatShader;
-    Magnum::GL::Buffer _haulderBuffer;
-    Magnum::GL::Mesh _haulder{Magnum::GL::MeshPrimitive::TriangleFan};
-    void _defineHaulder();
 
     Magnum::Vector2 _cursorPosition(const Sdl2Application::MouseMoveEvent& event) const;
 
     Magnum::Matrix3 _transformationWorld,
                     _projectionWorld,
-                    _transformationProjectionShortcutsText,
-                    _scaleMatrixShortcutsText,
                     _transformationProjectionDebugText;
 
     static constexpr int DOUBLE_CLICK_DELAY_MS = 200;
@@ -127,9 +123,12 @@ class USApplication : public Magnum::Platform::Application {
     Navigation::MapScaleHelper _msh;
     Navigation::KeyboardMoveHelper _kmh;
 
-    Widget::ShortcutsText _sth;
     Widget::Helper::SelectionRectangle _selectionRect;
     Widget::Helper::Grid _grid;
+    Widget::Helper::Enlighter _enlighter;
+
+
+    Magnum::Containers::Pointer<Widget::ShortcutsText> _stWidget;
     Widget::AtomSelectorButton _atomSelector;
     Widget::Panel _panel;
 

@@ -33,11 +33,11 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _mmh(&_timeline, &_transformationWorld),
     _msh(&_timeline, &_transformationWorld),
     _kmh(&_timeline, &_transformationWorld),
-    _sth(&_timeline, &_scaleMatrixShortcutsText),
     _atomSelector(&_timeline, &_flatShader, this),
     _panel(&_timeline, &_flatShader, this),
     _selectionRect(_rs),
-    _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT) {
+    _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT),
+    _enlighter(&_flatShader) {
     // set minimum size
     SDL_SetWindowMinimumSize(this->window(), MINIMUM_WIDTH, MINIMUM_HEIGHT);
 
@@ -50,9 +50,6 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
 
     // activate VSync
     setSwapInterval(-1);
-
-    // define
-    _defineHaulder();
 
     /* Load a TrueTypeFont plugin and open the font */
     _defaultFont = _fontManager.loadAndInstantiate("TrueTypeFont");
@@ -80,7 +77,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     // define shortcut text as static
     {
         Widget::StaticTextFactory textFactory(*_defaultFont, _worldCache, 14.f);
-        _shortcutsText = textFactory.generate(
+        auto text = textFactory.generate(
                 "[LeftClick  (DoubleClick)] Center screen on cursor\n"
                 "[LeftClick  (Maintain)]                       Move camera\n"
                 "[RightClick (Maintain / Release)]             Snapshot zoom-in\n"
@@ -90,15 +87,13 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
                 "[NumPad +/-]                                       Zoom",
             Magnum::Text::Alignment::TopRight
         );
+        _stWidget.reset(new Widget::ShortcutsText(std::move(text), &_timeline, &_textShader, this));
     }
 
     /* Set up premultiplied alpha blending to avoid overlapping text characters to cut into each other */
     Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::Blending);
     Magnum::GL::Renderer::setBlendFunction(Magnum::GL::Renderer::BlendFunction::SourceAlpha, Magnum::GL::Renderer::BlendFunction::OneMinusSourceAlpha);
     Magnum::GL::Renderer::setBlendEquation(Magnum::GL::Renderer::BlendEquation::Add, Magnum::GL::Renderer::BlendEquation::Add);
-
-    //
-    _updateProjections();
 
     // define debug text as dynamic
     _debugText.reset(new Magnum::Text::Renderer2D(*_defaultFont, _worldCache, 14.f, Magnum::Text::Alignment::TopLeft));
@@ -109,35 +104,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _timeline.start();
 }
 
-void UnderStory::USApplication::_defineHaulder() {
-    // define indices
-    Magnum::GL::Buffer indices;
-    indices.setData({
-        0, 1, 2,
-        0, 2, 3
-    });
-
-    // define vertices
-    struct HaulderVertex {
-        Magnum::Vector2 position;
-    };
-    const HaulderVertex vertex[]{
-        {{-1.f, -1.f}},
-        {{ 1.f, -1.f}},
-        {{ 1.f,  1.f}},
-        {{-1.f,  1.f}}
-    };
-
-    // bind buffer
-    _haulderBuffer.setData(vertex, Magnum::GL::BufferUsage::StaticDraw);
-
-    // define mesh
-    _haulder.setCount(indices.size())
-            .setIndexBuffer (std::move(indices),        0, Magnum::MeshIndexType::UnsignedInt)
-            .addVertexBuffer(std::move(_haulderBuffer), 0, Magnum::Shaders::Flat2D::Position{});
-}
-
-void UnderStory::USApplication::_updateProjections() {
+void UnderStory::USApplication::_onViewportChange() {
     //
     Widget::Constraints wh {windowSize()};
 
@@ -153,40 +120,30 @@ void UnderStory::USApplication::_updateProjections() {
             (Magnum::Vector2 {-.5f, .5f} - wh.pixelSize * 5 * Magnum::Vector2{-1.f, 1.f})
         );
 
-    // stick to top right corner + 5 pixels padding
-    _transformationProjectionShortcutsText = wh.baseProjMatrix *
-        Magnum::Matrix3::translation(
-            wh.ws *
-            (Magnum::Vector2 {.5f} - wh.pixelSize * 5)
-        );
-
-    // TODO(amphaal) include padding in rect calculation
-    _shortcutsTextRect = Widget::ShortcutsText::trNormalized(
-        _shortcutsText.geometry(),
-        this->framebufferSize()
-    );
-
     //
     _atomSelector.onViewportChange(wh);
+    _stWidget->onViewportChange(wh);
     _panel.onViewportChange(wh);
     _selectionRect.onViewportChange();
 }
 
 void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
     Magnum::GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
-    _updateProjections();
+    _onViewportChange();
 }
 
 void UnderStory::USApplication::drawEvent() {
     Magnum::GL::defaultFramebuffer.clear(Magnum::GL::FramebufferClear::Color);
 
     // advance animations
-    _mmh.advance();
-    _msh.advance();
-    _kmh.advance();
-    _sth.advance();
-    _atomSelector.advance();
-    _panel.advance();
+    {
+        _mmh.advance();
+        _msh.advance();
+        _kmh.advance();
+        _stWidget->advance();
+        _atomSelector.advance();
+        _panel.advance();
+    }
 
     // world
     auto worldMatrix = _projectionWorld * _transformationWorld;
@@ -222,18 +179,11 @@ void UnderStory::USApplication::drawEvent() {
         .setTransformationProjectionMatrix(_transformationProjectionDebugText)
         .draw(_debugText->mesh());
 
-    // haulder
-    _flatShader
-        .setTransformationProjectionMatrix({})
-        .setColor(_sth.haulderColor())
-        .draw(_haulder);
+    // enlighter
+    _enlighter.draw(_stWidget->enlighterColor());
 
     // shortcuts text
-    _textShader
-        .setColor(_sth.textColor())
-        .setOutlineColor(0xffffffAA_rgbaf)
-        .setTransformationProjectionMatrix(_transformationProjectionShortcutsText * _scaleMatrixShortcutsText)
-        .draw(_shortcutsText);
+    _stWidget->draw();
 
     // buffers swap, automatic redrawing and timeline frame check
     swapBuffers();
@@ -302,7 +252,11 @@ void UnderStory::USApplication::_updateHoverContext(MouseMoveEvent& event) {
     }
 
     // check if on shortcuts text
-    _sth.mouseMoveEvent(event, this, _shortcutsTextRect);
+    _stWidget->onMouseMove(cursorPos);
+    if(_stWidget->isHovered()) {
+        _hoverContext = _stWidget.get();
+        return;
+    }
 
     // define app as context by default
     _hoverContext = this;
