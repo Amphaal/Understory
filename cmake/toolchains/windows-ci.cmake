@@ -23,12 +23,12 @@ list(APPEND CMAKE_PREFIX_PATH
 #We want Release with debug infos
 SET(CMAKE_BUILD_TYPE Release)
 
-SET (CMAKE_C_COMPILER                       "clang")
-SET (CMAKE_CXX_COMPILER                     "clang++")
-SET (CMAKE_AR                               "llvm-ar")
-SET (CMAKE_RANLIB                           "llvm-ranlib")
-SET (CMAKE_NM                               "llvm-nm")
-SET (CMAKE_RC_COMPILER                      "llvm-rc")
+# SET (CMAKE_C_COMPILER                       "clang")
+# SET (CMAKE_CXX_COMPILER                     "clang++")
+# SET (CMAKE_AR                               "llvm-ar")
+# SET (CMAKE_RANLIB                           "llvm-ranlib")
+# SET (CMAKE_NM                               "llvm-nm")
+# SET (CMAKE_RC_COMPILER                      "llvm-rc")
 
 SET (CMAKE_C_FLAGS                          "-femulated-tls")
 SET (CMAKE_CXX_FLAGS                        ${CMAKE_C_FLAGS})
