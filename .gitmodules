@@ -1,0 +1,22 @@
+[submodule "src/core/tiny-process-library"]
+	path = src/core/tiny-process-library
+	url = https://gitlab.com/Amphaal/tiny-process-library
+[submodule "src/base/spdlog"]
+	path = src/base/spdlog
+	url = https://github.com/gabime/spdlog
+	branch = v1.x
+[submodule "src/core/stb"]
+	path = src/core/stb
+	url = https://github.com/nothings/stb
+[submodule "src/app/RxCpp"]
+	path = src/app/RxCpp
+	url = https://github.com/ReactiveX/RxCpp
+[submodule "src/app/corrade"]
+	path = src/app/corrade
+	url = https://github.com/Amphaal/corrade
+[submodule "src/app/magnum"]
+	path = src/app/magnum
+	url = https://github.com/Amphaal/magnum
+[submodule "src/app/magnum-plugins"]
+	path = src/app/magnum-plugins
+	url = https://github.com/mosra/magnum-plugins
