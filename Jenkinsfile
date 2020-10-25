@@ -13,6 +13,7 @@ pipeline {
                         SENTRY_PROJECT = 'understory'
                     }
                     steps {
+                        sh 'git submodule update --init'
                         sh 'cmake -GNinja -B_pkg -H. -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/windows-ci.cmake'
                         sh 'ninja -C_pkg zipForDeploy'
                         withCredentials([string(credentialsId: 'jenkins-bintray-api-key', variable: 'BINTRAY_API_KEY')]) {
