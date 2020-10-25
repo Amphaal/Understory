@@ -8,8 +8,6 @@ endif()
 
 # default configuration
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-# set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE CACHE INTERNAL "")
 
 # pre-startup
 cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
@@ -27,8 +25,6 @@ SET(APP_REPOSITORY_HOST "dl.bintray.com")
 SET(APP_REPOSITORY_COMMAND_LITE "/amphaal/understory/repository")
 SET(APP_REPOSITORY_COMMAND "${APP_REPOSITORY_COMMAND_LITE}/Updates.xml")
 SET(APP_REPOSITORY_URL "https://${APP_REPOSITORY_HOST}/${APP_REPOSITORY_COMMAND_LITE}")
-
-include(FetchContent)
 
 #policies
 if(COMMAND cmake_policy)
@@ -55,21 +51,6 @@ include_directories(
 
 # define _DEBUG markup if in DEBUG config
 add_compile_definitions($<$<CONFIG:Debug>:_DEBUG>) 
-
-################
-## Deps : stb ##
-################
-
-#fetch
-FetchContent_Declare(stb
-    GIT_REPOSITORY  "https://github.com/nothings/stb.git"
-)
-FetchContent_Populate(stb)
-
-#define lib
-add_library(stb INTERFACE)
-target_include_directories(stb INTERFACE ${stb_SOURCE_DIR})
-target_compile_definitions(stb INTERFACE STB_IMAGE_IMPLEMENTATION)
 
 ################
 ## Submodules ##

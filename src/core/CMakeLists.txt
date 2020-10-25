@@ -13,6 +13,11 @@ target_link_libraries(appCore INTERFACE UnderStory::network)
 ## Deps : stb ##
 ################
 
+#define lib
+add_library(stb INTERFACE)
+target_include_directories(stb INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/stb")
+target_compile_definitions(stb INTERFACE STB_IMAGE_IMPLEMENTATION)
+
 #link
 target_link_libraries(appCore INTERFACE stb)
 
@@ -20,13 +25,8 @@ target_link_libraries(appCore INTERFACE stb)
 ## Deps : tinyProcessLib ##
 ###########################
 
-#fetch
-FetchContent_Declare(tinyProcessLib
-    GIT_REPOSITORY  "https://gitlab.com/Amphaal/tiny-process-library.git"
-)
-FetchContent_MakeAvailable(tinyProcessLib)
-
 #link
+add_subdirectory(tiny-process-library)
 target_link_libraries(appCore INTERFACE tiny-process-library)
 
 ##

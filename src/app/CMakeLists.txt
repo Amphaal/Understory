@@ -10,6 +10,9 @@ endif()
 # define app executable
 add_executable(appExec ${APP_BUNDLE_TYPE})
 add_executable(UnderStory::executable ALIAS appExec)
+set_target_properties(appExec PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/bin
+)
 
 string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LC)
 set_target_properties(appExec PROPERTIES OUTPUT_NAME "${PROJECT_NAME_LC}")  # define executable name
@@ -68,30 +71,6 @@ IF(MINGW AND CMAKE_CROSSCOMPILING)
 
     SET(MINGW64_BIN ${MINGW64_ROOT}/bin)
 
-    ### MAGNUM
-        # find .dlls
-        list(APPEND MAGNUM_PLUGINS_USED
-            magnum/importers/PngImporter
-            magnum/fonts/FreeTypeFont
-        )
-        list(TRANSFORM MAGNUM_PLUGINS_USED PREPEND ${MINGW64_BIN}/)
-        list(TRANSFORM MAGNUM_PLUGINS_USED APPEND ".dll")
-        file(GLOB_RECURSE MAGNUM_PLUGINS_DLL ${MAGNUM_PLUGINS_USED})
-
-        # plugins to copy
-            add_custom_command(TARGET appExec POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:appExec>/magnum/importers
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MINGW64_BIN}/magnum/importers/PngImporter.dll $<TARGET_FILE_DIR:appExec>/magnum/importers
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MINGW64_BIN}/magnum/importers/PngImporter.conf $<TARGET_FILE_DIR:appExec>/magnum/importers
-            )
-
-            add_custom_command(TARGET appExec POST_BUILD
-                COMMAND ${CMAKE_COMMAND} -E make_directory $<TARGET_FILE_DIR:appExec>/magnum/fonts
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MINGW64_BIN}/magnum/fonts/FreeTypeFont.dll $<TARGET_FILE_DIR:appExec>/magnum/fonts
-                COMMAND ${CMAKE_COMMAND} -E copy_if_different ${MINGW64_BIN}/magnum/fonts/FreeTypeFont.conf $<TARGET_FILE_DIR:appExec>/magnum/fonts
-            )
-    ###
-
     #generate requirements
     add_dependencies(appExec peldd)
     add_custom_command(TARGET appExec POST_BUILD
@@ -125,7 +104,7 @@ endif()
 #install whole output directory
 install(
     DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/"
-    TYPE BIN
+    TYPE BIN    
     COMPONENT app
 )
 
@@ -133,21 +112,25 @@ install(
 ## Sources ##
 #############
 
-# find packages
-find_package(Corrade REQUIRED Main)
-find_package(Magnum REQUIRED
-    GL
-    Shaders
-    Text
-    Sdl2Application
-    Trade
-)
-find_package(MagnumPlugins REQUIRED 
-    FreeTypeFont
-    PngImporter
-)
+# used
+SET(WITH_SDL2APPLICATION    ON CACHE INTERNAL "")
+SET(WITH_PNGIMPORTER        ON CACHE INTERNAL "") 
+SET(WITH_FREETYPEFONT       ON CACHE INTERNAL "")
 
-set_directory_properties(PROPERTIES CORRADE_USE_PEDANTIC_FLAGS ON)
+# not used
+SET(WITH_INTERCONNECT       OFF CACHE INTERNAL "")
+SET(WITH_TESTSUITE          OFF CACHE INTERNAL "")
+SET(WITH_RC                 ON CACHE INTERNAL "")
+
+SET(WITH_DEBUGTOOLS         OFF CACHE INTERNAL "")
+SET(WITH_MESHTOOLS          OFF CACHE INTERNAL "")
+SET(WITH_SCENEGRAPH         OFF CACHE INTERNAL "")
+SET(WITH_PRIMITIVES         OFF CACHE INTERNAL "")
+
+#fetch
+add_subdirectory(corrade)
+add_subdirectory(magnum)
+add_subdirectory(magnum-plugins)
 
 corrade_add_resource(USApplication_RESOURCES 
     resources.conf
@@ -161,7 +144,7 @@ target_sources(appExec PRIVATE
 # linking
 target_link_libraries(appExec PRIVATE
     Corrade::Main
-    Magnum::Application
+    Magnum::Sdl2Application
     Magnum::GL
     Magnum::Magnum
     Magnum::Shaders
@@ -178,11 +161,5 @@ target_link_libraries(appExec PRIVATE UnderStory::core)
 ## Deps : RxCpp ##
 ##################
 
-#fetch
-FetchContent_Declare(rxcpp
-    GIT_REPOSITORY  "https://github.com/ReactiveX/RxCpp.git"
-)
-FetchContent_Populate(rxcpp)
-
 #link
-target_include_directories(appExec PRIVATE ${rxcpp_SOURCE_DIR}/Rx/v2/src)
+target_include_directories(appExec PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/RxCpp/Rx/v2/src")
