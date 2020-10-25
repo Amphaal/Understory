@@ -48,55 +48,6 @@ elseif(APPLE)
     ) 
 endif()
 
-###########
-# pe-util #
-###########
-
-#pe-util is required to find all .dll dependencies
-IF(MINGW AND CMAKE_CROSSCOMPILING)
-    include(ExternalProject)
-    ExternalProject_Add(peldd
-        GIT_REPOSITORY  "https://github.com/Amphaal/pe-util.git"
-        INSTALL_COMMAND ""
-    )
-
-    #define exec
-    ExternalProject_Get_Property(peldd BINARY_DIR)
-    set(PELDD_EXEC "${BINARY_DIR}/peldd")
-    
-    #make sure env var is set
-    if(NOT MINGW64_ROOT)
-        message(FATAL_ERROR "MINGW64_ROOT must be set ! Please use a toolchain file !")
-    endif()
-
-    SET(MINGW64_BIN ${MINGW64_ROOT}/bin)
-
-    #generate requirements
-    add_dependencies(appExec peldd)
-    add_custom_command(TARGET appExec POST_BUILD
-        COMMAND 
-            ${PELDD_EXEC} -a
-            -p ${MINGW64_BIN}
-            $<TARGET_FILE:appExec>
-            ${MAGNUM_PLUGINS_DLL}
-            | sed -f ${CMAKE_SOURCE_DIR}/cmake/antislash-to-slash.sed
-            | tr -d '\\015' 
-            > lib_requirements.txt
-        DEPENDS 
-            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/antislash-to-slash.sed
-        BYPRODUCTS
-            lib_requirements.txt
-    )
-
-    #copy required libs
-    add_custom_command(TARGET appExec POST_BUILD
-        COMMAND 
-            cat lib_requirements.txt | xargs cp -n -t ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-        DEPENDS 
-            lib_requirements.txt
-    )
-endif()
-
 #############
 ## Install ##
 #############
@@ -120,7 +71,7 @@ SET(WITH_FREETYPEFONT       ON CACHE INTERNAL "")
 # not used
 SET(WITH_INTERCONNECT       OFF CACHE INTERNAL "")
 SET(WITH_TESTSUITE          OFF CACHE INTERNAL "")
-SET(WITH_RC                 ON CACHE INTERNAL "")
+SET(WITH_RC                 OFF CACHE INTERNAL "")
 
 SET(WITH_DEBUGTOOLS         OFF CACHE INTERNAL "")
 SET(WITH_MESHTOOLS          OFF CACHE INTERNAL "")
@@ -132,13 +83,13 @@ add_subdirectory(corrade)
 add_subdirectory(magnum)
 add_subdirectory(magnum-plugins)
 
-corrade_add_resource(USApplication_RESOURCES 
+corrade_add_resource(appExec_RES
     resources.conf
 )
 
 target_sources(appExec PRIVATE 
     USApplication.cpp 
-    ${USApplication_RESOURCES}
+    ${appExec_RES}
 )
 
 # linking
@@ -163,3 +114,52 @@ target_link_libraries(appExec PRIVATE UnderStory::core)
 
 #link
 target_include_directories(appExec PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/RxCpp/Rx/v2/src")
+
+###########
+# pe-util #
+###########
+
+#pe-util is required to find all .dll dependencies
+IF(MINGW AND CMAKE_CROSSCOMPILING)
+    include(ExternalProject)
+    ExternalProject_Add(peldd
+        GIT_REPOSITORY  "https://github.com/Amphaal/pe-util.git"
+        INSTALL_COMMAND ""
+    )
+
+    #define exec
+    ExternalProject_Get_Property(peldd BINARY_DIR)
+    set(PELDD_EXEC "${BINARY_DIR}/peldd")
+    
+    #make sure env var is set
+    if(NOT MINGW64_ROOT)
+        message(FATAL_ERROR "MINGW64_ROOT must be set ! Please use a toolchain file !")
+    endif()
+
+    #generate requirements
+    add_dependencies(appExec peldd)
+    add_custom_command(TARGET appExec POST_BUILD
+        COMMAND 
+            ${PELDD_EXEC} -a
+            -p ${MINGW64_ROOT}/bin
+            -p $<TARGET_FILE_DIR:appExec>
+            $<TARGET_FILE:appExec>
+            $<TARGET_FILE:MagnumPlugins::FreeTypeFont>
+            $<TARGET_FILE:MagnumPlugins::PngImporter>
+            | sed -f ${CMAKE_SOURCE_DIR}/cmake/antislash-to-slash.sed
+            | tr -d '\\015' 
+            > lib_requirements.txt
+        DEPENDS 
+            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/antislash-to-slash.sed
+        BYPRODUCTS
+            lib_requirements.txt
+    )
+
+    #copy required libs
+    add_custom_command(TARGET appExec POST_BUILD
+        COMMAND 
+            cat lib_requirements.txt | xargs cp -n -t ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        DEPENDS 
+            lib_requirements.txt
+    )
+endif()

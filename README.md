@@ -35,11 +35,6 @@ Prepare your build environement:
     -   Run : `pacman -Su` (From msys2_shell.cmd)
     -   Run : `pacman -S --needed --noconfirm - < ./deps/msys2/pkglist_build.txt` (From msys2_shell.cmd)
     -   Run : `pacman -S --needed --noconfirm - < ./deps/msys2/pkglist_dev.txt` (From msys2_shell.cmd)
--   For OSX
-    -   Install latest XCode from the App Store
-    -   Run : `brew upgrade`
-    -   Run : `brew install $(cat ./deps/osx/pkglist_build.txt)`
-    -   Run : `brew install $(cat ./deps/osx/pkglist_dev.txt)`
 
 Recommanded:
 

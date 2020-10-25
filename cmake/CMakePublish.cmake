@@ -2,7 +2,7 @@
 # Prepare #
 ###########
 
-set(SETUP_NAME          "${PROJECT_NAME}-setup")
+set(SETUP_NAME "${PROJECT_NAME}-setup")
 
 # trad
 SET(APP_DESCRIPTION ${PROJECT_DESCRIPTION}
@@ -12,6 +12,8 @@ SET(APP_DESCRIPTION ${PROJECT_DESCRIPTION}
 #########
 # CPack #
 #########
+
+set(CPACK_COMPONENTS_ALL "app") # only app, no Unspecified 
 
 set(CPACK_GENERATOR "IFW")
 
