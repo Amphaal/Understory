@@ -11,6 +11,15 @@
         "CHERE_INVOKING": "1",
         "MSVSCODE": "1"
     },
+    "search.exclude": {
+        "src/app/corrade": true,
+        "src/app/magnum": true,
+        "src/app/magnum-plugins": true,
+        "src/app/RxCpp": true,
+        "src/base/spdlog": true,
+        "src/core/stb": true,
+        "src/core/tiny-process-library": true,
+    },
     "terminal.integrated.scrollback": 10000,
     "files.associations": {
         "future": "cpp",

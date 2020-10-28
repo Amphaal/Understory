@@ -13,12 +13,14 @@
             },
             "includePath": [
                 "${workspaceFolder}",
-                "${workspaceFolder}/build",
-                "${workspaceFolder}/build/_deps/stb-src",
-                "${workspaceFolder}/build/_deps/spdlog-src/include",
-                "${workspaceFolder}/build/_deps/rxcpp-src/Rx/v2/src",
-                "${workspaceFolder}/build/_deps/tinyprocesslib-src",
-                "C:/msys64/mingw64/include/SDL2"
+                "C:/msys64/mingw64/include/SDL2",
+                "${workspaceFolder}/src/app/magnum/src",
+                "${workspaceFolder}/src/app/magnum-plugins/src",
+                "${workspaceFolder}/src/app/corrade/src",
+                "${workspaceFolder}/src/app/RxCpp/Rx/v2/src",
+                "${workspaceFolder}/src/base/spdlog/include",
+                "${workspaceFolder}/src/core/tiny-process-library",
+                "${workspaceFolder}/build"
             ],
             "defines": [
                 "_DEBUG",

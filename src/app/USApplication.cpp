@@ -233,26 +233,29 @@ void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
     }
 }
 
+
+// TODO(amphaal) : priorize hover detection on latest context found
 void UnderStory::USApplication::_updateHoverContext(MouseMoveEvent& event) {
     //
     auto cursorPos = _cursorPosition(event);
 
-    // check if on atomSelector
     _atomSelector.onMouseMove(cursorPos);
+    _panel.onMouseMove(cursorPos);
+    _stWidget->onMouseMove(cursorPos);
+
+    // check if on atomSelector
     if(_atomSelector.isHovered()) {
         _hoverContext = &_atomSelector;
         return;
     }
 
     // check if on panel
-    _panel.onMouseMove(cursorPos);
     if(_panel.isHovered()) {
         _hoverContext = &_panel;
         return;
     }
 
     // check if on shortcuts text
-    _stWidget->onMouseMove(cursorPos);
     if(_stWidget->isHovered()) {
         _hoverContext = _stWidget.get();
         return;

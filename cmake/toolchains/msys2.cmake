@@ -29,7 +29,7 @@ SET (CMAKE_RANLIB               "llvm-ranlib")
 SET (CMAKE_NM                   "llvm-nm")
 SET (CMAKE_RC_COMPILER          "llvm-rc")
 
-SET (CMAKE_C_FLAGS              "-fuse-ld=lld")
+SET (CMAKE_C_FLAGS              "-Wno-ignored-attributes -fuse-ld=lld")
 SET (CMAKE_CXX_FLAGS            ${CMAKE_C_FLAGS})
 
 SET (CMAKE_C_FLAGS_DEBUG        "-O0 -g")
