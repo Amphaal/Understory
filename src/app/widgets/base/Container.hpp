@@ -19,39 +19,26 @@
 
 #pragma once
 
-#include "src/app/utility/AppBound.hpp"
-#include "Shape.hpp"
+#include "Hoverable.hpp"
+
+#include <Corrade/Containers/Array.h>
+#include <Corrade/Containers/GrowableArray.h>
 
 namespace UnderStory {
 
 namespace Widget {
 
 template<class T = Magnum::Range2D>
-class Hoverable : public Shape<T>, public AppBound {
+class Container : public Hoverable<T> {
  public:
-    Hoverable() {}
-
-    bool isHovered() const {
-        return _isHovered;
+    explicit Container(std::initializer_list<UnderStory::Widget::Shape> containing = {}) : Hoverable<T>(app) {
+        Containers::arrayReserve(_innerShapes, 1);
     }
 
-    virtual void checkIfMouseOver(const Magnum::Vector2 &cursorPos) {
-        // prevent updating if state did not change
-        auto hovered = this->_geometry.contains(cursorPos);
-        if(_isHovered == hovered) return;
-
-        // update state
-        _isHovered = hovered;
-
-        //
-        _onHoverChanged(_isHovered);
-    }
-
- protected:
-    virtual void _onHoverChanged(bool isHovered) {}
+    virtual std::string containerName() const = 0;
 
  private:
-    bool _isHovered = false;
+    Corrade::Containers::Array<Shape> _innerShapes;
 };
 
 }  // namespace Widget

@@ -38,8 +38,8 @@ struct ScrollAnimStateComponent {
 
 class MapScaleHelper : public Animation::BaseUIPlayerHelper<ScrollAnimStateComponent> {
  public:
-    explicit MapScaleHelper(Magnum::Timeline* timeline, Magnum::Matrix3* mainMatrix)
-    : BaseUIPlayerHelper(timeline, mainMatrix, SMOOTHING_AS_SECONDS, &_defaultAnimationCallback) {}
+    explicit MapScaleHelper(Magnum::Matrix3* mainMatrix)
+    : BaseUIPlayerHelper(mainMatrix, SMOOTHING_AS_SECONDS, &_defaultAnimationCallback) {}
 
     void keyPressEvent(Sdl2Application::KeyEvent& event) {
         switch (event.key()) {
@@ -72,7 +72,7 @@ class MapScaleHelper : public Animation::BaseUIPlayerHelper<ScrollAnimStateCompo
         _updateAnimationAndPlay(from, to);
     }
 
-    void mouseScrollEvent(Sdl2Application::MouseScrollEvent& event, const Magnum::Platform::Application* app) {
+    void mouseScrollEvent(Sdl2Application::MouseScrollEvent& event, const Magnum::Vector2i& framebufferSize) {
         // if no y offset, no need to handle
         auto direction = event.offset().y();
         if (!direction) return;
@@ -87,7 +87,7 @@ class MapScaleHelper : public Animation::BaseUIPlayerHelper<ScrollAnimStateCompo
         // define transform only on zoom-in
         if (direction > 0) {
             _defineZoomAccuracy(ZoomAccuracy::Scroll);
-            to.translation = MouseMovements::translatedVector(event, app);
+            to.translation = MouseMovements::translatedVector(event, framebufferSize);
         }
 
         // accept event

@@ -19,8 +19,6 @@
 
 #pragma once
 
-
-#include <Magnum/Platform/Sdl2Application.h>
 #include <Magnum/Math/Color.h>
 
 #include <utility>
@@ -28,8 +26,6 @@
 #include "../animation/BaseUIPlayerHelper.hpp"
 #include "../base/Hoverable.hpp"
 #include "StaticText.hpp"
-
-using Magnum::Platform::Sdl2Application;
 
 namespace UnderStory {
 
@@ -45,9 +41,8 @@ struct STHStateComponent {
 
 class ShortcutsText : public Animation::BaseUIPlayerHelper<STHStateComponent>, public Hoverable<> {
  public:
-    ShortcutsText(StaticText&& associatedText, Magnum::Timeline* timeline, Magnum::Shaders::DistanceFieldVector2D* shader, Magnum::Platform::Application* app) :
-        BaseUIPlayerHelper(timeline, &_moveAnim, .2f, &_defaultAnimationCallback),
-        Hoverable(app),
+    ShortcutsText(StaticText&& associatedText, Magnum::Shaders::DistanceFieldVector2D* shader) :
+        BaseUIPlayerHelper(&_moveAnim, .2f, &_defaultAnimationCallback),
         _text(std::move(associatedText)),
         _shader(shader) {
          _updateColors();
@@ -111,7 +106,7 @@ class ShortcutsText : public Animation::BaseUIPlayerHelper<STHStateComponent>, p
         );
     }
 
-    void _updateGeometry() final {
+    void _geometryUpdateRequested() final {
         _matrix = _responsiveMatrix * _moveAnim;
         _geometry = _text.geometryFromMatrix(_matrix);
     }
@@ -131,7 +126,7 @@ class ShortcutsText : public Animation::BaseUIPlayerHelper<STHStateComponent>, p
     void _onAnimationProgress() final {
         _replaceMainMatrix(Magnum::Matrix3::scaling(currentAnim().scaling));
         _updateColors();
-        _updateGeometry();
+        _geometryUpdateRequested();
     }
 
     void _updateColors() {

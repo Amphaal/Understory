@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <Magnum/Platform/Sdl2Application.h>
-
 #include <Magnum/Shaders/Flat.h>
 #include <Magnum/GL/Buffer.h>
 #include <Magnum/GL/Mesh.h>
@@ -43,11 +41,10 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class AtomSelectorButton : public Animation::BaseUIPlayerHelper<>, public Hoverable<>, public Toggleable {
+class AtomSelectorButton : public Animation::BaseUIPlayerHelper<>, public Toggleable<> {
  public:
-    AtomSelectorButton(Magnum::Timeline* timeline, Magnum::Shaders::Flat2D* shader, Magnum::Platform::Application* app) :
-        BaseUIPlayerHelper(timeline, &_moveAnim, .2f, &_defaultAnimationCallback),
-        Hoverable(app),
+    AtomSelectorButton(Magnum::Shaders::Flat2D* shader) :
+        BaseUIPlayerHelper(&_moveAnim, .2f, &_defaultAnimationCallback),
         _shader(shader) {
         _setup();
     }
@@ -94,9 +91,9 @@ class AtomSelectorButton : public Animation::BaseUIPlayerHelper<>, public Hovera
     void _onHoverChanged(bool isHovered) final {
         // apply changes
         if(isHovered) {
-            _app->setCursor(Magnum::Platform::Sdl2Application::Cursor::Hand);
+            app()->setCursor(Magnum::Platform::Sdl2Application::Cursor::Hand);
         } else {
-            _app->setCursor(Magnum::Platform::Sdl2Application::Cursor::Arrow);
+            app()->setCursor(Magnum::Platform::Sdl2Application::Cursor::Arrow);
         }
 
         //
@@ -110,7 +107,7 @@ class AtomSelectorButton : public Animation::BaseUIPlayerHelper<>, public Hovera
 
     void _onAnimationProgress() final {
         _replaceMainMatrix(Magnum::Matrix3::translation(currentAnim()));
-        _updateGeometry();
+        _geometryUpdateRequested();
     }
 
     void _updateAnimationYTarget() {
@@ -126,7 +123,7 @@ class AtomSelectorButton : public Animation::BaseUIPlayerHelper<>, public Hovera
         _updateAnimationAndPlay(_moveAnim.translation(), target);
     }
 
-    void _updateGeometry() final {
+    void _geometryUpdateRequested() final {
         _matrix = _responsiveMatrix * _moveAnim;
 
         _geometry = Magnum::Range2D {

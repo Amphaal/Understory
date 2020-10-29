@@ -19,41 +19,27 @@
 
 #pragma once
 
-#include "src/app/utility/AppBound.hpp"
-#include "Shape.hpp"
+#include <Magnum/Platform/Sdl2Application.h>
 
 namespace UnderStory {
 
-namespace Widget {
-
-template<class T = Magnum::Range2D>
-class Hoverable : public Shape<T>, public AppBound {
+class AppBound {
  public:
-    Hoverable() {}
-
-    bool isHovered() const {
-        return _isHovered;
+    AppBound() {}
+    explicit AppBound(Magnum::Platform::Application* app) {
+       setupApp(app);
     }
 
-    virtual void checkIfMouseOver(const Magnum::Vector2 &cursorPos) {
-        // prevent updating if state did not change
-        auto hovered = this->_geometry.contains(cursorPos);
-        if(_isHovered == hovered) return;
-
-        // update state
-        _isHovered = hovered;
-
-        //
-        _onHoverChanged(_isHovered);
+    Magnum::Platform::Application* app() {
+        return _app;
     }
 
- protected:
-    virtual void _onHoverChanged(bool isHovered) {}
+    static void setupApp(Magnum::Platform::Application* app) {
+        _app = app;
+    }
 
  private:
-    bool _isHovered = false;
+    static inline Magnum::Platform::Application* _app = nullptr;
 };
-
-}  // namespace Widget
 
 }  // namespace UnderStory

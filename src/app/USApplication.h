@@ -33,7 +33,6 @@
 #include <Magnum/Text/DistanceFieldGlyphCache.h>
 #include <Magnum/Text/Renderer.h>
 #include <Magnum/Shaders/Flat.h>
-#include <Magnum/Timeline.h>
 #include <Magnum/Trade/MeshData.h>
 #include <Magnum/ImageView.h>
 
@@ -63,9 +62,12 @@
 #include "widgets/text/ShortcutsText.hpp"
 #include "widgets/text/StaticText.hpp"
 
+#include "src/app/utility/AppBound.hpp"
+#include "src/app/utility/TimelineBound.hpp"
+
 namespace UnderStory {
 
-class USApplication : public Magnum::Platform::Application {
+class USApplication : public Magnum::Platform::Application, public AppBound, public TimelineBound {
  public:
     explicit USApplication(const Arguments& arguments);
 
@@ -126,7 +128,6 @@ class USApplication : public Magnum::Platform::Application {
     Widget::Helper::SelectionRectangle _selectionRect;
     Widget::Helper::Grid _grid;
     Widget::Helper::Enlighter _enlighter;
-
 
     Magnum::Containers::Pointer<Widget::ShortcutsText> _stWidget;
     Widget::AtomSelectorButton _atomSelector;

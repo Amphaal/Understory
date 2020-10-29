@@ -19,19 +19,14 @@
 
 #pragma once
 
-#include <Magnum/Platform/Sdl2Application.h>
-
-#include <Magnum/Math/Vector2.h>
-#include <Magnum/Math/Range.h>
-#include <Magnum/Magnum.h>
-
-#include <utility>
+#include "Hoverable.hpp"
 
 namespace UnderStory {
 
 namespace Widget {
 
-class Toggleable {
+template<class T = Magnum::Range2D>
+class Toggleable : public Hoverable<T> {
  public:
     Toggleable() {}
 

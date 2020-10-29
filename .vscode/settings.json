@@ -117,6 +117,11 @@
         "__functional_03": "cpp",
         "*.ipp": "cpp",
         "any": "cpp",
-        "source_location": "cpp"
+        "source_location": "cpp",
+        "csetjmp": "cpp",
+        "forward_list": "cpp",
+        "span": "cpp",
+        "valarray": "cpp",
+        "semaphore": "cpp"
     }
 }

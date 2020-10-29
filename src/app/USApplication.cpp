@@ -28,16 +28,18 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
                        .setWindowFlags(Configuration::WindowFlag::Resizable),
         GLConfiguration{}
     },
+    AppBound(this),
+    TimelineBound(&_timeline),
     _worldCache{Magnum::Vector2i{2048}, Magnum::Vector2i{512}, 22},
     _rs("data"),
-    _mmh(&_timeline, &_transformationWorld),
-    _msh(&_timeline, &_transformationWorld),
-    _kmh(&_timeline, &_transformationWorld),
-    _atomSelector(&_timeline, &_flatShader, this),
-    _panel(&_timeline, &_flatShader, this),
+    _mmh(&_transformationWorld),
+    _msh(&_transformationWorld),
+    _kmh(&_transformationWorld),
+    _atomSelector(&_flatShader),
+    _enlighter(&_flatShader),
+    _panel(&_flatShader),
     _selectionRect(_rs),
-    _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT),
-    _enlighter(&_flatShader) {
+    _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT) {
     // set minimum size
     SDL_SetWindowMinimumSize(this->window(), MINIMUM_WIDTH, MINIMUM_HEIGHT);
 
@@ -87,7 +89,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
                 "[NumPad +/-]                                       Zoom",
             Magnum::Text::Alignment::TopRight
         );
-        _stWidget.reset(new Widget::ShortcutsText(std::move(text), &_timeline, &_textShader, this));
+        _stWidget.reset(new Widget::ShortcutsText(std::move(text), &_textShader));
     }
 
     /* Set up premultiplied alpha blending to avoid overlapping text characters to cut into each other */
@@ -192,7 +194,7 @@ void UnderStory::USApplication::drawEvent() {
 }
 
 void UnderStory::USApplication::mouseScrollEvent(MouseScrollEvent& event) {
-    _msh.mouseScrollEvent(event, this);
+    _msh.mouseScrollEvent(event, this->framebufferSize());
 }
 
 void UnderStory::USApplication::keyReleaseEvent(KeyEvent& event) {
@@ -220,11 +222,11 @@ void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
             this->setCursor(Cursor::ResizeAll);
 
             //
-            _mmh.mouseMoveEvent(event, this);
+            _mmh.mouseMoveEvent(event, this->framebufferSize());
 
         } else if (_selectionRect.isSelecting()) {
             // if selection, update rect
-            _selectionRect.update(event, this);
+            _selectionRect.update(event, this->framebufferSize());
         }
 
     // no locked context, update hover context
@@ -239,9 +241,9 @@ void UnderStory::USApplication::_updateHoverContext(MouseMoveEvent& event) {
     //
     auto cursorPos = _cursorPosition(event);
 
-    _atomSelector.onMouseMove(cursorPos);
-    _panel.onMouseMove(cursorPos);
-    _stWidget->onMouseMove(cursorPos);
+    _atomSelector.checkIfMouseOver(cursorPos);
+    _panel.checkIfMouseOver(cursorPos);
+    _stWidget->checkIfMouseOver(cursorPos);
 
     // check if on atomSelector
     if(_atomSelector.isHovered()) {
@@ -291,7 +293,7 @@ void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {
 
             //
             if(_lockContext == this) {
-                _selectionRect.init(event, this);
+                _selectionRect.init(event, this->framebufferSize());
             }
         }
         break;
@@ -303,7 +305,7 @@ void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {
 
 void UnderStory::USApplication::leftMouseDoubleClickEvent(MouseEvent& event) {
     if(_lockContext == this) {
-        _mmh.mouseDoubleClickEvent(event, this);
+        _mmh.mouseDoubleClickEvent(event, this->framebufferSize());
     }
 }
 
@@ -331,7 +333,7 @@ void UnderStory::USApplication::mouseReleaseEvent(MouseEvent& event) {
         case MouseEvent::Button::Right: {
             if(_lockContext == this) {
                 if (_selectionRect.isSelecting()) {
-                    _selectionRect.end(event, this);
+                    _selectionRect.end(event, this->framebufferSize());
                     _msh.snapshotZoom(_selectionRect.asRectangle());
                 }
             }

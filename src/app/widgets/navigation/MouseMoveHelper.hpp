@@ -32,7 +32,7 @@ namespace Navigation {
 
 class MouseMoveHelper : public Animation::BaseUIPlayerHelper<> {
  public:
-     MouseMoveHelper(Magnum::Timeline* timeline, Magnum::Matrix3* mainMatrix) : BaseUIPlayerHelper(timeline, mainMatrix, .2f) {}
+     MouseMoveHelper(Magnum::Matrix3* mainMatrix) : BaseUIPlayerHelper(mainMatrix, .2f) {}
 
     void stopAnim() final {
        BaseUIPlayerHelper::stopAnim();
@@ -40,9 +40,9 @@ class MouseMoveHelper : public Animation::BaseUIPlayerHelper<> {
     }
 
     void mousePressEvent() { stopAnim(); }
-    void mouseMoveEvent(const Sdl2Application::MouseMoveEvent& event, const Magnum::Platform::Application* app) {
+    void mouseMoveEvent(const Sdl2Application::MouseMoveEvent& event, const Magnum::Vector2i& framebufferSize) {
         //
-        auto moveTr = MouseMovements::translatedVector(event, app);
+        auto moveTr = MouseMovements::translatedVector(event, framebufferSize);
 
         //
         _mm.addToAccelerationBuffer(moveTr);
@@ -50,8 +50,8 @@ class MouseMoveHelper : public Animation::BaseUIPlayerHelper<> {
         //
         _translateToAbs(moveTr);
     }
-    void mouseDoubleClickEvent(const Sdl2Application::MouseEvent& event, const Magnum::Platform::Application* app) {
-        auto moveTr = MouseMovements::translatedVector(event, app);
+    void mouseDoubleClickEvent(const Sdl2Application::MouseEvent& event, const Magnum::Vector2i& framebufferSize) {
+        auto moveTr = MouseMovements::translatedVector(event, framebufferSize);
         _updateAnimationFromMoveVectorAndPlay(moveTr);
     }
     void mouseMoveReleaseEvent() {

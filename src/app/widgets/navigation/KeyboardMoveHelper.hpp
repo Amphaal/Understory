@@ -34,7 +34,7 @@ namespace Navigation {
 
 class KeyboardMoveHelper : public Animation::BaseUIHelper {
  public:
-     KeyboardMoveHelper(Magnum::Timeline* timeline, Magnum::Matrix3* mainMatrix) : BaseUIHelper(timeline, mainMatrix) {}
+     KeyboardMoveHelper(Magnum::Matrix3* mainMatrix) : BaseUIHelper(mainMatrix) {}
 
     void stopAnim() override {
         _km = KeyboardMovements();
@@ -62,7 +62,7 @@ class KeyboardMoveHelper : public Animation::BaseUIHelper {
     void _considerAxis(AxisMomentum &axis) {
         if(!axis.currentDirection.isZero()) {  // if current direction is set on axis, means acceleration
             //
-            auto fd = _timeline->previousFrameDuration();
+            auto fd = timeline()->previousFrameDuration();
             if(axis.timePassed < MAX_SPEED_REACHED_IN_MS) {
                 axis.timePassed += fd;
                 //
@@ -75,7 +75,7 @@ class KeyboardMoveHelper : public Animation::BaseUIHelper {
 
         } else if(axis.timePassed) {  // decelerating, still has momentum
             //
-            auto fd = _timeline->previousFrameDuration();
+            auto fd = timeline()->previousFrameDuration();
             axis.timePassed -= fd;
 
             //

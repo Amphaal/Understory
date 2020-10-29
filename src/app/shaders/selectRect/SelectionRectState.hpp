@@ -49,13 +49,13 @@ struct SelectionRectState {
         return _isSelecting;
     }
 
-    void init(const Sdl2Application::MouseEvent& event, const Magnum::Platform::Application* app) {
+    void init(const Sdl2Application::MouseEvent& event, const Magnum::Vector2i& framebufferSize) {
         // vert
-        _p1() = _trVert(event.position(), app->framebufferSize());
+        _p1() = _trVert(event.position(), framebufferSize);
         _p2() = _p1();
 
         // frag
-        _p1_px = _trFrag(event.position(), app->framebufferSize());
+        _p1_px = _trFrag(event.position(), framebufferSize);
         _p2_px = _p1_px;
 
         //
@@ -65,12 +65,12 @@ struct SelectionRectState {
         _isSelecting = true;
     }
 
-    void update(const Sdl2Application::MouseMoveEvent& event, const Magnum::Platform::Application* app) {
-        _updatefromPoint(event.position(), app);
+    void update(const Sdl2Application::MouseMoveEvent& event, const Magnum::Vector2i& framebufferSize) {
+        _updatefromPoint(event.position(), framebufferSize);
     }
 
-    void end(const Sdl2Application::MouseEvent& event, const Magnum::Platform::Application* app) {
-        _updatefromPoint(event.position(), app);
+    void end(const Sdl2Application::MouseEvent& event, const Magnum::Vector2i& framebufferSize) {
+        _updatefromPoint(event.position(), framebufferSize);
         _isSelecting = false;
     }
 
@@ -158,10 +158,10 @@ struct SelectionRectState {
     Magnum::Vector2i _p1_px, _p2_px;
     bool _isSelecting = false;
 
-    void _updatefromPoint(const Magnum::Vector2i& point, const Magnum::Platform::Application* app) {
+    void _updatefromPoint(const Magnum::Vector2i& point, const Magnum::Vector2i& framebufferSize) {
         // set new coordinates
-        _p2() =  _trVert(point, app->framebufferSize());
-        _p2_px = _trFrag(point, app->framebufferSize());
+        _p2() =  _trVert(point, framebufferSize);
+        _p2_px = _trFrag(point, framebufferSize);
 
         // update intermediate
         _updateShaderData();

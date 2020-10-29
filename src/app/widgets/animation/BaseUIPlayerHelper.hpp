@@ -37,8 +37,8 @@ class BaseUIPlayerHelper : public BaseUIHelper {
     using AnimationCallback = void(*)(Magnum::Float, const float &, State<T>&);
 
     //
-    BaseUIPlayerHelper(Magnum::Timeline* timeline, Magnum::Matrix3* mainMatrix, float animDurationInSecs, AnimationCallback animCb = &_defaultAnimationCallback)
-    : BaseUIHelper(timeline, mainMatrix),
+    BaseUIPlayerHelper(Magnum::Matrix3* mainMatrix, float animDurationInSecs, AnimationCallback animCb = &_defaultAnimationCallback)
+    : BaseUIHelper(mainMatrix),
     _track({
         {.0f, .0f},
         {animDurationInSecs, 1.0f}
@@ -52,7 +52,7 @@ class BaseUIPlayerHelper : public BaseUIHelper {
     }
 
     void advance() final {
-        _player.advance(_timeline->previousFrameTime());
+        _player.advance(timeline()->previousFrameTime());
         if(!isAnimationPlaying()) return;
         _onAnimationProgress();
     }
@@ -88,7 +88,7 @@ class BaseUIPlayerHelper : public BaseUIHelper {
 
     void _startAnim() final {
         BaseUIHelper::_startAnim();
-        _player.play(_timeline->previousFrameTime());
+        _player.play(timeline()->previousFrameTime());
     }
 
     static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, State<T>& state) {

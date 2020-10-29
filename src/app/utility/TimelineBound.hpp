@@ -19,41 +19,27 @@
 
 #pragma once
 
-#include "src/app/utility/AppBound.hpp"
-#include "Shape.hpp"
+#include <Magnum/Timeline.h>
 
 namespace UnderStory {
 
-namespace Widget {
-
-template<class T = Magnum::Range2D>
-class Hoverable : public Shape<T>, public AppBound {
+class TimelineBound {
  public:
-    Hoverable() {}
-
-    bool isHovered() const {
-        return _isHovered;
+    TimelineBound() {}
+    explicit TimelineBound(Magnum::Timeline* timeline) {
+       setupTimeline(timeline);
     }
 
-    virtual void checkIfMouseOver(const Magnum::Vector2 &cursorPos) {
-        // prevent updating if state did not change
-        auto hovered = this->_geometry.contains(cursorPos);
-        if(_isHovered == hovered) return;
-
-        // update state
-        _isHovered = hovered;
-
-        //
-        _onHoverChanged(_isHovered);
+    Magnum::Timeline* timeline() {
+        return _timeline;
     }
 
- protected:
-    virtual void _onHoverChanged(bool isHovered) {}
+    static void setupTimeline(Magnum::Timeline* timeline) {
+        _timeline = timeline;
+    }
 
  private:
-    bool _isHovered = false;
+    static inline Magnum::Timeline* _timeline = nullptr;
 };
-
-}  // namespace Widget
 
 }  // namespace UnderStory

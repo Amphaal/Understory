@@ -19,8 +19,6 @@
 
 #pragma once
 
-#include <Magnum/Platform/Sdl2Application.h>
-
 #include <Magnum/Shaders/Flat.h>
 #include <Magnum/GL/Buffer.h>
 #include <Magnum/GL/Mesh.h>
@@ -43,11 +41,10 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class Panel : public Animation::BaseUIPlayerHelper<Magnum::Float>, public Hoverable<>, public Toggleable {
+class Panel : public Animation::BaseUIPlayerHelper<Magnum::Float>, public Toggleable<> {
  public:
-    Panel(Magnum::Timeline* timeline, Magnum::Shaders::Flat2D* shader, Magnum::Platform::Application* app) :
-        BaseUIPlayerHelper(timeline, &_moveAnim, .2f, &_defaultAnimationCallback),
-        Hoverable(app),
+    Panel(Magnum::Shaders::Flat2D* shader) :
+        BaseUIPlayerHelper(&_moveAnim, .2f, &_defaultAnimationCallback),
         _shader(shader) {
         _definePanelPosition(-X_PANEL_SIZE);
         _setup();
@@ -85,7 +82,7 @@ class Panel : public Animation::BaseUIPlayerHelper<Magnum::Float>, public Hovera
 
     void _onAnimationProgress() final {
         _definePanelPosition(currentAnim());
-        _updateGeometry();
+        _geometryUpdateRequested();
     }
 
     void _onToggled(bool isToggled) final {
@@ -95,7 +92,7 @@ class Panel : public Animation::BaseUIPlayerHelper<Magnum::Float>, public Hovera
             _updateAnimationAndPlay(0.f, -X_PANEL_SIZE);
     }
 
-    void _updateGeometry() final {
+    void _geometryUpdateRequested() final {
         _geometry = Magnum::Range2D {
             _moveAnim.transformPoint(BL_START),
             _moveAnim.transformPoint(BL_END)

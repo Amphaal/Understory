@@ -33,16 +33,16 @@ namespace Navigation {
 
 class MouseMovements {
  public:
-    static Magnum::Vector2 translatedVector(const Sdl2Application::MouseMoveEvent& event, const Magnum::Platform::Application* app) {
-        return _translatedVector(event.relativePosition(), app->framebufferSize());
+    static Magnum::Vector2 translatedVector(const Sdl2Application::MouseMoveEvent& event, const Magnum::Vector2i& framebufferSize) {
+        return _translatedVector(event.relativePosition(), framebufferSize);
     }
 
-    static Magnum::Vector2 translatedVector(Sdl2Application::MouseScrollEvent& event, const Magnum::Platform::Application* app) {
-        return _translatedVectorAbs(event.position(), app->framebufferSize());
+    static Magnum::Vector2 translatedVector(Sdl2Application::MouseScrollEvent& event, const Magnum::Vector2i& framebufferSize) {
+        return _translatedVectorAbs(event.position(), framebufferSize);
     }
 
-    static Magnum::Vector2 translatedVector(const Sdl2Application::MouseEvent& event, const Magnum::Platform::Application* app) {
-        return _translatedVectorAbs(event.position(), app->framebufferSize());
+    static Magnum::Vector2 translatedVector(const Sdl2Application::MouseEvent& event, const Magnum::Vector2i& framebufferSize) {
+        return _translatedVectorAbs(event.position(), framebufferSize);
     }
 
     void addToAccelerationBuffer(const Magnum::Vector2& tr) {
