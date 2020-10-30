@@ -31,14 +31,26 @@ namespace Widget {
 template<class T = Magnum::Range2D>
 class Container : public Hoverable<T> {
  public:
-    explicit Container(std::initializer_list<UnderStory::Widget::Shape> containing = {}) : Hoverable<T>(app) {
-        Containers::arrayReserve(_innerShapes, 1);
+    explicit Container(std::initializer_list<UnderStory::Widget::Hoverable*> containing = {}) : Hoverable<T>(app) {
+        Magnum::Containers::arrayReserve(_innerShapes, containing.size());
+        Magnum::Containers::arrayAppend(_innerShapes, containing);
     }
 
-    virtual std::string containerName() const = 0;
+    void checkIfMouseOver(const Magnum::Vector2 &cursorPos) final {
+       Hoverable::checkIfMouseOver(cursorPos);
+    }
 
  private:
-    Corrade::Containers::Array<Shape> _innerShapes;
+    Corrade::Containers::Array<Hoverable*> _innerShapes;
+    Hoverable* _latestHoveredShape = nullptr;
+
+    void _geometryUpdateRequested() final {
+
+    }
+
+    void _onHoverChanged(bool isHovered) final {
+        if(_latestHoveredShape) _latestHoveredShape->checkIfMouseOver
+    }
 };
 
 }  // namespace Widget
