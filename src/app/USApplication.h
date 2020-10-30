@@ -64,10 +64,11 @@
 
 #include "src/app/utility/AppBound.hpp"
 #include "src/app/utility/TimelineBound.hpp"
+#include "src/app/widgets/base/Container.hpp"
 
 namespace UnderStory {
 
-class USApplication : public Magnum::Platform::Application, public AppBound, public TimelineBound {
+class USApplication : public Magnum::Platform::Application, public Widget::Container<>, public TimelineBound {
  public:
     explicit USApplication(const Arguments& arguments);
 
@@ -83,7 +84,6 @@ class USApplication : public Magnum::Platform::Application, public AppBound, pub
     void mouseMoveEvent(MouseMoveEvent& event) override;
     void leftMouseDoubleClickEvent(MouseEvent& event);
 
-    void _onViewportChange();
     void _updateDebugText();
     void _resetWorldMatrix();
 
@@ -113,10 +113,9 @@ class USApplication : public Magnum::Platform::Application, public AppBound, pub
     // mouse state
     Navigation::MouseState _mouseState {DOUBLE_CLICK_DELAY_MS};
 
-    // mouse context
-    void* _hoverContext = nullptr;
-    void* _lockContext = nullptr;
-    void _updateHoverContext(MouseMoveEvent& event);
+    // mouse lock context
+    Widget::Hoverable<>* _lockContext = nullptr;
+    void _geometryUpdateRequested() final;
 
     Magnum::Utility::Resource _rs;
     Magnum::Timeline _timeline;

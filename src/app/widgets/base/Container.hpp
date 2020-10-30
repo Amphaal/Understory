@@ -31,25 +31,64 @@ namespace Widget {
 template<class T = Magnum::Range2D>
 class Container : public Hoverable<T> {
  public:
-    explicit Container(std::initializer_list<UnderStory::Widget::Hoverable*> containing = {}) : Hoverable<T>(app) {
-        Magnum::Containers::arrayReserve(_innerShapes, containing.size());
-        Magnum::Containers::arrayAppend(_innerShapes, containing);
+    explicit Container() {}
+
+    void bind(std::initializer_list<UnderStory::Widget::Hoverable<T>*> prioritized) {
+        _innerShapes = Corrade::Containers::Array<Hoverable<T>*>();
+        Magnum::Containers::arrayReserve(_innerShapes, prioritized.size());
+        Magnum::Containers::arrayAppend(_innerShapes, prioritized);
+    }
+
+    virtual void onViewportChange(const Constraints &wh) {
+        Shape<T>::onViewportChange(wh);
+
+        for(auto innerShape : _innerShapes) {
+            innerShape->onViewportChange(wh);
+        }
     }
 
     void checkIfMouseOver(const Magnum::Vector2 &cursorPos) final {
-       Hoverable::checkIfMouseOver(cursorPos);
+       // always check if previously subshape hovered is still hovered or not
+       if(_latestHoveredShape && _latestHoveredShape != this) {
+           _latestHoveredShape->checkIfMouseOver(cursorPos); 
+       }
+       
+       // check if container is hovered
+       Hoverable<T>::checkIfMouseOver(cursorPos);
+       if(!this->isHovered()) {
+           // if not, reset state and return
+           _updateLatestHoveredShape(nullptr);
+           return;
+        }
+
+        // iterate through innerShapes
+        for(auto innerShape : _innerShapes) {
+            // check
+            innerShape->checkIfMouseOver(cursorPos);
+
+            // found hovering, update state and immediate return
+            if(innerShape->isHovered()) {
+                _updateLatestHoveredShape(innerShape);
+                return;
+            }
+        }
+
+        // if no shapes fills, set state to self
+        _updateLatestHoveredShape(this);
+    }
+
+    Hoverable<T>* latestHovered() const {
+        return _latestHoveredShape;
     }
 
  private:
-    Corrade::Containers::Array<Hoverable*> _innerShapes;
-    Hoverable* _latestHoveredShape = nullptr;
+    Corrade::Containers::Array<Hoverable<T>*> _innerShapes;
+    Hoverable<T>* _latestHoveredShape = nullptr;
 
-    void _geometryUpdateRequested() final {
-
-    }
-
-    void _onHoverChanged(bool isHovered) final {
-        if(_latestHoveredShape) _latestHoveredShape->checkIfMouseOver
+    void _updateLatestHoveredShape(Hoverable<T>* hoverable) {
+        if(_latestHoveredShape == hoverable) return;
+        _latestHoveredShape = hoverable;
+        // Magnum::Debug{} << _latestHoveredShape;
     }
 };
 

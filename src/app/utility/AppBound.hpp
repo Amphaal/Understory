@@ -26,9 +26,6 @@ namespace UnderStory {
 class AppBound {
  public:
     AppBound() {}
-    explicit AppBound(Magnum::Platform::Application* app) {
-       setupApp(app);
-    }
 
     Magnum::Platform::Application* app() {
         return _app;

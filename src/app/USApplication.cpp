@@ -28,7 +28,6 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
                        .setWindowFlags(Configuration::WindowFlag::Resizable),
         GLConfiguration{}
     },
-    AppBound(this),
     TimelineBound(&_timeline),
     _worldCache{Magnum::Vector2i{2048}, Magnum::Vector2i{512}, 22},
     _rs("data"),
@@ -42,6 +41,9 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT) {
     // set minimum size
     SDL_SetWindowMinimumSize(this->window(), MINIMUM_WIDTH, MINIMUM_HEIGHT);
+
+    //
+    setupApp(this);
 
     //
     _updateChecker.start();
@@ -102,11 +104,17 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _debugText->reserve(100, Magnum::GL::BufferUsage::DynamicDraw, Magnum::GL::BufferUsage::StaticDraw);
     _updateDebugText();
 
+    // bind widgets to container (order is important)
+    this->bind({&_atomSelector, &_panel, _stWidget.get()}),
+
     //
     _timeline.start();
 }
 
-void UnderStory::USApplication::_onViewportChange() {
+void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
+    //
+    Magnum::GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
+
     //
     Widget::Constraints wh {windowSize()};
 
@@ -123,15 +131,15 @@ void UnderStory::USApplication::_onViewportChange() {
         );
 
     //
-    _atomSelector.onViewportChange(wh);
-    _stWidget->onViewportChange(wh);
-    _panel.onViewportChange(wh);
+    Container<>::onViewportChange(wh);
     _selectionRect.onViewportChange();
 }
 
-void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
-    Magnum::GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
-    _onViewportChange();
+void UnderStory::USApplication::_geometryUpdateRequested() {
+    this->_geometry = Magnum::Range2D {
+        {-1.f, -1.f},
+        {1.f, 1.f}
+    };
 }
 
 void UnderStory::USApplication::drawEvent() {
@@ -231,45 +239,15 @@ void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
 
     // no locked context, update hover context
     } else if(!_lockContext) {
-        _updateHoverContext(event);
+        auto cursorPos = _cursorPosition(event);
+        checkIfMouseOver(cursorPos);
     }
-}
-
-
-// TODO(amphaal) : priorize hover detection on latest context found
-void UnderStory::USApplication::_updateHoverContext(MouseMoveEvent& event) {
-    //
-    auto cursorPos = _cursorPosition(event);
-
-    _atomSelector.checkIfMouseOver(cursorPos);
-    _panel.checkIfMouseOver(cursorPos);
-    _stWidget->checkIfMouseOver(cursorPos);
-
-    // check if on atomSelector
-    if(_atomSelector.isHovered()) {
-        _hoverContext = &_atomSelector;
-        return;
-    }
-
-    // check if on panel
-    if(_panel.isHovered()) {
-        _hoverContext = &_panel;
-        return;
-    }
-
-    // check if on shortcuts text
-    if(_stWidget->isHovered()) {
-        _hoverContext = _stWidget.get();
-        return;
-    }
-
-    // define app as context by default
-    _hoverContext = this;
 }
 
 void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {
     //
-    _lockContext = _hoverContext;
+    _lockContext = this->latestHovered();
+    auto q = (UnderStory::Widget::Hoverable<Magnum::Range2D>*)this;
 
     //
     switch (event.button()) {
