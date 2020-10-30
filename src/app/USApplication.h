@@ -53,7 +53,7 @@
 #include "widgets/navigation/MouseState.hpp"
 
 #include "widgets/AtomSelectorButton.hpp"
-#include "widgets/Panel.hpp"
+#include "widgets/ScrollablePanel.hpp"
 
 #include "widgets/helpers/SelectionRectangle.hpp"
 #include "widgets/helpers/Grid.hpp"
@@ -63,12 +63,12 @@
 #include "widgets/text/StaticText.hpp"
 
 #include "src/app/utility/AppBound.hpp"
-#include "src/app/utility/TimelineBound.hpp"
+#include "src/app/widgets/animation/TimelineBound.hpp"
 #include "src/app/widgets/base/Container.hpp"
 
 namespace UnderStory {
 
-class USApplication : public Magnum::Platform::Application, public Widget::Container<>, public TimelineBound {
+class USApplication : public Magnum::Platform::Application, public Widget::Container<> {
  public:
     explicit USApplication(const Arguments& arguments);
 
@@ -130,7 +130,7 @@ class USApplication : public Magnum::Platform::Application, public Widget::Conta
 
     Magnum::Containers::Pointer<Widget::ShortcutsText> _stWidget;
     Widget::AtomSelectorButton _atomSelector;
-    Widget::Panel _panel;
+    Widget::ScrollablePanel _scrllblePanel;
 
     Utility::UpdateChecker _updateChecker;
 };

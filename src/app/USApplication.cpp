@@ -28,7 +28,6 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
                        .setWindowFlags(Configuration::WindowFlag::Resizable),
         GLConfiguration{}
     },
-    TimelineBound(&_timeline),
     _worldCache{Magnum::Vector2i{2048}, Magnum::Vector2i{512}, 22},
     _rs("data"),
     _mmh(&_transformationWorld),
@@ -36,14 +35,15 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _kmh(&_transformationWorld),
     _atomSelector(&_flatShader),
     _enlighter(&_flatShader),
-    _panel(&_flatShader),
+    _scrllblePanel(&_flatShader),
     _selectionRect(_rs),
     _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT) {
     // set minimum size
     SDL_SetWindowMinimumSize(this->window(), MINIMUM_WIDTH, MINIMUM_HEIGHT);
 
     //
-    setupApp(this);
+    AppBound::setupApp(this);
+    Animation::TimelineBound::setupTimeline(&_timeline);
 
     //
     _updateChecker.start();
@@ -105,7 +105,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _updateDebugText();
 
     // bind widgets to container (order is important)
-    this->bind({&_atomSelector, &_panel, _stWidget.get()}),
+    this->bind({&_atomSelector, &_scrllblePanel, _stWidget.get()}),
 
     //
     _timeline.start();
@@ -146,13 +146,14 @@ void UnderStory::USApplication::drawEvent() {
     Magnum::GL::defaultFramebuffer.clear(Magnum::GL::FramebufferClear::Color);
 
     // advance animations
+    Animation::TimelineBound::advance();
     {
         _mmh.advance();
         _msh.advance();
         _kmh.advance();
         _stWidget->advance();
         _atomSelector.advance();
-        _panel.advance();
+        _scrllblePanel.advance();
     }
 
     // world
@@ -174,7 +175,7 @@ void UnderStory::USApplication::drawEvent() {
     _selectionRect.mayDraw(_projectionWorld);
 
     // panel
-    _panel.mayDraw();
+    _scrllblePanel.mayDraw();
 
     // atom selector
     _atomSelector.draw();
@@ -240,7 +241,7 @@ void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
     // no locked context, update hover context
     } else if(!_lockContext) {
         auto cursorPos = _cursorPosition(event);
-        checkIfMouseOver(cursorPos);
+        this->checkIfMouseOver(cursorPos);
     }
 }
 
@@ -303,7 +304,7 @@ void UnderStory::USApplication::mouseReleaseEvent(MouseEvent& event) {
 
             } else if (_lockContext == &_atomSelector) {
                 _atomSelector.toggle();
-                _panel.toggle();
+                _scrllblePanel.toggle();
             }
         }
         break;

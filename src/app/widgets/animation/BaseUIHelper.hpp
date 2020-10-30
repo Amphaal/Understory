@@ -22,7 +22,9 @@
 #include <Magnum/Timeline.h>
 #include <Magnum/Math/Matrix3.h>
 
-#include "src/app/utility/TimelineBound.hpp"
+namespace UnderStory {namespace Animation { class TimelineBound; }}
+
+#include "TimelineBound.hpp"
 
 #include <vector>
 
@@ -32,7 +34,7 @@ namespace Animation {
 
 class BaseUIHelper : public TimelineBound {
  public:
-    BaseUIHelper(Magnum::Matrix3* mainMatrix) : _mainMatrix(mainMatrix) {}
+    BaseUIHelper(Magnum::Matrix3* mainMatrix) : _mainMatrix(mainMatrix) : TimelineBound(this) {}
 
     virtual void stopAnim() = 0;
     virtual void advance() = 0;

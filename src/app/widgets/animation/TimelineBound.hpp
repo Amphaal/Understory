@@ -21,17 +21,27 @@
 
 #include <Magnum/Timeline.h>
 
+namespace UnderStory {namespace Animation { class BaseUIHelper{
+    public:
+        void advance();
+}; }}
+
 namespace UnderStory {
+
+namespace Animation {
 
 class TimelineBound {
  public:
-    TimelineBound() {}
-    explicit TimelineBound(Magnum::Timeline* timeline) {
-       setupTimeline(timeline);
+    TimelineBound(Animation::BaseUIHelper* animated) {
+        _animated.push_back(animated);
     }
 
     Magnum::Timeline* timeline() {
         return _timeline;
+    }
+
+    static void advance() {
+        for(auto animated : _animated) animated->advance();
     }
 
     static void setupTimeline(Magnum::Timeline* timeline) {
@@ -40,6 +50,9 @@ class TimelineBound {
 
  private:
     static inline Magnum::Timeline* _timeline = nullptr;
+    static inline std::vector<Animation::BaseUIHelper*> _animated;
 };
+
+}  // namespace Animation
 
 }  // namespace UnderStory

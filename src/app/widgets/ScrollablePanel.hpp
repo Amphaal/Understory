@@ -41,9 +41,9 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class Panel : public Animation::BaseUIPlayerHelper<Magnum::Float>, public Toggleable<> {
+class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Float>, public Hoverable<>, public Toggleable {
  public:
-    Panel(Magnum::Shaders::Flat2D* shader) :
+    ScrollablePanel(Magnum::Shaders::Flat2D* shader) :
         BaseUIPlayerHelper(&_moveAnim, .2f, &_defaultAnimationCallback),
         _shader(shader) {
         _definePanelPosition(-X_PANEL_SIZE);

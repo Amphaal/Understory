@@ -41,7 +41,7 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class AtomSelectorButton : public Animation::BaseUIPlayerHelper<>, public Toggleable<> {
+class AtomSelectorButton : public Animation::BaseUIPlayerHelper<>, public Hoverable<>, public Toggleable {
  public:
     AtomSelectorButton(Magnum::Shaders::Flat2D* shader) :
         BaseUIPlayerHelper(&_moveAnim, .2f, &_defaultAnimationCallback),
