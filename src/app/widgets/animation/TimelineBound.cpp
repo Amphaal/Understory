@@ -17,42 +17,21 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
-#pragma once
+#include "BaseUIHelper.h"
+#include "TimelineBound.h"
 
-#include <Magnum/Timeline.h>
+UnderStory::Animation::TimelineBound::TimelineBound(UnderStory::Animation::BaseUIHelper* animated) {
+    _animated.push_back(animated);
+}
 
-namespace UnderStory {namespace Animation { class BaseUIHelper{
-    public:
-        void advance();
-}; }}
+Magnum::Timeline* UnderStory::Animation::TimelineBound::timeline() {
+    return _timeline;
+}
 
-namespace UnderStory {
+void UnderStory::Animation::TimelineBound::advance() {
+    for(auto animated : _animated) animated->advance();
+}
 
-namespace Animation {
-
-class TimelineBound {
- public:
-    TimelineBound(Animation::BaseUIHelper* animated) {
-        _animated.push_back(animated);
-    }
-
-    Magnum::Timeline* timeline() {
-        return _timeline;
-    }
-
-    static void advance() {
-        for(auto animated : _animated) animated->advance();
-    }
-
-    static void setupTimeline(Magnum::Timeline* timeline) {
-        _timeline = timeline;
-    }
-
- private:
-    static inline Magnum::Timeline* _timeline = nullptr;
-    static inline std::vector<Animation::BaseUIHelper*> _animated;
-};
-
-}  // namespace Animation
-
-}  // namespace UnderStory
+void UnderStory::Animation::TimelineBound::setupTimeline(Magnum::Timeline* timeline) {
+    _timeline = timeline;
+}

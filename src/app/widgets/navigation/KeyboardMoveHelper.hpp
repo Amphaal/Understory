@@ -23,7 +23,7 @@
 
 #include <Magnum/Platform/Sdl2Application.h>
 
-#include "../animation/BaseUIHelper.hpp"
+#include "../animation/BaseUIHelper.h"
 #include "KeyboardMovements.hpp"
 
 using Magnum::Platform::Sdl2Application;

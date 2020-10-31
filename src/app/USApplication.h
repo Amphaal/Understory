@@ -63,7 +63,7 @@
 #include "widgets/text/StaticText.hpp"
 
 #include "src/app/utility/AppBound.hpp"
-#include "src/app/widgets/animation/TimelineBound.hpp"
+#include "src/app/widgets/animation/TimelineBound.h"
 #include "src/app/widgets/base/Container.hpp"
 
 namespace UnderStory {

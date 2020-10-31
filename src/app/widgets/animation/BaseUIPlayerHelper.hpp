@@ -23,7 +23,7 @@
 #include <Magnum/Animation/Easing.h>
 #include <Magnum/Animation/Player.h>
 
-#include "BaseUIHelper.hpp"
+#include "BaseUIHelper.h"
 #include "State.hpp"
 
 namespace UnderStory {
