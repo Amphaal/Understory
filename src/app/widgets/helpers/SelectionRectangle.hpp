@@ -47,7 +47,7 @@ class SelectionRectangle : public Navigation::SelectionRectState {
         });
 
         // bind buffer
-        _selectRectBuffer.setData(vertexes(), Magnum::GL::BufferUsage::DynamicDraw);
+        _selectRectBuffer.setData(vertices(), Magnum::GL::BufferUsage::DynamicDraw);
 
         // define mesh
         _selectRect.setCount(indices.size())

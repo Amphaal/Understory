@@ -37,12 +37,12 @@ struct SelectionRectState {
     SelectionRectState() {}
     SelectionRectState(Shader::SelectionRect* shader, Magnum::GL::Buffer* buffer) : _associatedShader(shader), _associatedBuffer(buffer) {}
 
-    const Corrade::Containers::StaticArray<4, Shader::SelectionRect::Vertex>& vertexes() const {
-        return _vertexes;
+    const Corrade::Containers::StaticArray<4, Shader::SelectionRect::Vertex>& vertices() const {
+        return _vertices;
     }
 
     Magnum::Math::Range2D<float> asRectangle() const {
-        return { _vertexes[0].position, _vertexes[2].position };
+        return { _vertices[0].position, _vertices[2].position };
     }
 
     bool isSelecting() const {
@@ -148,13 +148,13 @@ struct SelectionRectState {
     }
 
     //
-    Corrade::Containers::StaticArray<4, Shader::SelectionRect::Vertex> _vertexes;
+    Corrade::Containers::StaticArray<4, Shader::SelectionRect::Vertex> _vertices;
     Shader::SelectionRect* _associatedShader = nullptr;
     Magnum::GL::Buffer* _associatedBuffer = nullptr;
 
     //
-    Magnum::Vector2& _p1() { return _vertexes[0].position; }
-    Magnum::Vector2& _p2() { return _vertexes[2].position; }
+    Magnum::Vector2& _p1() { return _vertices[0].position; }
+    Magnum::Vector2& _p2() { return _vertices[2].position; }
     Magnum::Vector2i _p1_px, _p2_px;
     bool _isSelecting = false;
 
@@ -168,12 +168,12 @@ struct SelectionRectState {
     }
 
     void _updateShaderData() {
-        // update intermediate vertexes points
-        _vertexes[1] = {{ _vertexes[2].position.x(), _vertexes[0].position.y() }};
-        _vertexes[3] = {{ _vertexes[0].position.x(), _vertexes[2].position.y() }};
+        // update intermediate vertices points
+        _vertices[1] = {{ _vertices[2].position.x(), _vertices[0].position.y() }};
+        _vertices[3] = {{ _vertices[0].position.x(), _vertices[2].position.y() }};
 
         // update buffer data
-        _associatedBuffer->setSubData(0, _vertexes);
+        _associatedBuffer->setSubData(0, _vertices);
 
         // define inner rect
         auto innerRect = _padded(

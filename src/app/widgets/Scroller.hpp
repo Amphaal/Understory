@@ -76,7 +76,7 @@ class Scroller : public Hoverable<> {
 
     void _setup() {
         // define indices
-        Magnum::GL::Buffer bIndices, bVertexes;
+        Magnum::GL::Buffer bIndices, bVertices;
         bIndices.setData({
             0, 1, 2,
             2, 3, 0
@@ -86,7 +86,7 @@ class Scroller : public Hoverable<> {
         struct Vertex {
             Magnum::Vector2 position;
         };
-        const Vertex vertexes[]{
+        const Vertex vertices[]{
             {},
             {},
             {},
@@ -94,12 +94,12 @@ class Scroller : public Hoverable<> {
         };
 
         // bind buffer
-        bVertexes.setData(vertexes, Magnum::GL::BufferUsage::StaticDraw);
+        bVertices.setData(vertices, Magnum::GL::BufferUsage::StaticDraw);
 
         // define panel mesh
         _mesh.setCount(bIndices.size())
                 .setIndexBuffer (std::move(bIndices),  0, Magnum::MeshIndexType::UnsignedInt)
-                .addVertexBuffer(std::move(bVertexes), 0, Magnum::Shaders::Flat2D::Position{});
+                .addVertexBuffer(std::move(bVertices), 0, Magnum::Shaders::Flat2D::Position{});
     }
 };
 

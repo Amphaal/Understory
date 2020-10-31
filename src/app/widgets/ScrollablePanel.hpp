@@ -44,16 +44,64 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Float>, public Container<>, public Toggleable {
+class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, public Container<>, public Toggleable {
  public:
-    enum StickTo {Left, Top, Right, Bottom};
-    ScrollablePanel(StickTo sticking = StickTo::Left, float axisPrcSize = .6f) :
+    enum StickTo {
+        Left,
+        Top,
+        Right,
+        Bottom
+    };
+
+    ScrollablePanel(const Magnum::Range2D &bounds, StickTo sticking = StickTo::Left, float axisPrcSize = .6f) :
         BaseUIPlayerHelper(&_matrix, .2f, &_defaultAnimationCallback)
         // _scroller(&_matrix, _geometry) 
         {
         //
         _definePanelPosition(-X_PANEL_SIZE);
-        _setup();
+
+        // define vertices
+        struct Vertex {
+            Magnum::Vector2 position;
+        };
+
+        switch (sticking) {
+        case StickTo::Left :
+            /* code */
+            break;
+        case StickTo::Top :
+            /* code */
+            break;
+        case StickTo::Right :
+            /* code */
+            break;
+        case StickTo::Bottom :
+            /* code */
+            break;
+        }
+
+        const Vertex vertices[4]{
+            {BL_START},
+            {{ BL_END.x(),   BL_START.y() }},
+            {BL_END},
+            {{ BL_START.x(),  BL_END.y() }}
+        };
+
+        // define indices
+        Magnum::GL::Buffer bIndices, bVertices;
+        bIndices.setData({
+            0, 1, 2,
+            2, 3, 0
+        });
+
+        // bind buffer
+        bVertices.setData(vertices, Magnum::GL::BufferUsage::StaticDraw);
+
+        // define panel mesh
+        _mesh.setCount(bIndices.size())
+                .setIndexBuffer (std::move(bIndices),  0, Magnum::MeshIndexType::UnsignedInt)
+                .addVertexBuffer(std::move(bVertices), 0, Magnum::Shaders::Flat2D::Position{});
+
     }
 
     void mayDraw() {
@@ -76,18 +124,13 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Float>, pub
     }
 
  private:
-    static constexpr float X_PANEL_SIZE = .8f;
-    static constexpr float Y_PANEL_SIZE = 2.f;
-    static constexpr Magnum::Vector2 BL_START {-1.f};
-    static constexpr Magnum::Vector2 BL_END {BL_START.x() + X_PANEL_SIZE, BL_START.y() + Y_PANEL_SIZE};
-
     // Scroller _scroller;
 
     Magnum::Matrix3 _matrix;
 
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
 
-    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<Magnum::Float>& state) {
+    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<Magnum::Vector2>& state) {
         //
         state.current = Magnum::Math::lerp(
             state.from,
@@ -115,40 +158,10 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Float>, pub
         };
     }
 
-    void _definePanelPosition(const Magnum::Float &xPos) {
+    void _definePanelPosition(const Magnum::Vector2 &pos) {
         _replaceMainMatrix(
-            Magnum::Matrix3::translation(
-                Magnum::Vector2::xAxis(xPos)
-            )
+            Magnum::Matrix3::translation(pos)
         );
-    }
-
-    void _setup() {
-        // define indices
-        Magnum::GL::Buffer bIndices, bVertexes;
-        bIndices.setData({
-            0, 1, 2,
-            2, 3, 0
-        });
-
-        // define vertices
-        struct Vertex {
-            Magnum::Vector2 position;
-        };
-        const Vertex vertexes[]{
-            {BL_START},
-            {{ BL_END.x(),   BL_START.y() }},
-            {BL_END},
-            {{ BL_START.x(),  BL_END.y() }}
-        };
-
-        // bind buffer
-        bVertexes.setData(vertexes, Magnum::GL::BufferUsage::StaticDraw);
-
-        // define panel mesh
-        _mesh.setCount(bIndices.size())
-                .setIndexBuffer (std::move(bIndices),  0, Magnum::MeshIndexType::UnsignedInt)
-                .addVertexBuffer(std::move(bVertexes), 0, Magnum::Shaders::Flat2D::Position{});
     }
 };
 
