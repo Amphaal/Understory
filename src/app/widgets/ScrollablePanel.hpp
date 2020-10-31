@@ -53,55 +53,18 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, p
         Bottom
     };
 
-    ScrollablePanel(const Magnum::Range2D &bounds, StickTo sticking = StickTo::Left, float axisPrcSize = .6f) :
-        BaseUIPlayerHelper(&_matrix, .2f, &_defaultAnimationCallback)
+    ScrollablePanel(const Magnum::Range2D* bounds, StickTo stickness = StickTo::Left, float thickness = .6f) :
+        BaseUIPlayerHelper(&_matrix, .2f, &_defaultAnimationCallback),
+        _bounds(bounds),
+        _stickness(stickness),
+        _thickness(thickness)
         // _scroller(&_matrix, _geometry) 
         {
-        //
-        _definePanelPosition(-X_PANEL_SIZE);
+        // set collapsed state as default
+        _definePanelPosition(_collapsedTransform());
 
-        // define vertices
-        struct Vertex {
-            Magnum::Vector2 position;
-        };
-
-        switch (sticking) {
-        case StickTo::Left :
-            /* code */
-            break;
-        case StickTo::Top :
-            /* code */
-            break;
-        case StickTo::Right :
-            /* code */
-            break;
-        case StickTo::Bottom :
-            /* code */
-            break;
-        }
-
-        const Vertex vertices[4]{
-            {BL_START},
-            {{ BL_END.x(),   BL_START.y() }},
-            {BL_END},
-            {{ BL_START.x(),  BL_END.y() }}
-        };
-
-        // define indices
-        Magnum::GL::Buffer bIndices, bVertices;
-        bIndices.setData({
-            0, 1, 2,
-            2, 3, 0
-        });
-
-        // bind buffer
-        bVertices.setData(vertices, Magnum::GL::BufferUsage::StaticDraw);
-
-        // define panel mesh
-        _mesh.setCount(bIndices.size())
-                .setIndexBuffer (std::move(bIndices),  0, Magnum::MeshIndexType::UnsignedInt)
-                .addVertexBuffer(std::move(bVertices), 0, Magnum::Shaders::Flat2D::Position{});
-
+        // 
+        _setup();
     }
 
     void mayDraw() {
@@ -124,6 +87,12 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, p
     }
 
  private:
+    float _thickness;
+    StickTo _stickness;
+    const Magnum::Range2D* _bounds;
+    Magnum::Vector2 _pStart;
+    Magnum::Vector2 _pEnd;
+
     // Scroller _scroller;
 
     Magnum::Matrix3 _matrix;
@@ -146,22 +115,83 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, p
 
     void _onToggled(bool isToggled) final {
         if(isToggled)
-            _updateAnimationAndPlay(-X_PANEL_SIZE, 0.f);
+            _updateAnimationAndPlay(_collapsedTransform(), {});
         else
-            _updateAnimationAndPlay(0.f, -X_PANEL_SIZE);
+            _updateAnimationAndPlay({}, _collapsedTransform());
     }
 
     void _geometryUpdateRequested() final {
         _geometry = Magnum::Range2D {
-            _matrix.transformPoint(BL_START),
-            _matrix.transformPoint(BL_END)
+            _matrix.transformPoint(_pStart),
+            _matrix.transformPoint(_pEnd)
         };
+    }
+
+    const Magnum::Vector2 _collapsedTransform() const {
+        switch (_stickness) {
+            case StickTo::Left :
+                return {-_thickness, .0f};
+            case StickTo::Top :
+                return {.0f, _thickness};
+            case StickTo::Right :
+                return {_thickness, .0f};
+            case StickTo::Bottom :
+                return {.0f, -_thickness};
+        }
     }
 
     void _definePanelPosition(const Magnum::Vector2 &pos) {
         _replaceMainMatrix(
             Magnum::Matrix3::translation(pos)
         );
+    }
+
+    void _setup() {
+        // define vertices
+        struct Vertex {
+            Magnum::Vector2 position;
+        };
+
+        switch (_stickness) {
+            case StickTo::Left :
+                _pStart = _bounds->min();
+                _pEnd = {_pStart.x() + _thickness, _bounds->max().y()};
+                break;
+            case StickTo::Top :
+                _pStart = {_bounds->min().x(), _bounds->max().y() - _thickness};
+                _pEnd = _bounds->max();
+                break;
+            case StickTo::Right :
+                _pStart = {_bounds->max().x() - _thickness, _bounds->min().y()};
+                _pEnd = _bounds->max();
+                break;
+            case StickTo::Bottom :
+                _pStart = _bounds->min();
+                _pEnd = {_bounds->max().x(), _pStart.y() + _thickness};
+                break;
+        }
+
+        const Vertex vertices[4]{
+            {_pStart},
+            {{ _pEnd.x(),   _pStart.y() }},
+            {_pEnd},
+            {{ _pStart.x(),  _pEnd.y() }}
+        };
+
+        // define indices
+        Magnum::GL::Buffer bIndices, bVertices;
+        bIndices.setData({
+            0, 1, 2,
+            2, 3, 0
+        });
+
+        // bind buffer
+        bVertices.setData(vertices, Magnum::GL::BufferUsage::StaticDraw);
+
+        // define panel mesh
+        _mesh.setCount(bIndices.size())
+                .setIndexBuffer (std::move(bIndices),  0, Magnum::MeshIndexType::UnsignedInt)
+                .addVertexBuffer(std::move(bVertices), 0, Magnum::Shaders::Flat2D::Position{});
     }
 };
 

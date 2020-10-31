@@ -34,7 +34,8 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _msh(&_transformationWorld),
     _kmh(&_transformationWorld),
     _selectionRect(_rs),
-    _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT) {
+    _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT),
+    _atomSelectorPnl(&this->_geometry) {
     // set minimum size
     SDL_SetWindowMinimumSize(this->window(), MINIMUM_WIDTH, MINIMUM_HEIGHT);
 
