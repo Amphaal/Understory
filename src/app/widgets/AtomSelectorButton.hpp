@@ -19,7 +19,6 @@
 
 #pragma once
 
-#include <Magnum/Shaders/Flat.h>
 #include <Magnum/GL/Buffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/Vector2.h>
@@ -35,6 +34,8 @@
 #include "base/Hoverable.hpp"
 #include "base/Toggleable.hpp"
 
+#include "src/app/shaders/Shaders.hpp"
+
 namespace UnderStory {
 
 namespace Widget {
@@ -43,9 +44,7 @@ using namespace Magnum::Math::Literals;
 
 class AtomSelectorButton : public Animation::BaseUIPlayerHelper<>, public Hoverable<>, public Toggleable {
  public:
-    AtomSelectorButton(Magnum::Shaders::Flat2D* shader) :
-        BaseUIPlayerHelper(&_moveAnim, .2f, &_defaultAnimationCallback),
-        _shader(shader) {
+    AtomSelectorButton() : BaseUIPlayerHelper(&_moveAnim, .2f, &_defaultAnimationCallback) {
         _setup();
     }
 
@@ -66,7 +65,8 @@ class AtomSelectorButton : public Animation::BaseUIPlayerHelper<>, public Hovera
     }
 
     void draw() {
-        _shader->setTransformationProjectionMatrix(_matrix)
+        Shaders::flat
+            ->setTransformationProjectionMatrix(_matrix)
             .setColor(isHovered() || isToggled() ? 0xFFFFFF_rgbf : 0x000000_rgbf)
             .draw(_mesh);
     }
@@ -77,7 +77,6 @@ class AtomSelectorButton : public Animation::BaseUIPlayerHelper<>, public Hovera
     Magnum::Matrix3 _matrix;
 
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
-    Magnum::Shaders::Flat2D* _shader = nullptr;
 
     static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<Magnum::Vector2>& state) {
         //

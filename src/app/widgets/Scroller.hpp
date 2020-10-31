@@ -31,10 +31,7 @@
 #include "animation/BaseUIPlayerHelper.hpp"
 
 #include "base/Constraints.hpp"
-#include "base/Container.hpp"
-#include "base/Toggleable.hpp"
-
-// #include "Scroller.hpp"
+#include "base/Hoverable.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
 
@@ -44,83 +41,37 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Float>, public Container<>, public Toggleable {
+class Scroller : public Hoverable<> {
  public:
-    enum StickTo {Left, Top, Right, Bottom};
-    ScrollablePanel(StickTo sticking = StickTo::Left, float axisPrcSize = .6f) :
-        BaseUIPlayerHelper(&_matrix, .2f, &_defaultAnimationCallback)
-        // _scroller(&_matrix, _geometry) 
-        {
+    Scroller(Magnum::Matrix3* panelMatrix, const Magnum::Range2D& panelSize) :
+        _panelSize(&panelSize),
+        _panelMatrix(panelMatrix) {
         //
-        _definePanelPosition(-X_PANEL_SIZE);
         _setup();
     }
 
     void mayDraw() {
         //
-        if(!isToggled() && !isAnimationPlaying()) return;
-
-        //
-        // _scroller.mayDraw();
-
-        //
         Shaders::flat
-            ->setTransformationProjectionMatrix(_matrix)
-            .setColor(0x000000AA_rgbaf)
+            .setTransformationProjectionMatrix(*_panelMatrix)
+            .setColor(0xFF0000_rgbf)
             .draw(_mesh);
     }
 
     void onMouseScroll(const Magnum::Vector2& scrollOffset) {
         // TODO
-        // _scroller.onMouseScroll(scrollOffset);
     }
 
  private:
-    static constexpr float X_PANEL_SIZE = .8f;
-    static constexpr float Y_PANEL_SIZE = 2.f;
-    static constexpr Magnum::Vector2 BL_START {-1.f};
-    static constexpr Magnum::Vector2 BL_END {BL_START.x() + X_PANEL_SIZE, BL_START.y() + Y_PANEL_SIZE};
-
-    // Scroller _scroller;
-
-    Magnum::Matrix3 _matrix;
-
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
-
-    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<Magnum::Float>& state) {
-        //
-        state.current = Magnum::Math::lerp(
-            state.from,
-            state.to,
-            Magnum::Animation::Easing::cubicOut(prc)
-        );
-    }
-
-    void _onAnimationProgress() final {
-        _definePanelPosition(currentAnim());
-        _geometryUpdateRequested();
-    }
-
-    void _onToggled(bool isToggled) final {
-        if(isToggled)
-            _updateAnimationAndPlay(-X_PANEL_SIZE, 0.f);
-        else
-            _updateAnimationAndPlay(0.f, -X_PANEL_SIZE);
-    }
+    Magnum::Matrix3* _panelMatrix = nullptr;
+    const Magnum::Range2D* _panelSize = nullptr;
 
     void _geometryUpdateRequested() final {
         _geometry = Magnum::Range2D {
-            _matrix.transformPoint(BL_START),
-            _matrix.transformPoint(BL_END)
+            _panelMatrix->transformPoint(BL_START),
+            _panelMatrix->transformPoint(BL_END)
         };
-    }
-
-    void _definePanelPosition(const Magnum::Float &xPos) {
-        _replaceMainMatrix(
-            Magnum::Matrix3::translation(
-                Magnum::Vector2::xAxis(xPos)
-            )
-        );
     }
 
     void _setup() {
@@ -136,10 +87,10 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Float>, pub
             Magnum::Vector2 position;
         };
         const Vertex vertexes[]{
-            {BL_START},
-            {{ BL_END.x(),   BL_START.y() }},
-            {BL_END},
-            {{ BL_START.x(),  BL_END.y() }}
+            {},
+            {},
+            {},
+            {}
         };
 
         // bind buffer

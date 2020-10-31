@@ -27,6 +27,8 @@
 #include "../base/Hoverable.hpp"
 #include "StaticText.hpp"
 
+#include "src/app/shaders/Shaders.hpp"
+
 namespace UnderStory {
 
 namespace Widget {
@@ -41,10 +43,8 @@ struct STHStateComponent {
 
 class ShortcutsText : public Animation::BaseUIPlayerHelper<STHStateComponent>, public Hoverable<> {
  public:
-    ShortcutsText(StaticText&& associatedText, Magnum::Shaders::DistanceFieldVector2D* shader) :
-        BaseUIPlayerHelper(&_moveAnim, .2f, &_defaultAnimationCallback),
-        _text(std::move(associatedText)),
-        _shader(shader) {
+    ShortcutsText(StaticText&& associatedText) : BaseUIPlayerHelper(&_moveAnim, .2f, &_defaultAnimationCallback),
+        _text(std::move(associatedText)) {
          _updateColors();
     }
 
@@ -61,7 +61,7 @@ class ShortcutsText : public Animation::BaseUIPlayerHelper<STHStateComponent>, p
     }
 
     void draw() {
-        _shader
+        Shaders::distanceField
             ->setColor(_textColor)
             .setOutlineColor(0xffffffAA_rgbaf)
             .setTransformationProjectionMatrix(_matrix)
@@ -81,7 +81,6 @@ class ShortcutsText : public Animation::BaseUIPlayerHelper<STHStateComponent>, p
     Magnum::Matrix3 _responsiveMatrix;
 
     StaticText _text;
-    Magnum::Shaders::DistanceFieldVector2D* _shader;
 
     static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<STHStateComponent>& state) {
         //

@@ -28,11 +28,10 @@
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/GL/Renderbuffer.h>
 #include <Magnum/Platform/Sdl2Application.h>
-#include <Magnum/Shaders/DistanceFieldVector.h>
 #include <Magnum/Text/AbstractFont.h>
 #include <Magnum/Text/DistanceFieldGlyphCache.h>
 #include <Magnum/Text/Renderer.h>
-#include <Magnum/Shaders/Flat.h>
+
 #include <Magnum/Trade/MeshData.h>
 #include <Magnum/ImageView.h>
 
@@ -66,6 +65,8 @@
 #include "src/app/widgets/animation/TimelineBound.h"
 #include "src/app/widgets/base/Container.hpp"
 
+#include "src/app/shaders/Shaders.hpp"
+
 namespace UnderStory {
 
 class USApplication : public Magnum::Platform::Application, public Widget::Container<> {
@@ -94,9 +95,6 @@ class USApplication : public Magnum::Platform::Application, public Widget::Conta
     Widget::StaticText _worldText;
 
     Magnum::Containers::Pointer<Magnum::Text::Renderer2D> _debugText;
-    Magnum::Shaders::DistanceFieldVector2D _textShader;
-
-    Magnum::Shaders::Flat2D _flatShader;
 
     Magnum::Vector2 _cursorPosition(const Sdl2Application::MouseMoveEvent& event) const;
 
@@ -124,13 +122,16 @@ class USApplication : public Magnum::Platform::Application, public Widget::Conta
     Navigation::MapScaleHelper _msh;
     Navigation::KeyboardMoveHelper _kmh;
 
+    Magnum::Shaders::DistanceFieldVector2D _distanceField;
+    Magnum::Shaders::Flat2D _flat;
+
     Widget::Helper::SelectionRectangle _selectionRect;
     Widget::Helper::Grid _grid;
     Widget::Helper::Enlighter _enlighter;
 
     Magnum::Containers::Pointer<Widget::ShortcutsText> _stWidget;
     Widget::AtomSelectorButton _atomSelector;
-    Widget::ScrollablePanel _scrllblePanel;
+    Widget::ScrollablePanel _atomSelectorPnl;
 
     Utility::UpdateChecker _updateChecker;
 };

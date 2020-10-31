@@ -33,13 +33,14 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _mmh(&_transformationWorld),
     _msh(&_transformationWorld),
     _kmh(&_transformationWorld),
-    _atomSelector(&_flatShader),
-    _enlighter(&_flatShader),
-    _scrllblePanel(&_flatShader),
     _selectionRect(_rs),
     _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT) {
     // set minimum size
     SDL_SetWindowMinimumSize(this->window(), MINIMUM_WIDTH, MINIMUM_HEIGHT);
+
+    //
+    Shaders::distanceField = &_distanceField;
+    Shaders::flat = &_flat;
 
     //
     AppBound::setupApp(this);
@@ -91,7 +92,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
                 "[NumPad +/-]                                       Zoom",
             Magnum::Text::Alignment::TopRight
         );
-        _stWidget.reset(new Widget::ShortcutsText(std::move(text), &_textShader));
+        _stWidget.reset(new Widget::ShortcutsText(std::move(text)));
     }
 
     /* Set up premultiplied alpha blending to avoid overlapping text characters to cut into each other */
@@ -105,7 +106,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _updateDebugText();
 
     // bind widgets to container (order is important)
-    this->bind({&_atomSelector, &_scrllblePanel, _stWidget.get()}),
+    this->bind({&_atomSelector, &_atomSelectorPnl, _stWidget.get()}),
 
     //
     _timeline.start();
@@ -147,21 +148,13 @@ void UnderStory::USApplication::drawEvent() {
 
     // advance animations
     Animation::TimelineBound::advance();
-    {
-        _mmh.advance();
-        _msh.advance();
-        _kmh.advance();
-        _stWidget->advance();
-        _atomSelector.advance();
-        _scrllblePanel.advance();
-    }
 
     // world
     auto worldMatrix = _projectionWorld * _transformationWorld;
     auto scale = _transformationWorld.uniformScaling();
-    _textShader.bindVectorTexture(_worldCache.texture());
-    _textShader
-        .setTransformationProjectionMatrix(worldMatrix)
+    Shaders::distanceField->bindVectorTexture(_worldCache.texture());
+    Shaders::distanceField
+        ->setTransformationProjectionMatrix(worldMatrix)
         .setColor(0x2f83cc_rgbf)
         .setOutlineColor(0xdcdcdc_rgbf)
         .setOutlineRange(.45f, .35f)
@@ -175,15 +168,15 @@ void UnderStory::USApplication::drawEvent() {
     _selectionRect.mayDraw(_projectionWorld);
 
     // panel
-    _scrllblePanel.mayDraw();
+    _atomSelectorPnl.mayDraw();
 
     // atom selector
     _atomSelector.draw();
 
     // debug text
     _updateDebugText();
-    _textShader
-        .setColor(DEBUG_TEXT_COLOR)
+    Shaders::distanceField
+        ->setColor(DEBUG_TEXT_COLOR)
         .setOutlineColor(DEBUG_TEXT_COLOR)
         .setOutlineRange(.47f, .44f)
         .setSmoothness(.33f)
@@ -203,7 +196,15 @@ void UnderStory::USApplication::drawEvent() {
 }
 
 void UnderStory::USApplication::mouseScrollEvent(MouseScrollEvent& event) {
-    _msh.mouseScrollEvent(event, this->framebufferSize());
+    auto lh = this->latestHovered();
+
+    // handle map scaling 
+    if(lh == this) {
+        _msh.mouseScrollEvent(event, this->framebufferSize());
+    // handle panel scroll
+    } else if(lh == &_atomSelectorPnl) {
+        _atomSelectorPnl.onMouseScroll(event.offset());
+    }
 }
 
 void UnderStory::USApplication::keyReleaseEvent(KeyEvent& event) {
@@ -304,7 +305,7 @@ void UnderStory::USApplication::mouseReleaseEvent(MouseEvent& event) {
 
             } else if (_lockContext == &_atomSelector) {
                 _atomSelector.toggle();
-                _scrllblePanel.toggle();
+                _atomSelectorPnl.toggle();
             }
         }
         break;

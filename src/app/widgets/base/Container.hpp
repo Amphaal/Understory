@@ -28,6 +28,7 @@ namespace UnderStory {
 
 namespace Widget {
 
+// TODO(amphaal) when contained is moving out of cursor (animated / deleted), refresh hover
 template<class T = Magnum::Range2D>
 class Container : public Hoverable<T> {
  public:
@@ -63,6 +64,9 @@ class Container : public Hoverable<T> {
 
         // iterate through innerShapes
         for(auto innerShape : _innerShapes) {
+            //
+            if(innerShape == _latestHoveredShape && innerShape->isHovered()) return;
+
             // check
             innerShape->checkIfMouseOver(cursorPos);
 

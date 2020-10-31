@@ -30,11 +30,11 @@
 #include <Magnum/Math/Color.h>
 #include <Magnum/Math/Matrix3.h>
 
-#include <Magnum/Shaders/Flat.h>
-
 #include <Magnum/Mesh.h>
 
 #include <utility>
+
+#include "src/app/shaders/Shaders.hpp"
 
 namespace UnderStory {
 
@@ -44,7 +44,7 @@ namespace Helper {
 
 class Enlighter {
  public:
-    explicit Enlighter(Magnum::Shaders::Flat2D *shader) : _shader(shader) {
+    Enlighter() {
         // define indices
         Magnum::GL::Buffer indices, vertices;
         indices.setData({
@@ -73,14 +73,13 @@ class Enlighter {
     }
 
     void draw(const Magnum::Color4 &color) {
-        _shader
+        Shaders::flat
             ->setTransformationProjectionMatrix({})
             .setColor(color)
             .draw(_mesh);
     }
 
  private:
-    Magnum::Shaders::Flat2D* _shader;
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::TriangleFan};
 };
 
