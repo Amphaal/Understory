@@ -34,7 +34,7 @@
 #include "base/Container.hpp"
 #include "base/Toggleable.hpp"
 
-// #include "Scroller.hpp"
+#include "Scroller.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
 
@@ -46,19 +46,12 @@ using namespace Magnum::Math::Literals;
 
 class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, public Container<>, public Toggleable {
  public:
-    enum StickTo {
-        Left,
-        Top,
-        Right,
-        Bottom
-    };
-
     ScrollablePanel(const Magnum::Range2D* bounds, StickTo stickness = StickTo::Left, float thickness = .6f) :
         BaseUIPlayerHelper(&_matrix, .2f, &_defaultAnimationCallback),
         _bounds(bounds),
         _stickness(stickness),
-        _thickness(thickness)
-        // _scroller(&_matrix, _geometry) 
+        _thickness(thickness),
+        _scroller(&_matrix, &_geometry, stickness) 
         {
         // set collapsed state as default
         _definePanelPosition(_collapsedTransform());
@@ -83,7 +76,7 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, p
 
     void onMouseScroll(const Magnum::Vector2& scrollOffset) {
         // TODO
-        // _scroller.onMouseScroll(scrollOffset);
+        _scroller.onMouseScroll(scrollOffset);
     }
 
  private:
@@ -93,7 +86,7 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, p
     Magnum::Vector2 _pStart;
     Magnum::Vector2 _pEnd;
 
-    // Scroller _scroller;
+    Scroller _scroller;
 
     Magnum::Matrix3 _matrix;
 

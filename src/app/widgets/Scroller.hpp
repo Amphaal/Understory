@@ -43,9 +43,10 @@ using namespace Magnum::Math::Literals;
 
 class Scroller : public Hoverable<> {
  public:
-    Scroller(Magnum::Matrix3* panelMatrix, const Magnum::Range2D& panelSize) :
-        _panelSize(&panelSize),
-        _panelMatrix(panelMatrix) {
+    Scroller(const Magnum::Matrix3* panelMatrix, const Magnum::Range2D* panelBounds, StickTo stickness) :
+        _panelBounds(panelBounds),
+        _panelMatrix(panelMatrix),
+        _stickness(stickness) {
         //
         _setup();
     }
@@ -53,7 +54,7 @@ class Scroller : public Hoverable<> {
     void mayDraw() {
         //
         Shaders::flat
-            .setTransformationProjectionMatrix(*_panelMatrix)
+            ->setTransformationProjectionMatrix(*_panelMatrix)
             .setColor(0xFF0000_rgbf)
             .draw(_mesh);
     }
@@ -64,14 +65,25 @@ class Scroller : public Hoverable<> {
 
  private:
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
-    Magnum::Matrix3* _panelMatrix = nullptr;
-    const Magnum::Range2D* _panelSize = nullptr;
+    const Magnum::Matrix3* _panelMatrix = nullptr;
+    const Magnum::Range2D* _panelBounds = nullptr;
+    Magnum::Range2D _panelBounds;
+    StickTo _stickness;
 
     void _geometryUpdateRequested() final {
         _geometry = Magnum::Range2D {
             _panelMatrix->transformPoint(BL_START),
             _panelMatrix->transformPoint(BL_END)
         };
+    }
+
+    void _onHoverChanged(bool isHovered) final {
+        // apply changes
+        if(isHovered) {
+            app()->setCursor(Magnum::Platform::Sdl2Application::Cursor::Hand);
+        } else {
+            app()->setCursor(Magnum::Platform::Sdl2Application::Cursor::Arrow);
+        }
     }
 
     void _setup() {

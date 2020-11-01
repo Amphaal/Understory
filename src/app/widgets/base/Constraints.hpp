@@ -27,6 +27,13 @@ namespace UnderStory {
 
 namespace Widget {
 
+enum class StickTo {
+    Left,
+    Top,
+    Right,
+    Bottom
+};
+
 struct Constraints {
  public:
     explicit Constraints(const Magnum::Vector2i &windowSize) :
