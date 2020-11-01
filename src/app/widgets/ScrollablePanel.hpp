@@ -56,6 +56,9 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, p
         // set collapsed state as default
         _definePanelPosition(_collapsedTransform());
 
+        //
+        bind({&_scroller});
+
         // 
         _setup();
     }
@@ -65,7 +68,7 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, p
         if(!isToggled() && !isAnimationPlaying()) return;
 
         //
-        // _scroller.mayDraw();
+        _scroller.mayDraw();
 
         //
         Shaders::flat
@@ -77,6 +80,14 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, p
     void onMouseScroll(const Magnum::Vector2& scrollOffset) {
         // TODO
         _scroller.onMouseScroll(scrollOffset);
+    }
+
+    void _onHoverChanged(bool isHovered) final {
+        if(isHovered) {
+            _scroller.reveal();
+        } else {
+            _scroller.fade();
+        }
     }
 
  private:
@@ -164,7 +175,7 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, p
                 break;
         }
 
-        const Vertex vertices[4]{
+        const Vertex vertices[]{
             {_pStart},
             {{ _pEnd.x(),   _pStart.y() }},
             {_pEnd},

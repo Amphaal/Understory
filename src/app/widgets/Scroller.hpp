@@ -43,9 +43,15 @@ using namespace Magnum::Math::Literals;
 
 class Scroller : public Hoverable<> {
  public:
-    Scroller(const Magnum::Matrix3* panelMatrix, const Magnum::Range2D* panelBounds, StickTo stickness) :
+    Scroller(
+        const Magnum::Matrix3* panelMatrix, 
+        const Magnum::Range2D* panelBounds, 
+        const Magnum::Float* contentSize, 
+        StickTo stickness
+    ) :
         _panelBounds(panelBounds),
         _panelMatrix(panelMatrix),
+        _contentSize(contentSize),
         _stickness(stickness) {
         //
         _setup();
@@ -63,22 +69,34 @@ class Scroller : public Hoverable<> {
         // TODO
     }
 
+    void onContentSizeChange() {
+
+    }
+
+    void reveal() {
+
+    }
+
+    void fade() {
+
+    }
+
  private:
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
     const Magnum::Matrix3* _panelMatrix = nullptr;
     const Magnum::Range2D* _panelBounds = nullptr;
-    Magnum::Range2D _panelBounds;
+    const Magnum::Float* _contentSize = nullptr;
+    Magnum::Range2D _bounds;
     StickTo _stickness;
 
     void _geometryUpdateRequested() final {
         _geometry = Magnum::Range2D {
-            _panelMatrix->transformPoint(BL_START),
-            _panelMatrix->transformPoint(BL_END)
+            _panelMatrix->transformPoint(_bounds.min()),
+            _panelMatrix->transformPoint(_bounds.max())
         };
     }
 
     void _onHoverChanged(bool isHovered) final {
-        // apply changes
         if(isHovered) {
             app()->setCursor(Magnum::Platform::Sdl2Application::Cursor::Hand);
         } else {
@@ -99,10 +117,10 @@ class Scroller : public Hoverable<> {
             Magnum::Vector2 position;
         };
         const Vertex vertices[]{
-            {},
-            {},
-            {},
-            {}
+            {{-1.f, -1.f}},
+            {{ 1.f, -1.f}},
+            {{ 1.f,  1.f}},
+            {{-1.f,  1.f}}
         };
 
         // bind buffer
