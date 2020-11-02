@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <Corrade/Containers/StaticArray.h>
+
 #include <Magnum/GL/Buffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/Vector2.h>
@@ -57,11 +59,10 @@ class Scroller : public Hoverable<> {
         _setup();
     }
 
-    void mayDraw() {
+    void draw() {
         //
-        Shaders::flat
+        Shaders::color
             ->setTransformationProjectionMatrix(*_panelMatrix)
-            .setColor(0xFF0000_rgbf)
             .draw(_mesh);
     }
 
@@ -70,29 +71,48 @@ class Scroller : public Hoverable<> {
     }
 
     void onContentSizeChange() {
-
+        // TODO
     }
 
     void reveal() {
-
+        // TODO
     }
 
     void fade() {
-
+        // TODO
     }
 
  private:
-    Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
+    StickTo _stickness;
+    static constexpr float THICKNESS_PX = 20.f;
+    static constexpr float PADDING_PX = 10.f;
+
     const Magnum::Matrix3* _panelMatrix = nullptr;
     const Magnum::Range2D* _panelBounds = nullptr;
     const Magnum::Float* _contentSize = nullptr;
-    Magnum::Range2D _bounds;
-    StickTo _stickness;
+
+    Magnum::GL::Buffer _buffer;
+    Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
+
+    struct Vertex {
+        Magnum::Vector2 position;
+        Magnum::Color4 color;
+    };
+    Corrade::Containers::StaticArray<4, Vertex> _vertices;
+
+    virtual void onViewportChange(const Constraints &wh) {
+        _updateVertices(wh.pixelSize);
+        Hoverable<>::onViewportChange(wh);
+    }
 
     void _geometryUpdateRequested() final {
+        // update buffer
+        _buffer.setSubData(0, _vertices);
+
+        // update geometry
         _geometry = Magnum::Range2D {
-            _panelMatrix->transformPoint(_bounds.min()),
-            _panelMatrix->transformPoint(_bounds.max())
+            _panelMatrix->transformPoint(_vertices[0].position),
+            _panelMatrix->transformPoint(_vertices[2].position)
         };
     }
 
@@ -104,32 +124,76 @@ class Scroller : public Hoverable<> {
         }
     }
 
+    void _updateVertices(const Magnum::Vector2& pixelSize) {
+
+        // start and begin of scroller placeholder
+        auto pStart = _panelBounds->min();
+        auto pEnd = _panelBounds->max();
+
+        // define vertices from parent shape
+        switch (_stickness) {
+            case StickTo::Left :
+                pEnd.x() = pStart.x() + (pixelSize.x() * THICKNESS_PX);
+                break;
+            case StickTo::Top :
+                pStart.y() = pEnd.y() - (pixelSize.y() * THICKNESS_PX);
+                break;
+            case StickTo::Right :
+                pStart.x() = pEnd.x() - (pixelSize.x() * THICKNESS_PX);
+                break;
+            case StickTo::Bottom :
+                pEnd.y() = pStart.y() + (pixelSize.y() * THICKNESS_PX);
+                break;
+        }
+
+        // define shape and pad extremities
+        auto shape = Magnum::Range2D{pStart, pEnd};
+        shape = shape.padded({ 0.f, - (pixelSize.y() * PADDING_PX) });
+
+        // lateral padding
+        switch (_stickness) {
+            case StickTo::Left :
+                shape = shape.translated({PADDING_PX * pixelSize.x(), 0.f});
+                break;
+            case StickTo::Top :
+                shape = shape.translated({0.f, PADDING_PX * pixelSize.y()});
+                break;
+            case StickTo::Right :
+                shape = shape.translated({-PADDING_PX * pixelSize.x(), 0.f});
+                break;
+            case StickTo::Bottom :
+                shape = shape.translated({0.f, -PADDING_PX * pixelSize.y()});
+                break;
+        }
+
+        // placeholder
+        _vertices[0] = {shape.bottomLeft(),     0xFFFFFF66_rgbaf};
+        _vertices[1] = {shape.bottomRight(),    0xFFFFFF66_rgbaf};
+        _vertices[2] = {shape.topRight(),       0xFFFFFF66_rgbaf};
+        _vertices[3] = {shape.topLeft(),        0xFFFFFF66_rgbaf};
+    }
+
     void _setup() {
         // define indices
-        Magnum::GL::Buffer bIndices, bVertices;
+        Magnum::GL::Buffer bIndices;
         bIndices.setData({
+            // placeholder
             0, 1, 2,
             2, 3, 0
+            // // scroller
+            // 4, 5, 6,
+            // 6, 7, 4
         });
 
-        // define vertices
-        struct Vertex {
-            Magnum::Vector2 position;
-        };
-        const Vertex vertices[]{
-            {{-1.f, -1.f}},
-            {{ 1.f, -1.f}},
-            {{ 1.f,  1.f}},
-            {{-1.f,  1.f}}
-        };
-
         // bind buffer
-        bVertices.setData(vertices, Magnum::GL::BufferUsage::StaticDraw);
+        _buffer.setData(_vertices, Magnum::GL::BufferUsage::DynamicDraw);
 
         // define panel mesh
         _mesh.setCount(bIndices.size())
-                .setIndexBuffer (std::move(bIndices),  0, Magnum::MeshIndexType::UnsignedInt)
-                .addVertexBuffer(std::move(bVertices), 0, Magnum::Shaders::Flat2D::Position{});
+                .setIndexBuffer (std::move(bIndices),   0, Magnum::MeshIndexType::UnsignedInt)
+                .addVertexBuffer(_buffer,               0, Magnum::Shaders::Flat2D::Position{}, 
+                                                           Magnum::Shaders::Flat2D::Color4{}
+                );
     }
 };
 

@@ -21,6 +21,7 @@
 
 #include <Magnum/Shaders/DistanceFieldVector.h>
 #include <Magnum/Shaders/Flat.h>
+#include <Magnum/Shaders/VertexColor.h>
 
 namespace UnderStory {
 
@@ -28,6 +29,7 @@ class Shaders {
  public:
     static inline Magnum::Shaders::DistanceFieldVector2D* distanceField = nullptr;
     static inline Magnum::Shaders::Flat2D* flat = nullptr;
+    static inline Magnum::Shaders::VertexColor2D* color = nullptr;
 };
 
 }  // namespace UnderStory

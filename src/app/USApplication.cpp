@@ -42,6 +42,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     //
     Shaders::distanceField = &_distanceField;
     Shaders::flat = &_flat;
+    Shaders::color = &_color;
 
     //
     AppBound::setupApp(this);

@@ -43,6 +43,29 @@ class Shape {
     virtual void _geometryUpdateRequested() = 0;
 };
 
+struct SlaveShape {
+ public:
+    SlaveShape(const Magnum::Range2D* masterShape) : _masterShape(masterShape) {}
+
+    const Magnum::Range2D* masterShape() const {
+        return _masterShape;
+    }    
+
+    const Magnum::Range2D& shape() const {
+        return _shape;
+    }
+ 
+ protected:
+    void _updateShape(const Magnum::Range2D& shape) {
+        _shape = shape;
+    }
+
+ private:
+    const Magnum::Range2D* _masterShape;
+    Magnum::Range2D _shape;
+};
+
+
 }  // namespace Widget
 
 }  // namespace UnderStory

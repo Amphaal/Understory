@@ -44,14 +44,73 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, public Container<>, public Toggleable {
+class SP_SlaveShape : public SlaveShape {
  public:
-    ScrollablePanel(const Magnum::Range2D* bounds, StickTo stickness = StickTo::Left, float thickness = .6f) :
+    SP_SlaveShape(const Magnum::Range2D* bounds, StickTo stickness, float thickness) : SlaveShape(bounds), _stickness(stickness), _thickness(thickness) {
+        Magnum::Vector2 pStart, pEnd;
+        
+        // determine shape and position
+        switch (_stickness) {
+            case StickTo::Left :
+                pStart = masterShape()->min();
+                pEnd = {pStart.x() + _thickness, masterShape()->max().y()};
+                break;
+            case StickTo::Top :
+                pStart = {masterShape()->min().x(), masterShape()->max().y() - _thickness};
+                pEnd = masterShape()->max();
+                break;
+            case StickTo::Right :
+                pStart = {masterShape()->max().x() - _thickness, masterShape()->min().y()};
+                pEnd = masterShape()->max();
+                break;
+            case StickTo::Bottom :
+                pStart = masterShape()->min();
+                pEnd = {masterShape()->max().x(), pStart.y() + _thickness};
+                break;
+        }
+
+        // update shape
+        this->_updateShape({pStart, pEnd});
+    }
+ protected:
+    // scroller position within panel
+    const StickTo _scrollerStickyness() const {
+        switch (_stickness) {
+            case StickTo::Left :
+                return StickTo::Right;
+            case StickTo::Top :
+                return StickTo::Bottom;
+            case StickTo::Right :
+                return StickTo::Right;
+            case StickTo::Bottom :
+                return StickTo::Bottom;
+        }
+    }
+
+    const Magnum::Vector2 _collapsedTransform() const {
+        switch (_stickness) {
+            case StickTo::Left :
+                return {-_thickness, .0f};
+            case StickTo::Top :
+                return {.0f, _thickness};
+            case StickTo::Right :
+                return {_thickness, .0f};
+            case StickTo::Bottom :
+                return {.0f, -_thickness};
+        }
+    }
+
+ private:
+    StickTo _stickness;
+    float _thickness;
+};
+
+class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, public Container<>, public Toggleable, public SP_SlaveShape {
+ public:
+    ScrollablePanel(const Magnum::Range2D* masterShape, StickTo stickness = StickTo::Left, float thickness = .6f) :
         BaseUIPlayerHelper(&_matrix, .2f, &_defaultAnimationCallback),
-        _bounds(bounds),
-        _stickness(stickness),
-        _thickness(thickness),
-        _scroller(&_matrix, &_geometry, stickness) 
+        SP_SlaveShape(masterShape, stickness, thickness),
+        _scroller(&_matrix, &this->shape(), nullptr, this->_scrollerStickyness()) 
         {
         // set collapsed state as default
         _definePanelPosition(_collapsedTransform());
@@ -67,14 +126,14 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, p
         //
         if(!isToggled() && !isAnimationPlaying()) return;
 
-        //
-        _scroller.mayDraw();
-
-        //
+        // draw background
         Shaders::flat
             ->setTransformationProjectionMatrix(_matrix)
             .setColor(0x000000AA_rgbaf)
             .draw(_mesh);
+
+        // draw scroller
+        _scroller.draw();
     }
 
     void onMouseScroll(const Magnum::Vector2& scrollOffset) {
@@ -91,12 +150,6 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, p
     }
 
  private:
-    float _thickness;
-    StickTo _stickness;
-    const Magnum::Range2D* _bounds;
-    Magnum::Vector2 _pStart;
-    Magnum::Vector2 _pEnd;
-
     Scroller _scroller;
 
     Magnum::Matrix3 _matrix;
@@ -126,22 +179,9 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, p
 
     void _geometryUpdateRequested() final {
         _geometry = Magnum::Range2D {
-            _matrix.transformPoint(_pStart),
-            _matrix.transformPoint(_pEnd)
+            _matrix.transformPoint(shape().min()),
+            _matrix.transformPoint(shape().max())
         };
-    }
-
-    const Magnum::Vector2 _collapsedTransform() const {
-        switch (_stickness) {
-            case StickTo::Left :
-                return {-_thickness, .0f};
-            case StickTo::Top :
-                return {.0f, _thickness};
-            case StickTo::Right :
-                return {_thickness, .0f};
-            case StickTo::Bottom :
-                return {.0f, -_thickness};
-        }
     }
 
     void _definePanelPosition(const Magnum::Vector2 &pos) {
@@ -156,30 +196,11 @@ class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, p
             Magnum::Vector2 position;
         };
 
-        switch (_stickness) {
-            case StickTo::Left :
-                _pStart = _bounds->min();
-                _pEnd = {_pStart.x() + _thickness, _bounds->max().y()};
-                break;
-            case StickTo::Top :
-                _pStart = {_bounds->min().x(), _bounds->max().y() - _thickness};
-                _pEnd = _bounds->max();
-                break;
-            case StickTo::Right :
-                _pStart = {_bounds->max().x() - _thickness, _bounds->min().y()};
-                _pEnd = _bounds->max();
-                break;
-            case StickTo::Bottom :
-                _pStart = _bounds->min();
-                _pEnd = {_bounds->max().x(), _pStart.y() + _thickness};
-                break;
-        }
-
-        const Vertex vertices[]{
-            {_pStart},
-            {{ _pEnd.x(),   _pStart.y() }},
-            {_pEnd},
-            {{ _pStart.x(),  _pEnd.y() }}
+        const Vertex vertices[] {
+            {shape().bottomLeft()},
+            {shape().bottomRight()},
+            {shape().topRight()},
+            {shape().topLeft()}
         };
 
         // define indices

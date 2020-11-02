@@ -20,7 +20,6 @@
 #pragma once
 
 #include <Corrade/Containers/StaticArray.h>
-#include <Corrade/Containers/ArrayView.h>
 
 #include <Magnum/Math/Range.h>
 
