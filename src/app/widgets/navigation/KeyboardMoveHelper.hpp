@@ -23,7 +23,7 @@
 
 #include <Magnum/Platform/Sdl2Application.h>
 
-#include "../animation/BaseUIHelper.h"
+#include "../animation/MatrixAnimator.h"
 #include "KeyboardMovements.hpp"
 
 using Magnum::Platform::Sdl2Application;
@@ -32,9 +32,9 @@ namespace UnderStory {
 
 namespace Navigation {
 
-class KeyboardMoveHelper : public Animation::BaseUIHelper {
+class KeyboardMoveHelper : public Animation::MatrixAnimator {
  public:
-     KeyboardMoveHelper(Magnum::Matrix3* mainMatrix) : BaseUIHelper(mainMatrix) {}
+     KeyboardMoveHelper(Magnum::Matrix3* mainMatrix) : MatrixAnimator(mainMatrix) {}
 
     void stopAnim() override {
         _km = KeyboardMovements();

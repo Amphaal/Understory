@@ -21,7 +21,7 @@
 
 #include <Magnum/Platform/Sdl2Application.h>
 
-#include "../animation/BaseUIPlayerHelper.hpp"
+#include "../animation/PlayerMatrixAnimator.hpp"
 #include "MouseMovements.hpp"
 
 using Magnum::Platform::Sdl2Application;
@@ -30,12 +30,12 @@ namespace UnderStory {
 
 namespace Navigation {
 
-class MouseMoveHelper : public Animation::BaseUIPlayerHelper<> {
+class MouseMoveHelper : public Animation::PlayerMatrixAnimator<> {
  public:
-     MouseMoveHelper(Magnum::Matrix3* mainMatrix) : BaseUIPlayerHelper(mainMatrix, .2f) {}
+     MouseMoveHelper(Magnum::Matrix3* mainMatrix) : PlayerMatrixAnimator(mainMatrix, .2f) {}
 
     void stopAnim() final {
-       BaseUIPlayerHelper::stopAnim();
+       PlayerMatrixAnimator::stopAnim();
        if(_mm.isComputing()) _mm.resetAccelerationBuffer();
     }
 
@@ -68,7 +68,7 @@ class MouseMoveHelper : public Animation::BaseUIPlayerHelper<> {
 
     void _updateAnimationFromMoveVectorAndPlay(const Magnum::Vector2 &moveTr) {
         auto from = mainMatrix()->translation();
-        BaseUIPlayerHelper::_updateAnimationAndPlay(from, from + moveTr);
+        PlayerMatrixAnimator::_updateAnimationAndPlay(from, from + moveTr);
     }
 
     void _translateTo(const Magnum::Vector2 &translationVector) {

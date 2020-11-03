@@ -23,7 +23,7 @@
 
 #include <utility>
 
-#include "../animation/BaseUIPlayerHelper.hpp"
+#include "../animation/PlayerMatrixAnimator.hpp"
 #include "../base/Hoverable.hpp"
 #include "StaticText.hpp"
 
@@ -41,9 +41,9 @@ struct STHStateComponent {
     float haulerOpacity = .0f;
 };
 
-class ShortcutsText : public Animation::BaseUIPlayerHelper<STHStateComponent>, public Hoverable<> {
+class ShortcutsText : public Animation::PlayerMatrixAnimator<STHStateComponent>, public Hoverable<> {
  public:
-    ShortcutsText(StaticText&& associatedText) : BaseUIPlayerHelper(&_moveAnim, .2f, &_defaultAnimationCallback),
+    ShortcutsText(StaticText&& associatedText) : PlayerMatrixAnimator(&_moveAnim, .2f, &_defaultAnimationCallback),
         _text(std::move(associatedText)) {
          _updateColors();
     }

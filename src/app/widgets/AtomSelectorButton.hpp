@@ -28,7 +28,7 @@
 
 #include <utility>
 
-#include "animation/BaseUIPlayerHelper.hpp"
+#include "animation/PlayerMatrixAnimator.hpp"
 
 #include "base/Constraints.hpp"
 #include "base/Hoverable.hpp"
@@ -42,9 +42,9 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class AtomSelectorButton : public Animation::BaseUIPlayerHelper<>, public Hoverable<>, public Toggleable {
+class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hoverable<>, public Toggleable {
  public:
-    AtomSelectorButton() : BaseUIPlayerHelper(&_moveAnim, .2f, &_defaultAnimationCallback) {
+    AtomSelectorButton() : PlayerMatrixAnimator(&_moveAnim, .2f, &_defaultAnimationCallback) {
         _setup();
     }
 

@@ -23,7 +23,7 @@
 #include <Magnum/Animation/Easing.h>
 #include <Magnum/Animation/Player.h>
 
-#include "BaseUIHelper.h"
+#include "MatrixAnimator.h"
 #include "State.hpp"
 
 namespace UnderStory {
@@ -31,14 +31,14 @@ namespace UnderStory {
 namespace Animation {
 
 template<class T = Magnum::Vector2>
-class BaseUIPlayerHelper : public BaseUIHelper {
+class PlayerMatrixAnimator : public MatrixAnimator {
  public:
     //
     using AnimationCallback = void(*)(Magnum::Float, const float &, State<T>&);
 
     //
-    BaseUIPlayerHelper(Magnum::Matrix3* mainMatrix, float animDurationInSecs, AnimationCallback animCb = &_defaultAnimationCallback)
-    : BaseUIHelper(mainMatrix),
+    PlayerMatrixAnimator(Magnum::Matrix3* mainMatrix, float animDurationInSecs, AnimationCallback animCb = &_defaultAnimationCallback)
+    : MatrixAnimator(mainMatrix),
     _track({
         {.0f, .0f},
         {animDurationInSecs, 1.0f}
@@ -87,7 +87,7 @@ class BaseUIPlayerHelper : public BaseUIHelper {
     State<T> _animState;
 
     void _startAnim() final {
-        BaseUIHelper::_startAnim();
+        MatrixAnimator::_startAnim();
         _player.play(timeline()->previousFrameTime());
     }
 

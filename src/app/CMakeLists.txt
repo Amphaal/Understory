@@ -88,7 +88,7 @@ corrade_add_resource(appExec_RES
 )
 
 target_sources(appExec PRIVATE
-    widgets/animation/BaseUIHelper.cpp
+    widgets/animation/MatrixAnimator.cpp
     widgets/animation/TimelineBound.cpp
     USApplication.cpp
     ${appExec_RES}

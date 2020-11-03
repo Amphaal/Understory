@@ -97,6 +97,9 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
         _stWidget.reset(new Widget::ShortcutsText(std::move(text)));
     }
 
+    // enable stencil for scrolling 
+    Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::ScissorTest);
+
     /* Set up premultiplied alpha blending to avoid overlapping text characters to cut into each other */
     Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::Blending);
     Magnum::GL::Renderer::setBlendFunction(Magnum::GL::Renderer::BlendFunction::SourceAlpha, Magnum::GL::Renderer::BlendFunction::OneMinusSourceAlpha);

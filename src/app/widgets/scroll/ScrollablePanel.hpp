@@ -28,11 +28,11 @@
 
 #include <utility>
 
-#include "animation/BaseUIPlayerHelper.hpp"
+#include "../animation/PlayerMatrixAnimator.hpp"
 
-#include "base/Constraints.hpp"
-#include "base/Container.hpp"
-#include "base/Toggleable.hpp"
+#include "../base/Constraints.hpp"
+#include "../base/Container.hpp"
+#include "../base/Toggleable.hpp"
 
 #include "Scroller.hpp"
 
@@ -105,10 +105,10 @@ class SP_SlaveShape : public SlaveShape {
     float _thickness;
 };
 
-class ScrollablePanel : public Animation::BaseUIPlayerHelper<Magnum::Vector2>, public Container<>, public Toggleable, public SP_SlaveShape {
+class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container<>, public Toggleable, public SP_SlaveShape {
  public:
     ScrollablePanel(const Magnum::Range2D* masterShape, StickTo stickness = StickTo::Left, float thickness = .6f) :
-        BaseUIPlayerHelper(&_matrix, .2f, &_defaultAnimationCallback),
+        PlayerMatrixAnimator(&_matrix, .2f, &_defaultAnimationCallback),
         SP_SlaveShape(masterShape, stickness, thickness),
         _scroller(&_matrix, &this->shape(), nullptr, this->_scrollerStickyness()) 
         {

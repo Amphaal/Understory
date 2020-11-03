@@ -17,10 +17,10 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
-#include "BaseUIHelper.h"
+#include "MatrixAnimator.h"
 #include "TimelineBound.h"
 
-UnderStory::Animation::TimelineBound::TimelineBound(UnderStory::Animation::BaseUIHelper* animated) {
+UnderStory::Animation::TimelineBound::TimelineBound(UnderStory::Animation::MatrixAnimator* animated) {
     _animated.push_back(animated);
 }
 

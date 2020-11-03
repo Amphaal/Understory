@@ -19,37 +19,15 @@
 
 #pragma once
 
-#include <Magnum/Magnum.h>
-#include <Magnum/Timeline.h>
-#include <Magnum/Math/Matrix3.h>
-
-#include <vector>
-
-#include "TimelineBound.h"
-
 namespace UnderStory {
 
-namespace Animation {
+namespace Widget {
 
-class BaseUIHelper : public TimelineBound {
+class ScrollableContent {
  public:
-    BaseUIHelper(Magnum::Matrix3* mainMatrix);
-
-    virtual void stopAnim() = 0;
-    virtual void advance() = 0;
-
-    void setExcludedWhenPlaying(std::initializer_list<BaseUIHelper*> list);
-
- protected:
-    Magnum::Matrix3* _mainMatrix = nullptr;
-
-    // must be overriden and reused
-    virtual void _startAnim();
-
- private:
-    std::vector<BaseUIHelper*> _excluded;
+    ScrollableContent();
 };
 
-}  // namespace Animation
+}  // namespace Widget
 
 }  // namespace UnderStory

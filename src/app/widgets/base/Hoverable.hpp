@@ -38,6 +38,11 @@ class Hoverable : public Shape<T>, public AppBound {
     virtual void checkIfMouseOver(const Magnum::Vector2 &cursorPos) {
         // prevent updating if state did not change
         auto hovered = this->_geometry.contains(cursorPos);
+        
+        // check subelements hovering
+        _mouseIsOver(cursorPos);
+
+        // dont go further if state did not change        
         if(_isHovered == hovered) return;
 
         // update state
@@ -49,6 +54,7 @@ class Hoverable : public Shape<T>, public AppBound {
 
  protected:
     virtual void _onHoverChanged(bool isHovered) {}
+    virtual void _mouseIsOver(const Magnum::Vector2 &cursorPos) {}
 
  private:
     bool _isHovered = false;

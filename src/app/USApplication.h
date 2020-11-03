@@ -52,7 +52,7 @@
 #include "widgets/navigation/MouseState.hpp"
 
 #include "widgets/AtomSelectorButton.hpp"
-#include "widgets/ScrollablePanel.hpp"
+#include "widgets/scroll/ScrollablePanel.hpp"
 
 #include "widgets/helpers/SelectionRectangle.hpp"
 #include "widgets/helpers/Grid.hpp"

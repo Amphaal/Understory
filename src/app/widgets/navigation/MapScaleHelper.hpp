@@ -23,7 +23,7 @@
 
 #include <utility>
 
-#include "../animation/BaseUIPlayerHelper.hpp"
+#include "../animation/PlayerMatrixAnimator.hpp"
 
 using Magnum::Platform::Sdl2Application;
 
@@ -36,10 +36,10 @@ struct ScrollAnimStateComponent {
     Magnum::Vector2 scaling;
 };
 
-class MapScaleHelper : public Animation::BaseUIPlayerHelper<ScrollAnimStateComponent> {
+class MapScaleHelper : public Animation::PlayerMatrixAnimator<ScrollAnimStateComponent> {
  public:
     explicit MapScaleHelper(Magnum::Matrix3* mainMatrix)
-    : BaseUIPlayerHelper(mainMatrix, SMOOTHING_AS_SECONDS, &_defaultAnimationCallback) {}
+    : PlayerMatrixAnimator(mainMatrix, SMOOTHING_AS_SECONDS, &_defaultAnimationCallback) {}
 
     void keyPressEvent(Sdl2Application::KeyEvent& event) {
         switch (event.key()) {

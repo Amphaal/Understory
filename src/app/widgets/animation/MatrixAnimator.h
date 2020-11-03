@@ -17,15 +17,39 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
-#include "BaseUIHelper.h"
+#pragma once
 
-UnderStory::Animation::BaseUIHelper::BaseUIHelper(Magnum::Matrix3* mainMatrix) :
- Animation::TimelineBound(this), _mainMatrix(mainMatrix) {}
+#include <Magnum/Magnum.h>
+#include <Magnum/Timeline.h>
+#include <Magnum/Math/Matrix3.h>
 
-void UnderStory::Animation::BaseUIHelper::setExcludedWhenPlaying(std::initializer_list<BaseUIHelper*> list) {
-    _excluded = list;
-}
+#include <vector>
 
-void UnderStory::Animation::BaseUIHelper::_startAnim() {
-    for(auto &excluded : _excluded) excluded->stopAnim();
-}
+#include "TimelineBound.h"
+
+namespace UnderStory {
+
+namespace Animation {
+
+class MatrixAnimator : public TimelineBound {
+ public:
+    MatrixAnimator(Magnum::Matrix3* mainMatrix);
+
+    virtual void stopAnim() = 0;
+    virtual void advance() = 0;
+
+    void setExcludedWhenPlaying(std::initializer_list<MatrixAnimator*> list);
+
+ protected:
+    Magnum::Matrix3* _mainMatrix = nullptr;
+
+    // must be overriden and reused
+    virtual void _startAnim();
+
+ private:
+    std::vector<MatrixAnimator*> _excluded;
+};
+
+}  // namespace Animation
+
+}  // namespace UnderStory

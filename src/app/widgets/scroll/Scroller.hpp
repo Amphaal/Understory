@@ -30,12 +30,14 @@
 
 #include <utility>
 
-#include "animation/BaseUIPlayerHelper.hpp"
+#include "../animation/PlayerMatrixAnimator.hpp"
 
-#include "base/Constraints.hpp"
-#include "base/Hoverable.hpp"
+#include "../base/Constraints.hpp"
+#include "../base/Hoverable.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
+
+#include "ScrollableContent.hpp"
 
 namespace UnderStory {
 
@@ -48,12 +50,12 @@ class Scroller : public Hoverable<> {
     Scroller(
         const Magnum::Matrix3* panelMatrix, 
         const Magnum::Range2D* panelBounds, 
-        const Magnum::Float* contentSize, 
+        const ScrollableContent* content, 
         StickTo stickness
     ) :
         _panelBounds(panelBounds),
         _panelMatrix(panelMatrix),
-        _contentSize(contentSize),
+        _content(content),
         _stickness(stickness) {
         //
         _setup();
@@ -89,16 +91,20 @@ class Scroller : public Hoverable<> {
 
     const Magnum::Matrix3* _panelMatrix = nullptr;
     const Magnum::Range2D* _panelBounds = nullptr;
-    const Magnum::Float* _contentSize = nullptr;
+
+    const ScrollableContent* _content = nullptr;
 
     Magnum::GL::Buffer _buffer;
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
+
+    bool _isScrollerHovered = false;
+    Magnum::Range2D _scrollerPos;
 
     struct Vertex {
         Magnum::Vector2 position;
         Magnum::Color4 color;
     };
-    Corrade::Containers::StaticArray<4, Vertex> _vertices;
+    Corrade::Containers::StaticArray<8, Vertex> _vertices;
 
     virtual void onViewportChange(const Constraints &wh) {
         _updateVertices(wh.pixelSize);
@@ -116,61 +122,82 @@ class Scroller : public Hoverable<> {
         };
     }
 
-    void _onHoverChanged(bool isHovered) final {
-        if(isHovered) {
-            app()->setCursor(Magnum::Platform::Sdl2Application::Cursor::Hand);
-        } else {
-            app()->setCursor(Magnum::Platform::Sdl2Application::Cursor::Arrow);
-        }
+    // if mouse is over placeholder
+    void _mouseIsOver(const Magnum::Vector2 &cursorPos) final {
+        // check if over scroller
+        auto isScrollerHovered = _scrollerPos.contains(cursorPos);
+        if(isScrollerHovered == _isScrollerHovered) return;
+
+        // change state
+        _isScrollerHovered = isScrollerHovered;
+        _updateScrollerState();
+
+        // update buffer
+        _buffer.setSubData(0, _vertices);
     }
 
     void _updateVertices(const Magnum::Vector2& pixelSize) {
-
         // start and begin of scroller placeholder
-        auto pStart = _panelBounds->min();
-        auto pEnd = _panelBounds->max();
+        auto phStart = _panelBounds->min();
+        auto phEnd = _panelBounds->max();
 
-        // define vertices from parent shape
+        // define vertices from parent phShape
         switch (_stickness) {
             case StickTo::Left :
-                pEnd.x() = pStart.x() + (pixelSize.x() * THICKNESS_PX);
+                phEnd.x() = phStart.x() + (pixelSize.x() * THICKNESS_PX);
                 break;
             case StickTo::Top :
-                pStart.y() = pEnd.y() - (pixelSize.y() * THICKNESS_PX);
+                phStart.y() = phEnd.y() - (pixelSize.y() * THICKNESS_PX);
                 break;
             case StickTo::Right :
-                pStart.x() = pEnd.x() - (pixelSize.x() * THICKNESS_PX);
+                phStart.x() = phEnd.x() - (pixelSize.x() * THICKNESS_PX);
                 break;
             case StickTo::Bottom :
-                pEnd.y() = pStart.y() + (pixelSize.y() * THICKNESS_PX);
+                phEnd.y() = phStart.y() + (pixelSize.y() * THICKNESS_PX);
                 break;
         }
 
-        // define shape and pad extremities
-        auto shape = Magnum::Range2D{pStart, pEnd};
-        shape = shape.padded({ 0.f, - (pixelSize.y() * PADDING_PX) });
+        // define phShape and pad extremities
+        auto phShape = Magnum::Range2D{phStart, phEnd};
+        phShape = phShape.padded({ 0.f, - (pixelSize.y() * PADDING_PX) });
 
         // lateral padding
         switch (_stickness) {
             case StickTo::Left :
-                shape = shape.translated({PADDING_PX * pixelSize.x(), 0.f});
+                phShape = phShape.translated({PADDING_PX * pixelSize.x(), 0.f});
                 break;
             case StickTo::Top :
-                shape = shape.translated({0.f, PADDING_PX * pixelSize.y()});
+                phShape = phShape.translated({0.f, PADDING_PX * pixelSize.y()});
                 break;
             case StickTo::Right :
-                shape = shape.translated({-PADDING_PX * pixelSize.x(), 0.f});
+                phShape = phShape.translated({-PADDING_PX * pixelSize.x(), 0.f});
                 break;
             case StickTo::Bottom :
-                shape = shape.translated({0.f, -PADDING_PX * pixelSize.y()});
+                phShape = phShape.translated({0.f, -PADDING_PX * pixelSize.y()});
                 break;
         }
 
         // placeholder
-        _vertices[0] = {shape.bottomLeft(),     0xFFFFFF66_rgbaf};
-        _vertices[1] = {shape.bottomRight(),    0xFFFFFF66_rgbaf};
-        _vertices[2] = {shape.topRight(),       0xFFFFFF66_rgbaf};
-        _vertices[3] = {shape.topLeft(),        0xFFFFFF66_rgbaf};
+        _vertices[0] = {phShape.bottomLeft(),     0xFFFFFF66_rgbaf};
+        _vertices[1] = {phShape.bottomRight(),    0xFFFFFF66_rgbaf};
+        _vertices[2] = {phShape.topRight(),       0xFFFFFF66_rgbaf};
+        _vertices[3] = {phShape.topLeft(),        0xFFFFFF66_rgbaf};
+
+        // scroller
+        // _vertices[4].position = phShape.bottomLeft();
+        // _vertices[5].position = phShape.bottomRight();
+        // _vertices[6].position = phShape.topRight();
+        // _vertices[7].position = phShape.topLeft();
+        // _scrollerPos = { _vertices[4].position, _vertices[6].position };
+        // _updateScrollerState();
+    }
+
+    void _updateScrollerState() {
+        Magnum::Color4 color = _isScrollerHovered ? 0xFFFFFFFF_rgbaf : 0xCCCCCCFF_rgbaf;
+        _vertices[4].color = color;
+        _vertices[5].color = color;
+        _vertices[6].color = color;
+        _vertices[7].color = color;
     }
 
     void _setup() {
@@ -179,10 +206,10 @@ class Scroller : public Hoverable<> {
         bIndices.setData({
             // placeholder
             0, 1, 2,
-            2, 3, 0
-            // // scroller
-            // 4, 5, 6,
-            // 6, 7, 4
+            2, 3, 0,
+            // scroller
+            4, 5, 6,
+            6, 7, 4
         });
 
         // bind buffer
