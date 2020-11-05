@@ -41,7 +41,7 @@ class Container : public Hoverable<T> {
     }
 
     virtual void onViewportChange(const Constraints &wh) {
-        Shape<T>::onViewportChange(wh);
+        Hoverable<T>::onViewportChange(wh);
 
         for(auto innerShape : _innerShapes) {
             innerShape->onViewportChange(wh);
@@ -93,6 +93,25 @@ class Container : public Hoverable<T> {
         if(_latestHoveredShape == hoverable) return;
         _latestHoveredShape = hoverable;
         // Magnum::Debug{} << _latestHoveredShape;
+    }
+};
+
+// Container with static shape and geometry
+class AppContainer : public Container<Magnum::Range2D> {
+ public:
+    AppContainer() {
+        Magnum::Range2D bounds {
+            {-1.f, -1.f},
+            {1.f, 1.f}
+        };
+
+        _updateShape(bounds);
+        _updateGeometry(bounds);
+    }
+
+ private:
+    void _geometryUpdateRequested() final {
+        // nothing special to do, geometry is hard-set and never changes
     }
 };
 

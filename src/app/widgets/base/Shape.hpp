@@ -32,39 +32,53 @@ namespace Widget {
 template<class T = Magnum::Range2D>
 class Shape {
  public:
+    // no constructor, since shapes are set within screen constraints
     Shape() {}
 
+    // defaults to update its geometry, but might require
     virtual void onViewportChange(const Constraints &wh) {
+        _shapeUpdateRequested(wh);  // if shape is responsive 
         _geometryUpdateRequested();
     }
 
- protected:
-    T _geometry;
-    virtual void _geometryUpdateRequested() = 0;
-};
-
-struct SlaveShape {
- public:
-    SlaveShape(const Magnum::Range2D* masterShape) : _masterShape(masterShape) {}
-
-    const Magnum::Range2D* masterShape() const {
-        return _masterShape;
-    }    
-
-    const Magnum::Range2D& shape() const {
+    // inplaced shape (eg within OpenGL original coordinates, mostly {-1.f} <> {1.f})
+    const T& shape() const {
         return _shape;
     }
- 
+
+    // shape with matrix transforms applied, allows to determine current position
+    const T& geometry() const {
+        return _geometry;
+    }
+
  protected:
-    void _updateShape(const Magnum::Range2D& shape) {
+    virtual void _geometryUpdateRequested() = 0;
+    virtual void _shapeUpdateRequested(const Constraints &wh) {};
+
+    void _updateShape(const T& shape) {
         _shape = shape;
+    }
+    void _updateGeometry(const T& geometry) {
+        _geometry = geometry;
     }
 
  private:
-    const Magnum::Range2D* _masterShape;
-    Magnum::Range2D _shape;
+    T _geometry;
+    T _shape;
 };
 
+template<class T = Magnum::Range2D>
+class Morphable {
+ public:
+    Morphable(const Shape<T>* parent) : _parent(parent) {}
+
+    const Shape<T>* parent() const {
+        return _parent;
+    }
+
+ private:
+    const Shape<T>* _parent;
+};
 
 }  // namespace Widget
 

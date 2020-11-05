@@ -35,7 +35,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _kmh(&_transformationWorld),
     _selectionRect(_rs),
     _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT),
-    _atomSelectorPnl(&BOUNDS) {
+    _atomSelectorPnl(this) {
     // set minimum size
     SDL_SetWindowMinimumSize(this->window(), MINIMUM_WIDTH, MINIMUM_HEIGHT);
 
@@ -137,12 +137,8 @@ void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
         );
 
     //
-    Container<>::onViewportChange(wh);
+    AppContainer::onViewportChange(wh);
     _selectionRect.onViewportChange();
-}
-
-void UnderStory::USApplication::_geometryUpdateRequested() {
-    this->_geometry = BOUNDS;
 }
 
 void UnderStory::USApplication::drawEvent() {

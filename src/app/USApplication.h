@@ -69,7 +69,7 @@
 
 namespace UnderStory {
 
-class USApplication : public Magnum::Platform::Application, public Widget::Container<> {
+class USApplication : public Magnum::Platform::Application, public Widget::AppContainer {
  public:
     explicit USApplication(const Arguments& arguments);
 
@@ -107,17 +107,12 @@ class USApplication : public Magnum::Platform::Application, public Widget::Conta
     static constexpr Magnum::Color4 DEBUG_TEXT_COLOR {1.f, .7f, .3f};
     static constexpr int MINIMUM_HEIGHT = 600;
     static constexpr int MINIMUM_WIDTH = 800;
-    static constexpr Magnum::Range2D BOUNDS {
-        {-1.f, -1.f},
-        {1.f, 1.f}
-    };
 
     // mouse state
     Navigation::MouseState _mouseState {DOUBLE_CLICK_DELAY_MS};
 
     // mouse lock context
     Widget::Hoverable<>* _lockContext = nullptr;
-    void _geometryUpdateRequested() final;
 
     Magnum::Utility::Resource _rs;
     Magnum::Timeline _timeline;

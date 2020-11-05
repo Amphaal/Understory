@@ -35,6 +35,7 @@
 #include "../base/Toggleable.hpp"
 
 #include "Scroller.hpp"
+#include "ScrollableContent.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
 
@@ -44,79 +45,20 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class SP_SlaveShape : public SlaveShape {
+class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container<>, public Morphable<>, public Toggleable {
  public:
-    SP_SlaveShape(const Magnum::Range2D* bounds, StickTo stickness, float thickness) : SlaveShape(bounds), _stickness(stickness), _thickness(thickness) {
-        Magnum::Vector2 pStart, pEnd;
-        
-        // determine shape and position
-        switch (_stickness) {
-            case StickTo::Left :
-                pStart = masterShape()->min();
-                pEnd = {pStart.x() + _thickness, masterShape()->max().y()};
-                break;
-            case StickTo::Top :
-                pStart = {masterShape()->min().x(), masterShape()->max().y() - _thickness};
-                pEnd = masterShape()->max();
-                break;
-            case StickTo::Right :
-                pStart = {masterShape()->max().x() - _thickness, masterShape()->min().y()};
-                pEnd = masterShape()->max();
-                break;
-            case StickTo::Bottom :
-                pStart = masterShape()->min();
-                pEnd = {masterShape()->max().x(), pStart.y() + _thickness};
-                break;
-        }
-
-        // update shape
-        this->_updateShape({pStart, pEnd});
-    }
- protected:
-    // scroller position within panel
-    const StickTo _scrollerStickyness() const {
-        switch (_stickness) {
-            case StickTo::Left :
-                return StickTo::Right;
-            case StickTo::Top :
-                return StickTo::Bottom;
-            case StickTo::Right :
-                return StickTo::Right;
-            case StickTo::Bottom :
-                return StickTo::Bottom;
-        }
-    }
-
-    const Magnum::Vector2 _collapsedTransform() const {
-        switch (_stickness) {
-            case StickTo::Left :
-                return {-_thickness, .0f};
-            case StickTo::Top :
-                return {.0f, _thickness};
-            case StickTo::Right :
-                return {_thickness, .0f};
-            case StickTo::Bottom :
-                return {.0f, -_thickness};
-        }
-    }
-
- private:
-    StickTo _stickness;
-    float _thickness;
-};
-
-class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container<>, public Toggleable, public SP_SlaveShape {
- public:
-    ScrollablePanel(const Magnum::Range2D* masterShape, StickTo stickness = StickTo::Left, float thickness = .6f) :
+    ScrollablePanel(const Shape<>* parent, StickTo stickness = StickTo::Left, float thickness = .6f) :
         PlayerMatrixAnimator(&_matrix, .2f, &_defaultAnimationCallback),
-        SP_SlaveShape(masterShape, stickness, thickness),
-        _scroller(&_matrix, &this->shape(), nullptr, this->_scrollerStickyness()) 
+        Morphable(parent),
+        _stickness(stickness),
+        _thickness(thickness),
+        _scroller(this, &_matrix, &_content, _scrollerStickyness()) 
         {
         // set collapsed state as default
         _definePanelPosition(_collapsedTransform());
 
         //
-        bind({&_scroller});
+        bind({&_scroller, &_content});
 
         // 
         _setup();
@@ -150,7 +92,11 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
     }
 
  private:
+    StickTo _stickness;
+    float _thickness;
+
     Scroller _scroller;
+    ScrollableContent _content;
 
     Magnum::Matrix3 _matrix;
 
@@ -178,10 +124,10 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
     }
 
     void _geometryUpdateRequested() final {
-        _geometry = Magnum::Range2D {
+        _updateGeometry(Magnum::Range2D {
             _matrix.transformPoint(shape().min()),
             _matrix.transformPoint(shape().max())
-        };
+        });
     }
 
     void _definePanelPosition(const Magnum::Vector2 &pos) {
@@ -190,7 +136,63 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
         );
     }
 
+    // scroller position within panel
+    const StickTo _scrollerStickyness() const {
+        switch (_stickness) {
+            case StickTo::Left :
+                return StickTo::Right;
+            case StickTo::Top :
+                return StickTo::Bottom;
+            case StickTo::Right :
+                return StickTo::Right;
+            case StickTo::Bottom :
+                return StickTo::Bottom;
+        }
+    }
+
+    const Magnum::Vector2 _collapsedTransform() const {
+        switch (_stickness) {
+            case StickTo::Left :
+                return {-_thickness, .0f};
+            case StickTo::Top :
+                return {.0f, _thickness};
+            case StickTo::Right :
+                return {_thickness, .0f};
+            case StickTo::Bottom :
+                return {.0f, -_thickness};
+        }
+    }
+
     void _setup() {
+        // as shape is immuable, set it once
+        {
+            Magnum::Vector2 pStart, pEnd;
+            auto &masterShape = this->parent()->shape();
+
+            // determine shape and position
+            switch (_stickness) {
+                case StickTo::Left :
+                    pStart = masterShape.min();
+                    pEnd = {pStart.x() + _thickness, masterShape.max().y()};
+                    break;
+                case StickTo::Top :
+                    pStart = {masterShape.min().x(), masterShape.max().y() - _thickness};
+                    pEnd = masterShape.max();
+                    break;
+                case StickTo::Right :
+                    pStart = {masterShape.max().x() - _thickness, masterShape.min().y()};
+                    pEnd = masterShape.max();
+                    break;
+                case StickTo::Bottom :
+                    pStart = masterShape.min();
+                    pEnd = {masterShape.max().x(), pStart.y() + _thickness};
+                    break;
+            }
+
+            // update shape
+            this->_updateShape({pStart, pEnd});
+        }
+
         // define vertices
         struct Vertex {
             Magnum::Vector2 position;

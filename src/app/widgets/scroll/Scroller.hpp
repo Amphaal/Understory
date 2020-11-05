@@ -45,15 +45,14 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class Scroller : public Hoverable<> {
+class Scroller : public Hoverable<>, public Morphable<> {
  public:
     Scroller(
+        const Shape<>* parent,
         const Magnum::Matrix3* panelMatrix, 
-        const Magnum::Range2D* panelBounds, 
         const ScrollableContent* content, 
         StickTo stickness
-    ) :
-        _panelBounds(panelBounds),
+    ) : Morphable(parent),
         _panelMatrix(panelMatrix),
         _content(content),
         _stickness(stickness) {
@@ -90,8 +89,6 @@ class Scroller : public Hoverable<> {
     static constexpr float PADDING_PX = 10.f;
 
     const Magnum::Matrix3* _panelMatrix = nullptr;
-    const Magnum::Range2D* _panelBounds = nullptr;
-
     const ScrollableContent* _content = nullptr;
 
     Magnum::GL::Buffer _buffer;
@@ -106,20 +103,15 @@ class Scroller : public Hoverable<> {
     };
     Corrade::Containers::StaticArray<8, Vertex> _vertices;
 
-    virtual void onViewportChange(const Constraints &wh) {
-        _updateVertices(wh.pixelSize);
-        Hoverable<>::onViewportChange(wh);
-    }
-
     void _geometryUpdateRequested() final {
         // update buffer
         _buffer.setSubData(0, _vertices);
 
         // update geometry
-        _geometry = Magnum::Range2D {
+        _updateGeometry(Magnum::Range2D {
             _panelMatrix->transformPoint(_vertices[0].position),
             _panelMatrix->transformPoint(_vertices[2].position)
-        };
+        });
     }
 
     // if mouse is over placeholder
@@ -136,10 +128,11 @@ class Scroller : public Hoverable<> {
         _buffer.setSubData(0, _vertices);
     }
 
-    void _updateVertices(const Magnum::Vector2& pixelSize) {
+    void _shapeUpdateRequested(const Constraints &wh) final {
         // start and begin of scroller placeholder
-        auto phStart = _panelBounds->min();
-        auto phEnd = _panelBounds->max();
+        auto &pixelSize = wh.pixelSize;
+        auto phStart = parent()->shape().min();
+        auto phEnd = parent()->shape().max();
 
         // define vertices from parent phShape
         switch (_stickness) {
@@ -184,12 +177,12 @@ class Scroller : public Hoverable<> {
         _vertices[3] = {phShape.topLeft(),        0xFFFFFF66_rgbaf};
 
         // scroller
-        // _vertices[4].position = phShape.bottomLeft();
-        // _vertices[5].position = phShape.bottomRight();
-        // _vertices[6].position = phShape.topRight();
-        // _vertices[7].position = phShape.topLeft();
-        // _scrollerPos = { _vertices[4].position, _vertices[6].position };
-        // _updateScrollerState();
+        _vertices[4].position = phShape.bottomLeft();
+        _vertices[5].position = phShape.bottomRight();
+        _vertices[6].position = phShape.topRight();
+        _vertices[7].position = phShape.topLeft();
+        _scrollerPos = { _vertices[4].position, _vertices[6].position };
+        _updateScrollerState();
     }
 
     void _updateScrollerState() {

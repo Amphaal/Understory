@@ -107,7 +107,11 @@ class ShortcutsText : public Animation::PlayerMatrixAnimator<STHStateComponent>,
 
     void _geometryUpdateRequested() final {
         _matrix = _responsiveMatrix * _moveAnim;
-        _geometry = _text.geometryFromMatrix(_matrix);
+
+        //
+        _updateGeometry(
+            _text.geometryFromMatrix(_matrix)
+        );
     }
 
     void _onHoverChanged(bool isHovered) final {

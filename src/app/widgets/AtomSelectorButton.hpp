@@ -125,10 +125,10 @@ class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hove
     void _geometryUpdateRequested() final {
         _matrix = _responsiveMatrix * _moveAnim;
 
-        _geometry = Magnum::Range2D {
+        _updateGeometry(Magnum::Range2D {
             _matrix.transformPoint({-1.f, -1.f}),
             _matrix.transformPoint({1.f, 1.f})
-        };
+        });
     }
 
     void _setup() {

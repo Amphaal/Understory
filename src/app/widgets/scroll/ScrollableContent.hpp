@@ -19,13 +19,20 @@
 
 #pragma once
 
+#include "../base/Hoverable.hpp"
+
 namespace UnderStory {
 
 namespace Widget {
 
-class ScrollableContent {
+class ScrollableContent : public Hoverable<> {
  public:
-    ScrollableContent();
+    ScrollableContent() { };
+ 
+ private:
+    void _geometryUpdateRequested() final {
+        // TODO
+    }
 };
 
 }  // namespace Widget
