@@ -29,21 +29,23 @@ namespace UnderStory {
 namespace Widget {
 
 // TODO(amphaal) when contained is moving out of cursor (animated / deleted), refresh hover
-template<class T = Magnum::Range2D>
-class Container : public Hoverable<T> {
+class Container : public Hoverable {
  public:
     explicit Container() {}
 
-    void bind(std::initializer_list<UnderStory::Widget::Hoverable<T>*> prioritized) {
-        _innerShapes = Corrade::Containers::Array<Hoverable<T>*>();
+    void bind(std::initializer_list<UnderStory::Widget::Hoverable*> prioritized) {
+        _innerShapes = Corrade::Containers::Array<Hoverable*>();
         Magnum::Containers::arrayReserve(_innerShapes, prioritized.size());
         Magnum::Containers::arrayAppend(_innerShapes, prioritized);
     }
 
     virtual void onViewportChange(const Constraints &wh) {
-        Hoverable<T>::onViewportChange(wh);
+        Hoverable::onViewportChange(wh);
+
+        auto shapeConstraints = this->shape();
 
         for(auto innerShape : _innerShapes) {
+            innerShape->_updateShapeFromConstraints(wh, shapeConstraints);
             innerShape->onViewportChange(wh);
         }
     }
@@ -55,7 +57,7 @@ class Container : public Hoverable<T> {
        }
        
        // check if container is hovered
-       Hoverable<T>::checkIfMouseOver(cursorPos);
+       Hoverable::checkIfMouseOver(cursorPos);
        if(!this->isHovered()) {
            // if not, reset state and return
            _updateLatestHoveredShape(nullptr);
@@ -81,15 +83,15 @@ class Container : public Hoverable<T> {
         _updateLatestHoveredShape(this);
     }
 
-    Hoverable<T>* latestHovered() const {
+    Hoverable* latestHovered() const {
         return _latestHoveredShape;
     }
 
  private:
-    Corrade::Containers::Array<Hoverable<T>*> _innerShapes;
-    Hoverable<T>* _latestHoveredShape = nullptr;
+    Corrade::Containers::Array<Hoverable*> _innerShapes;
+    Hoverable* _latestHoveredShape = nullptr;
 
-    void _updateLatestHoveredShape(Hoverable<T>* hoverable) {
+    void _updateLatestHoveredShape(Hoverable* hoverable) {
         if(_latestHoveredShape == hoverable) return;
         _latestHoveredShape = hoverable;
         // Magnum::Debug{} << _latestHoveredShape;
@@ -97,7 +99,7 @@ class Container : public Hoverable<T> {
 };
 
 // Container with static shape and geometry
-class AppContainer : public Container<Magnum::Range2D> {
+class AppContainer : public Container {
  public:
     AppContainer() {
         Magnum::Range2D bounds {

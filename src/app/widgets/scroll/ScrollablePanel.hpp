@@ -45,9 +45,9 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container<>, public Morphable<>, public Toggleable {
+class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container, public Morphable, public Toggleable {
  public:
-    ScrollablePanel(const Shape<>* parent, StickTo stickness = StickTo::Left, float thickness = .6f) :
+    ScrollablePanel(const Shape* parent, StickTo stickness = StickTo::Left, float thickness = .6f) :
         PlayerMatrixAnimator(&_matrix, .2f, &_defaultAnimationCallback),
         Morphable(parent),
         _stickness(stickness),

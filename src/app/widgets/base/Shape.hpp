@@ -29,55 +29,57 @@ namespace UnderStory {
 
 namespace Widget {
 
-template<class T = Magnum::Range2D>
+class Container;
+
 class Shape {
  public:
     // no constructor, since shapes are set within screen constraints
     Shape() {}
+    friend class Container;
 
     // defaults to update its geometry, but might require
     virtual void onViewportChange(const Constraints &wh) {
-        _shapeUpdateRequested(wh);  // if shape is responsive 
         _geometryUpdateRequested();
     }
 
     // inplaced shape (eg within OpenGL original coordinates, mostly {-1.f} <> {1.f})
-    const T& shape() const {
+    const Magnum::Range2D& shape() const {
         return _shape;
     }
 
     // shape with matrix transforms applied, allows to determine current position
-    const T& geometry() const {
+    const Magnum::Range2D& geometry() const {
         return _geometry;
     }
 
  protected:
     virtual void _geometryUpdateRequested() = 0;
-    virtual void _shapeUpdateRequested(const Constraints &wh) {};
 
-    void _updateShape(const T& shape) {
+    void _updateShape(const Magnum::Range2D& shape) {
         _shape = shape;
     }
-    void _updateGeometry(const T& geometry) {
+    void _updateGeometry(const Magnum::Range2D& geometry) {
         _geometry = geometry;
     }
 
+    // can be called from Container, must update "shapeAllowedSpace" with remaining space
+    virtual void _updateShapeFromConstraints(const Constraints &wh, Magnum::Range2D& shapeAllowedSpace) {};
+
  private:
-    T _geometry;
-    T _shape;
+    Magnum::Range2D _geometry;
+    Magnum::Range2D _shape;
 };
 
-template<class T = Magnum::Range2D>
 class Morphable {
  public:
-    Morphable(const Shape<T>* parent) : _parent(parent) {}
+    Morphable(const Shape* parent) : _parent(parent) {}
 
-    const Shape<T>* parent() const {
+    const Shape* parent() const {
         return _parent;
     }
 
  private:
-    const Shape<T>* _parent;
+    const Shape* _parent;
 };
 
 }  // namespace Widget

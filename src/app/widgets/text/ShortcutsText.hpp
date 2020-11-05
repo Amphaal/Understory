@@ -41,7 +41,7 @@ struct STHStateComponent {
     float haulerOpacity = .0f;
 };
 
-class ShortcutsText : public Animation::PlayerMatrixAnimator<STHStateComponent>, public Hoverable<> {
+class ShortcutsText : public Animation::PlayerMatrixAnimator<STHStateComponent>, public Hoverable {
  public:
     ShortcutsText(StaticText&& associatedText) : PlayerMatrixAnimator(&_moveAnim, .2f, &_defaultAnimationCallback),
         _text(std::move(associatedText)) {

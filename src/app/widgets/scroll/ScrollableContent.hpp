@@ -25,7 +25,7 @@ namespace UnderStory {
 
 namespace Widget {
 
-class ScrollableContent : public Hoverable<> {
+class ScrollableContent : public Hoverable {
  public:
     ScrollableContent() { };
  

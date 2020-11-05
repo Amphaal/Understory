@@ -98,7 +98,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     }
 
     // enable stencil for scrolling 
-    Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::ScissorTest);
+    // Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::ScissorTest);
 
     /* Set up premultiplied alpha blending to avoid overlapping text characters to cut into each other */
     Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::Blending);
@@ -247,7 +247,6 @@ void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
 void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {
     //
     _lockContext = this->latestHovered();
-    auto q = (UnderStory::Widget::Hoverable<Magnum::Range2D>*)this;
 
     //
     switch (event.button()) {

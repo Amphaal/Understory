@@ -45,10 +45,10 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class Scroller : public Hoverable<>, public Morphable<> {
+class Scroller : public Hoverable, public Morphable {
  public:
     Scroller(
-        const Shape<>* parent,
+        const Shape* parent,
         const Magnum::Matrix3* panelMatrix, 
         const ScrollableContent* content, 
         StickTo stickness
@@ -128,61 +128,53 @@ class Scroller : public Hoverable<>, public Morphable<> {
         _buffer.setSubData(0, _vertices);
     }
 
-    void _shapeUpdateRequested(const Constraints &wh) final {
+    void _updateShapeFromConstraints(const Constraints &wh, Magnum::Range2D& shapeAllowedSpace) final {
         // start and begin of scroller placeholder
         auto &pixelSize = wh.pixelSize;
-        auto phStart = parent()->shape().min();
-        auto phEnd = parent()->shape().max();
+        auto ph = parent()->shape();
 
-        // define vertices from parent phShape
+        // size with padding
+        auto size = THICKNESS_PX + PADDING_PX * 2;
+
+        // define vertices from parent "ph"
         switch (_stickness) {
             case StickTo::Left :
-                phEnd.x() = phStart.x() + (pixelSize.x() * THICKNESS_PX);
+                ph.max().x() = ph.min().x() + (pixelSize.x() * size);
                 break;
             case StickTo::Top :
-                phStart.y() = phEnd.y() - (pixelSize.y() * THICKNESS_PX);
+                ph.min().y() = ph.max().y() - (pixelSize.y() * size);
                 break;
             case StickTo::Right :
-                phStart.x() = phEnd.x() - (pixelSize.x() * THICKNESS_PX);
+                ph.min().x() = ph.max().x() - (pixelSize.x() * size);
                 break;
             case StickTo::Bottom :
-                phEnd.y() = phStart.y() + (pixelSize.y() * THICKNESS_PX);
+                ph.max().y() = ph.min().y() + (pixelSize.y() * size);
                 break;
         }
 
         // define phShape and pad extremities
-        auto phShape = Magnum::Range2D{phStart, phEnd};
-        phShape = phShape.padded({ 0.f, - (pixelSize.y() * PADDING_PX) });
-
-        // lateral padding
-        switch (_stickness) {
-            case StickTo::Left :
-                phShape = phShape.translated({PADDING_PX * pixelSize.x(), 0.f});
-                break;
-            case StickTo::Top :
-                phShape = phShape.translated({0.f, PADDING_PX * pixelSize.y()});
-                break;
-            case StickTo::Right :
-                phShape = phShape.translated({-PADDING_PX * pixelSize.x(), 0.f});
-                break;
-            case StickTo::Bottom :
-                phShape = phShape.translated({0.f, -PADDING_PX * pixelSize.y()});
-                break;
-        }
+        Magnum::Range2D phMarginless = ph;
+        phMarginless = ph.padded({ 
+            - (pixelSize.x() * PADDING_PX), 
+            - (pixelSize.y() * PADDING_PX) 
+        });
 
         // placeholder
-        _vertices[0] = {phShape.bottomLeft(),     0xFFFFFF66_rgbaf};
-        _vertices[1] = {phShape.bottomRight(),    0xFFFFFF66_rgbaf};
-        _vertices[2] = {phShape.topRight(),       0xFFFFFF66_rgbaf};
-        _vertices[3] = {phShape.topLeft(),        0xFFFFFF66_rgbaf};
+        _vertices[0] = {phMarginless.bottomLeft(),     0xFFFFFF66_rgbaf};
+        _vertices[1] = {phMarginless.bottomRight(),    0xFFFFFF66_rgbaf};
+        _vertices[2] = {phMarginless.topRight(),       0xFFFFFF66_rgbaf};
+        _vertices[3] = {phMarginless.topLeft(),        0xFFFFFF66_rgbaf};
 
         // scroller
-        _vertices[4].position = phShape.bottomLeft();
-        _vertices[5].position = phShape.bottomRight();
-        _vertices[6].position = phShape.topRight();
-        _vertices[7].position = phShape.topLeft();
+        _vertices[4].position = phMarginless.bottomLeft();
+        _vertices[5].position = phMarginless.bottomRight();
+        _vertices[6].position = phMarginless.topRight();
+        _vertices[7].position = phMarginless.topLeft();
         _scrollerPos = { _vertices[4].position, _vertices[6].position };
         _updateScrollerState();
+
+        // update remaining space
+        // TODO
     }
 
     void _updateScrollerState() {

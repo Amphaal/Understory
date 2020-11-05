@@ -112,7 +112,7 @@ class USApplication : public Magnum::Platform::Application, public Widget::AppCo
     Navigation::MouseState _mouseState {DOUBLE_CLICK_DELAY_MS};
 
     // mouse lock context
-    Widget::Hoverable<>* _lockContext = nullptr;
+    Widget::Hoverable* _lockContext = nullptr;
 
     Magnum::Utility::Resource _rs;
     Magnum::Timeline _timeline;

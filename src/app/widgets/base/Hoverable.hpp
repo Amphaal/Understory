@@ -26,8 +26,7 @@ namespace UnderStory {
 
 namespace Widget {
 
-template<class T = Magnum::Range2D>
-class Hoverable : public Shape<T>, public AppBound {
+class Hoverable : public Shape, public AppBound {
  public:
     Hoverable() {}
 
