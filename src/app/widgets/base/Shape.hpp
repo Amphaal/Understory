@@ -70,18 +70,6 @@ class Shape {
     Magnum::Range2D _shape;
 };
 
-class Morphable {
- public:
-    Morphable(const Shape* parent) : _parent(parent) {}
-
-    const Shape* parent() const {
-        return _parent;
-    }
-
- private:
-    const Shape* _parent;
-};
-
 }  // namespace Widget
 
 }  // namespace UnderStory

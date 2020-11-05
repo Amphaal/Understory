@@ -45,14 +45,14 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container, public Morphable, public Toggleable {
+class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container, public Toggleable {
  public:
     ScrollablePanel(const Shape* parent, StickTo stickness = StickTo::Left, float thickness = .6f) :
         PlayerMatrixAnimator(&_matrix, .2f, &_defaultAnimationCallback),
-        Morphable(parent),
         _stickness(stickness),
         _thickness(thickness),
-        _scroller(this, &_matrix, &_content, _scrollerStickyness()) 
+        _scroller(&_matrix, &_content, _scrollerStickyness()),
+        _content(&_matrix)
         {
         // set collapsed state as default
         _definePanelPosition(_collapsedTransform());
@@ -61,7 +61,7 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
         bind({&_scroller, &_content});
 
         // 
-        _setup();
+        _setup(parent);
     }
 
     void mayDraw() {
@@ -163,11 +163,11 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
         }
     }
 
-    void _setup() {
+    void _setup(const Shape* parent) {
         // as shape is immuable, set it once
         {
             Magnum::Vector2 pStart, pEnd;
-            auto &masterShape = this->parent()->shape();
+            auto &masterShape = parent->shape();
 
             // determine shape and position
             switch (_stickness) {

@@ -27,11 +27,26 @@ namespace Widget {
 
 class ScrollableContent : public Hoverable {
  public:
-    ScrollableContent() { };
- 
- private:
-    void _geometryUpdateRequested() final {
+    ScrollableContent(const Magnum::Matrix3* panelMatrix) : _panelMatrix(panelMatrix) {};
+    
+    void draw() {
         // TODO
+    }
+
+ private:
+    const Magnum::Matrix3* _panelMatrix;
+
+    void _geometryUpdateRequested() final {
+        _updateGeometry(Magnum::Range2D {
+            _panelMatrix->transformPoint(shape().min()),
+            _panelMatrix->transformPoint(shape().max())
+        });
+    }
+
+    void _updateShapeFromConstraints(const Constraints &wh, Magnum::Range2D& shapeAllowedSpace) final {
+        // take all remaining space
+        _updateShape(shapeAllowedSpace);
+        shapeAllowedSpace = {};
     }
 };
 

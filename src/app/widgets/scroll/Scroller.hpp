@@ -45,15 +45,13 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class Scroller : public Hoverable, public Morphable {
+class Scroller : public Hoverable {
  public:
     Scroller(
-        const Shape* parent,
         const Magnum::Matrix3* panelMatrix, 
         const ScrollableContent* content, 
         StickTo stickness
-    ) : Morphable(parent),
-        _panelMatrix(panelMatrix),
+    ) : _panelMatrix(panelMatrix),
         _content(content),
         _stickness(stickness) {
         //
@@ -109,8 +107,8 @@ class Scroller : public Hoverable, public Morphable {
 
         // update geometry
         _updateGeometry(Magnum::Range2D {
-            _panelMatrix->transformPoint(_vertices[0].position),
-            _panelMatrix->transformPoint(_vertices[2].position)
+            _panelMatrix->transformPoint(shape().min()),
+            _panelMatrix->transformPoint(shape().max())
         });
     }
 
@@ -131,28 +129,36 @@ class Scroller : public Hoverable, public Morphable {
     void _updateShapeFromConstraints(const Constraints &wh, Magnum::Range2D& shapeAllowedSpace) final {
         // start and begin of scroller placeholder
         auto &pixelSize = wh.pixelSize;
-        auto ph = parent()->shape();
+        auto ph = shapeAllowedSpace;
 
         // size with padding
         auto size = THICKNESS_PX + PADDING_PX * 2;
 
-        // define vertices from parent "ph"
+        // define space of placeholder
+        // and update remaining space
         switch (_stickness) {
             case StickTo::Left :
                 ph.max().x() = ph.min().x() + (pixelSize.x() * size);
+                shapeAllowedSpace.min().x() = ph.max().x();
                 break;
             case StickTo::Top :
                 ph.min().y() = ph.max().y() - (pixelSize.y() * size);
+                shapeAllowedSpace.max().y() = ph.min().y();
                 break;
             case StickTo::Right :
                 ph.min().x() = ph.max().x() - (pixelSize.x() * size);
+                shapeAllowedSpace.max().x() = ph.min().x();
                 break;
             case StickTo::Bottom :
                 ph.max().y() = ph.min().y() + (pixelSize.y() * size);
+                shapeAllowedSpace.min().y() = ph.max().y();
                 break;
         }
 
-        // define phShape and pad extremities
+        // update shape with placeholder
+        this->_updateShape(ph);
+
+        // reduce size with padding
         Magnum::Range2D phMarginless = ph;
         phMarginless = ph.padded({ 
             - (pixelSize.x() * PADDING_PX), 
@@ -170,11 +176,10 @@ class Scroller : public Hoverable, public Morphable {
         _vertices[5].position = phMarginless.bottomRight();
         _vertices[6].position = phMarginless.topRight();
         _vertices[7].position = phMarginless.topLeft();
+
+        // update state of scroller
         _scrollerPos = { _vertices[4].position, _vertices[6].position };
         _updateScrollerState();
-
-        // update remaining space
-        // TODO
     }
 
     void _updateScrollerState() {
