@@ -21,7 +21,7 @@
 
 #include <Magnum/Platform/Sdl2Application.h>
 
-#include "../animation/PlayerMatrixAnimator.hpp"
+#include "src/app/widgets/animation/PlayerMatrixAnimator.hpp"
 #include "MouseMovements.hpp"
 
 using Magnum::Platform::Sdl2Application;

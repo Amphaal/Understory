@@ -51,7 +51,7 @@
 #include "widgets/navigation/KeyboardMoveHelper.hpp"
 #include "widgets/navigation/MouseState.hpp"
 
-#include "widgets/AtomSelectorButton.hpp"
+#include "widgets/atomSelector/AtomSelectorButton.hpp"
 #include "widgets/scroll/ScrollablePanel.hpp"
 
 #include "widgets/helpers/SelectionRectangle.hpp"

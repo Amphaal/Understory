@@ -23,7 +23,7 @@
 
 #include <Magnum/Platform/Sdl2Application.h>
 
-#include "../animation/MatrixAnimator.h"
+#include "src/app/widgets/animation/MatrixAnimator.h"
 #include "KeyboardMovements.hpp"
 
 using Magnum::Platform::Sdl2Application;

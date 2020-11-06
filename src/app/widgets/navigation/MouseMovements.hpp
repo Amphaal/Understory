@@ -116,7 +116,7 @@ class MouseMovements {
     Magnum::Vector2 _getAccelerationTranslation() const {
         // check buffer size
         auto bufSize = _accelBuffer.size();
-        if(!bufSize) return Magnum::Vector2();
+        if(!bufSize || !_accelMs) return Magnum::Vector2();
 
         // define sample strengh
         auto sampleStrength = static_cast<float>(bufSize) / 100;

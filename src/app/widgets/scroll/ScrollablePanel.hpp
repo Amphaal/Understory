@@ -28,14 +28,14 @@
 
 #include <utility>
 
-#include "../animation/PlayerMatrixAnimator.hpp"
+#include "src/app/widgets/animation/PlayerMatrixAnimator.hpp"
 
-#include "../base/Constraints.hpp"
-#include "../base/Container.hpp"
-#include "../base/Toggleable.hpp"
+#include "src/app/widgets/base/Constraints.hpp"
+#include "src/app/widgets/base/Container.hpp"
+#include "src/app/widgets/base/Toggleable.hpp"
 
 #include "Scroller.hpp"
-#include "ScrollableContent.hpp"
+#include "ScrollableCanvas.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
 
@@ -47,18 +47,18 @@ using namespace Magnum::Math::Literals;
 
 class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container, public Toggleable {
  public:
-    ScrollablePanel(const Shape* parent, StickTo stickness = StickTo::Left, float thickness = .6f) :
+    ScrollablePanel(const Shape* parent, const ScrollableContent* content, StickTo stickness = StickTo::Left, float thickness = .6f) :
         PlayerMatrixAnimator(&_matrix, .2f, &_defaultAnimationCallback),
         _stickness(stickness),
         _thickness(thickness),
-        _scroller(&_matrix, &_content, _scrollerStickyness()),
-        _content(&_matrix)
+        _scroller(&_matrix, &_canvas, _scrollerStickyness()),
+        _canvas(&_matrix, content)
         {
         // set collapsed state as default
         _definePanelPosition(_collapsedTransform());
 
         //
-        bind({&_scroller, &_content});
+        bind({&_scroller, &_canvas});
 
         // 
         _setup(parent);
@@ -73,6 +73,9 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
             ->setTransformationProjectionMatrix(_matrix)
             .setColor(0x000000AA_rgbaf)
             .draw(_mesh);
+
+        // draw content
+        _canvas.draw();
 
         // draw scroller
         _scroller.draw();
@@ -96,7 +99,7 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
     float _thickness;
 
     Scroller _scroller;
-    ScrollableContent _content;
+    ScrollableCanvas _canvas;
 
     Magnum::Matrix3 _matrix;
 

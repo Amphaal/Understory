@@ -18,20 +18,3 @@
 // different license and copyright still refer to this GPL.
 
 #pragma once
-
-#include "src/app/widgets/base/Hoverable.hpp"
-
-#include "src/app/shaders/Shaders.hpp"
-
-namespace UnderStory {
-
-namespace Widget {
-
-class ScrollableContent : public Hoverable {
- public:
-    ScrollableContent() {}
-};
-
-}  // namespace Widget
-
-}  // namespace UnderStory

@@ -28,11 +28,11 @@
 
 #include <utility>
 
-#include "animation/PlayerMatrixAnimator.hpp"
+#include "src/app/widgets/animation/PlayerMatrixAnimator.hpp"
 
-#include "base/Constraints.hpp"
-#include "base/Hoverable.hpp"
-#include "base/Toggleable.hpp"
+#include "src/app/widgets/base/Constraints.hpp"
+#include "src/app/widgets/base/Hoverable.hpp"
+#include "src/app/widgets/base/Toggleable.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
 

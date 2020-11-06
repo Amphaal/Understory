@@ -23,8 +23,8 @@
 
 #include <utility>
 
-#include "../animation/PlayerMatrixAnimator.hpp"
-#include "../base/Hoverable.hpp"
+#include "src/app/widgets/animation/PlayerMatrixAnimator.hpp"
+#include "src/app/widgets/base/Hoverable.hpp"
 #include "StaticText.hpp"
 
 #include "src/app/shaders/Shaders.hpp"

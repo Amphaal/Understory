@@ -23,7 +23,7 @@
 
 #include <utility>
 
-#include "../animation/PlayerMatrixAnimator.hpp"
+#include "src/app/widgets/animation/PlayerMatrixAnimator.hpp"
 
 using Magnum::Platform::Sdl2Application;
 

@@ -30,14 +30,14 @@
 
 #include <utility>
 
-#include "../animation/PlayerMatrixAnimator.hpp"
+#include "src/app/widgets/animation/PlayerMatrixAnimator.hpp"
 
-#include "../base/Constraints.hpp"
-#include "../base/Hoverable.hpp"
+#include "src/app/widgets/base/Constraints.hpp"
+#include "src/app/widgets/base/Hoverable.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
 
-#include "ScrollableContent.hpp"
+#include "ScrollableCanvas.hpp"
 
 namespace UnderStory {
 
@@ -49,7 +49,7 @@ class Scroller : public Hoverable {
  public:
     Scroller(
         const Magnum::Matrix3* panelMatrix, 
-        const ScrollableContent* content, 
+        const ScrollableCanvas* content, 
         StickTo stickness
     ) : _panelMatrix(panelMatrix),
         _content(content),
@@ -87,7 +87,7 @@ class Scroller : public Hoverable {
     static constexpr float PADDING_PX = 10.f;
 
     const Magnum::Matrix3* _panelMatrix = nullptr;
-    const ScrollableContent* _content = nullptr;
+    const ScrollableCanvas* _content = nullptr;
 
     Magnum::GL::Buffer _buffer;
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
