@@ -21,15 +21,21 @@
 
 #include "src/app/widgets/base/Hoverable.hpp"
 
-#include "src/app/shaders/Shaders.hpp"
-
 namespace UnderStory {
 
 namespace Widget {
 
 class ScrollableContent : public Hoverable {
  public:
-    ScrollableContent() {}
+    ScrollableContent(ScrollableContent&& content, const Magnum::Matrix3* panelMatrix, GrowableAxis ga) :
+        ScrollableContent(content), _ga(ga), _panelMatrix(panelMatrix) {}
+
+    virtual void draw() = 0;
+    virtual Hoverable* asHoverable() = 0;
+
+ private:
+    GrowableAxis _ga;
+    const Magnum::Matrix3* _panelMatrix;
 };
 
 }  // namespace Widget

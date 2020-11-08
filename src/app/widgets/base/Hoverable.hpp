@@ -34,14 +34,19 @@ class Hoverable : public Shape, public AppBound {
         return _isHovered;
     }
 
+    // defaults to update its geometry, but might require
+    virtual void onViewportChange(Magnum::Range2D& shapeAllowedSpace) {
+        _availableSpaceChanged(shapeAllowedSpace);
+    }
+
     virtual void checkIfMouseOver(const Magnum::Vector2 &cursorPos) {
         // prevent updating if state did not change
         auto hovered = this->geometry().contains(cursorPos);
-        
+
         // check subelements hovering
         _mouseIsOver(cursorPos);
 
-        // dont go further if state did not change        
+        // dont go further if state did not change
         if(_isHovered == hovered) return;
 
         // update state
@@ -51,11 +56,28 @@ class Hoverable : public Shape, public AppBound {
         _onHoverChanged(_isHovered);
     }
 
+    // shape with matrix transforms applied, allows to determine current position
+    const Magnum::Range2D& geometry() const {
+        return _geometry;
+    }
+
  protected:
+    void _updateGeometry(const Magnum::Matrix3 &matrix) {
+        _updateGeometry(Magnum::Range2D {
+            matrix.transformPoint(shape().min()),
+            matrix.transformPoint(shape().max())
+        });
+    }
+
+    void _updateGeometry(const Magnum::Range2D& geometry) {
+        _geometry = geometry;
+    }
+
     virtual void _onHoverChanged(bool isHovered) {}
     virtual void _mouseIsOver(const Magnum::Vector2 &cursorPos) {}
 
  private:
+    Magnum::Range2D _geometry;
     bool _isHovered = false;
 };
 

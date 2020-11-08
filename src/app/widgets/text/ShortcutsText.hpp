@@ -43,21 +43,26 @@ struct STHStateComponent {
 
 class ShortcutsText : public Animation::PlayerMatrixAnimator<STHStateComponent>, public Hoverable {
  public:
-    ShortcutsText(StaticText&& associatedText) : PlayerMatrixAnimator(&_moveAnim, .2f, &_defaultAnimationCallback),
+    explicit ShortcutsText(StaticText&& associatedText) : PlayerMatrixAnimator(&_moveAnim, .2f, &_defaultAnimationCallback),
         _text(std::move(associatedText)) {
          _updateColors();
     }
 
-    void onViewportChange(const Constraints &wh) final {
+    void onViewportChange(Magnum::Range2D& shapeAllowedSpace) final {
+        Hoverable::onViewportChange(shapeAllowedSpace);
+
         // stick to top right corner + 5 pixels padding
-        _responsiveMatrix = wh.baseProjMatrix *
+            auto& ws = constraints().ws();
+            auto& baseProjMatrix = constraints().baseProjMatrix();
+            auto& pixelSize = constraints().pixelSize();
+        _responsiveMatrix = baseProjMatrix *
             Magnum::Matrix3::translation(
-                wh.ws *
-                (Magnum::Vector2 {.5f} - wh.pixelSize * 5)
+                ws *
+                (Magnum::Vector2 {.5f} - pixelSize * 5)
             );
 
         // update geometry
-        Hoverable::onViewportChange(wh);
+        _updateGeometry();
     }
 
     void draw() {
@@ -105,13 +110,12 @@ class ShortcutsText : public Animation::PlayerMatrixAnimator<STHStateComponent>,
         );
     }
 
-    void _geometryUpdateRequested() final {
+    void _updateGeometry() {
+        // update matrix
         _matrix = _responsiveMatrix * _moveAnim;
 
-        //
-        _updateGeometry(
-            _text.geometryFromMatrix(_matrix)
-        );
+        // update geom
+        Hoverable::_updateGeometry(_text.geometry());
     }
 
     void _onHoverChanged(bool isHovered) final {
@@ -129,7 +133,7 @@ class ShortcutsText : public Animation::PlayerMatrixAnimator<STHStateComponent>,
     void _onAnimationProgress() final {
         _replaceMainMatrix(Magnum::Matrix3::scaling(currentAnim().scaling));
         _updateColors();
-        _geometryUpdateRequested();
+        _updateGeometry();
     }
 
     void _updateColors() {

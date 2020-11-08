@@ -35,7 +35,8 @@
 #include "src/app/widgets/base/Toggleable.hpp"
 
 #include "Scroller.hpp"
-#include "ScrollableCanvas.hpp"
+#include "ScrollableContent.hpp"
+#include "Scissorer.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
 
@@ -45,23 +46,19 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container, public Toggleable {
+class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container, public Toggleable, private Scissorer {
  public:
-    ScrollablePanel(const Shape* parent, const ScrollableContent* content, StickTo stickness = StickTo::Left, float thickness = .6f) :
+    explicit ScrollablePanel(ScrollableContent&& content, StickTo stickness = StickTo::Left, float thickness = .6f) :
         PlayerMatrixAnimator(&_matrix, .2f, &_defaultAnimationCallback),
         _stickness(stickness),
         _thickness(thickness),
-        _scroller(&_matrix, &_canvas, _scrollerStickyness()),
-        _canvas(&_matrix, content)
-        {
+        _scroller(&_matrix, _scrollerStickyness()),
+        _content(std::move(content), &_matrix, _contentGrowableAxis()) {
         // set collapsed state as default
         _definePanelPosition(_collapsedTransform());
 
         //
-        bind({&_scroller, &_canvas});
-
-        // 
-        _setup(parent);
+        bind({&_scroller, &_content});
     }
 
     void mayDraw() {
@@ -75,7 +72,9 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
             .draw(_mesh);
 
         // draw content
-        _canvas.draw();
+        _applyScissor();
+            _content.draw();
+        _applyScissor();
 
         // draw scroller
         _scroller.draw();
@@ -99,9 +98,10 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
     float _thickness;
 
     Scroller _scroller;
-    ScrollableCanvas _canvas;
 
     Magnum::Matrix3 _matrix;
+    Magnum::Range2Di _contentScissor;
+    ScrollableContent _content;
 
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
 
@@ -116,7 +116,7 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
 
     void _onAnimationProgress() final {
         _definePanelPosition(currentAnim());
-        _geometryUpdateRequested();
+        _updateGeometry();
     }
 
     void _onToggled(bool isToggled) final {
@@ -126,11 +126,17 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
             _updateAnimationAndPlay({}, _collapsedTransform());
     }
 
-    void _geometryUpdateRequested() final {
-        _updateGeometry(Magnum::Range2D {
-            _matrix.transformPoint(shape().min()),
-            _matrix.transformPoint(shape().max())
-        });
+    // helper
+    void _updateGeometry() {
+        Hoverable::_updateGeometry(_matrix);
+
+        // update scissor
+        _updateScissorTarget(geometry());
+    }
+
+    void onViewportChange(Magnum::Range2D& shapeAllowedSpace) final {
+        Hoverable::onViewportChange(shapeAllowedSpace);
+        _updateGeometry();
     }
 
     void _definePanelPosition(const Magnum::Vector2 &pos) {
@@ -153,6 +159,17 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
         }
     }
 
+    const GrowableAxis _contentGrowableAxis() const {
+        switch (_stickness) {
+            case StickTo::Left :
+            case StickTo::Right :
+                return GrowableAxis::Height;
+            case StickTo::Top :
+            case StickTo::Bottom :
+                return GrowableAxis::Width;
+        }
+    }
+
     const Magnum::Vector2 _collapsedTransform() const {
         switch (_stickness) {
             case StickTo::Left :
@@ -166,11 +183,15 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
         }
     }
 
-    void _setup(const Shape* parent) {
+    bool _setupDone = false;
+    void _availableSpaceChanged(Magnum::Range2D& availableSpace) final {
+        //
+        if(_setupDone) return;
+
         // as shape is immuable, set it once
         {
             Magnum::Vector2 pStart, pEnd;
-            auto &masterShape = parent->shape();
+            auto &masterShape = availableSpace;
 
             // determine shape and position
             switch (_stickness) {
@@ -200,7 +221,6 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
         struct Vertex {
             Magnum::Vector2 position;
         };
-
         const Vertex vertices[] {
             {shape().bottomLeft()},
             {shape().bottomRight()},
@@ -222,6 +242,9 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
         _mesh.setCount(bIndices.size())
                 .setIndexBuffer (std::move(bIndices),  0, Magnum::MeshIndexType::UnsignedInt)
                 .addVertexBuffer(std::move(bVertices), 0, Magnum::Shaders::Flat2D::Position{});
+
+        //
+        _setupDone = true;
     }
 };
 

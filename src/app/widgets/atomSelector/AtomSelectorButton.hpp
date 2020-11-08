@@ -44,24 +44,28 @@ using namespace Magnum::Math::Literals;
 
 class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hoverable, public Toggleable {
  public:
-    AtomSelectorButton() : PlayerMatrixAnimator(&_moveAnim, .2f, &_defaultAnimationCallback) {
-        _setup();
-    }
+    AtomSelectorButton() : PlayerMatrixAnimator(&_moveAnim, .2f, &_defaultAnimationCallback) {}
 
-    void onViewportChange(const Constraints &wh) final {
+    void onViewportChange(Magnum::Range2D& shapeAllowedSpace) final {
+        Hoverable::onViewportChange(shapeAllowedSpace);
+
+        //
         auto asXPadding = 15.f;
         auto targetPrcXSize = .025f;
 
         // update responsive matrix
-        auto asSize = wh.ws.x() * (targetPrcXSize / 2);
-        _responsiveMatrix = wh.baseProjMatrix *
+            auto& ws = constraints().ws();
+            auto& baseProjMatrix = constraints().baseProjMatrix();
+            auto& pixelSize = constraints().pixelSize();
+            auto asSize = ws.x() * (targetPrcXSize / 2);
+        _responsiveMatrix = baseProjMatrix *
             Magnum::Matrix3::translation(
-                wh.ws * (Magnum::Vector2{-.5f} + Magnum::Vector2{wh.pixelSize.x() * (asSize + asXPadding), 0.f})
+                ws * (Magnum::Vector2{-.5f} + Magnum::Vector2{pixelSize.x() * (asSize + asXPadding), 0.f})
             ) *
             Magnum::Matrix3::scaling(Magnum::Vector2{asSize});
 
-        // update geometry
-        Hoverable::onViewportChange(wh);
+        //
+        _updateGeometry();
     }
 
     void draw() {
@@ -105,8 +109,15 @@ class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hove
     }
 
     void _onAnimationProgress() final {
-        _replaceMainMatrix(Magnum::Matrix3::translation(currentAnim()));
-        _geometryUpdateRequested();
+        // update matrix
+        _replaceMainMatrix(
+            Magnum::Matrix3::translation(
+                currentAnim()
+            )
+        );
+
+        // update geom
+        _updateGeometry();
     }
 
     void _updateAnimationYTarget() {
@@ -122,16 +133,19 @@ class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hove
         _updateAnimationAndPlay(_moveAnim.translation(), target);
     }
 
-    void _geometryUpdateRequested() final {
+    void _updateGeometry() {
+        // update matrix
         _matrix = _responsiveMatrix * _moveAnim;
 
-        _updateGeometry(Magnum::Range2D {
-            _matrix.transformPoint({-1.f, -1.f}),
-            _matrix.transformPoint({1.f, 1.f})
-        });
+        // update geom
+        Hoverable::_updateGeometry(_matrix);
     }
 
-    void _setup() {
+    bool _setupDone = false;
+    void _availableSpaceChanged(Magnum::Range2D& availableSpace) final {
+        //
+        if(_setupDone) return;
+
         // define indices
         Magnum::GL::Buffer bIndices, bVertices;
         bIndices.setData({
@@ -157,6 +171,12 @@ class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hove
         _mesh.setCount(bIndices.size())
                 .setIndexBuffer (std::move(bIndices),  0, Magnum::MeshIndexType::UnsignedInt)
                 .addVertexBuffer(std::move(bVertices), 0, Magnum::Shaders::Flat2D::Position{});
+
+        //
+        _updateGeometry();
+
+        //
+        _setupDone = true;
     }
 };
 

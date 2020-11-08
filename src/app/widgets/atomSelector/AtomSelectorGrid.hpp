@@ -18,3 +18,89 @@
 // different license and copyright still refer to this GPL.
 
 #pragma once
+
+#include <Magnum/GL/Buffer.h>
+#include <Magnum/GL/Mesh.h>
+
+#include <Magnum/Magnum.h>
+#include <Magnum/Mesh.h>
+#include <Magnum/Math/Color.h>
+
+#include <Corrade/Containers/StaticArray.h>
+
+#include <utility>
+
+#include "src/app/shaders/Shaders.hpp"
+#include "src/app/widgets/base/Hoverable.hpp"
+
+namespace UnderStory {
+
+namespace Widget {
+
+using namespace Magnum::Math::Literals;
+
+class AtomSelectorGrid : public Hoverable {
+ public:
+    explicit AtomSelectorGrid(const Magnum::Matrix3* parentMatrix) : _parentMatrix(parentMatrix) {
+        _setup();
+    }
+
+    void draw() {
+        Shaders::color
+            ->setTransformationProjectionMatrix(*_parentMatrix)
+            .draw(_mesh);
+    }
+
+ private:
+    const Magnum::Matrix3* _parentMatrix;
+
+    Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
+    Magnum::GL::Buffer _buffer;
+
+    struct Vertex {
+        Magnum::Vector2 position;
+        Magnum::Color4 color;
+    };
+    Corrade::Containers::StaticArray<4, Vertex> _vertices;
+
+    void _updateGeometry() {
+        // update buffer
+        _buffer.setSubData(0, _vertices);
+
+        // update geometry
+        Hoverable::_updateGeometry(*_parentMatrix);
+    }
+
+    void _availableSpaceChanged(Magnum::Range2D& availableSpace) final {
+        // take all remaining space
+        _updateShape(availableSpace);
+        availableSpace = {};
+
+        // update vertices
+        _vertices[0] = {shape().bottomLeft(),     0xFF000099_rgbaf};
+        _vertices[1] = {shape().bottomRight(),    0xFF000099_rgbaf};
+        _vertices[2] = {shape().topRight(),       0x00FF0099_rgbaf};
+        _vertices[3] = {shape().topLeft(),        0x00FF0099_rgbaf};
+    }
+
+    void _setup() {
+        // define indices
+        Magnum::GL::Buffer bIndices;
+        bIndices.setData({
+            0, 1, 2,
+            2, 3, 0
+        });
+
+        // bind buffer
+        _buffer.setData(_vertices, Magnum::GL::BufferUsage::DynamicDraw);
+
+        // define panel mesh
+        _mesh.setCount(bIndices.size())
+                .setIndexBuffer (std::move(bIndices),   0, Magnum::MeshIndexType::UnsignedInt)
+                .addVertexBuffer(_buffer,               0, Magnum::Shaders::Flat2D::Position{}, Magnum::Shaders::Flat2D::Color4{});
+    }
+};
+
+}  // namespace Widget
+
+}  // namespace UnderStory

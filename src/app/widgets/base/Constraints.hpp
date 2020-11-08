@@ -34,16 +34,36 @@ enum class StickTo {
     Bottom
 };
 
-struct Constraints {
- public:
-    explicit Constraints(const Magnum::Vector2i &windowSize) :
-    ws(windowSize),
-    baseProjMatrix(Magnum::Matrix3::projection(ws)),
-    pixelSize(Magnum::Vector2 {1.f} / ws) {}
+enum class GrowableAxis {
+    Width,
+    Height
+};
 
-    const Magnum::Vector2 ws;
-    const Magnum::Matrix3 baseProjMatrix;
-    const Magnum::Vector2 pixelSize;
+class Constraints {
+ public:
+    Constraints() {}
+
+    explicit Constraints(const Magnum::Vector2i &windowSize) :
+        _ws(windowSize),
+        _baseProjMatrix(Magnum::Matrix3::projection(_ws)),
+        _pixelSize(Magnum::Vector2 {1.f} / _ws) {}
+
+    const Magnum::Vector2& ws() const {
+        return _ws;
+    }
+
+    const Magnum::Matrix3& baseProjMatrix() const {
+        return _baseProjMatrix;
+    }
+
+    const Magnum::Vector2& pixelSize() const {
+        return _pixelSize;
+    }
+
+ private:
+    Magnum::Vector2 _ws;
+    Magnum::Matrix3 _baseProjMatrix;
+    Magnum::Vector2 _pixelSize;
 };
 
 }  // namespace Widget

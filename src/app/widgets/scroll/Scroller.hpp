@@ -37,8 +37,6 @@
 
 #include "src/app/shaders/Shaders.hpp"
 
-#include "ScrollableCanvas.hpp"
-
 namespace UnderStory {
 
 namespace Widget {
@@ -48,11 +46,9 @@ using namespace Magnum::Math::Literals;
 class Scroller : public Hoverable {
  public:
     Scroller(
-        const Magnum::Matrix3* panelMatrix, 
-        const ScrollableCanvas* content, 
+        const Magnum::Matrix3* panelMatrix,
         StickTo stickness
     ) : _panelMatrix(panelMatrix),
-        _content(content),
         _stickness(stickness) {
         //
         _setup();
@@ -87,7 +83,7 @@ class Scroller : public Hoverable {
     static constexpr float PADDING_PX = 10.f;
 
     const Magnum::Matrix3* _panelMatrix = nullptr;
-    const ScrollableCanvas* _content = nullptr;
+    const ScrollableContent* _content = nullptr;
 
     Magnum::GL::Buffer _buffer;
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
@@ -101,15 +97,12 @@ class Scroller : public Hoverable {
     };
     Corrade::Containers::StaticArray<8, Vertex> _vertices;
 
-    void _geometryUpdateRequested() final {
+    void _updateGeometry() {
         // update buffer
         _buffer.setSubData(0, _vertices);
 
         // update geometry
-        _updateGeometry(Magnum::Range2D {
-            _panelMatrix->transformPoint(shape().min()),
-            _panelMatrix->transformPoint(shape().max())
-        });
+        Hoverable::_updateGeometry(*_panelMatrix);
     }
 
     // if mouse is over placeholder
@@ -126,10 +119,10 @@ class Scroller : public Hoverable {
         _buffer.setSubData(0, _vertices);
     }
 
-    void _updateShapeFromConstraints(const Constraints &wh, Magnum::Range2D& shapeAllowedSpace) final {
+    void _availableSpaceChanged(Magnum::Range2D& availableSpace) final {
         // start and begin of scroller placeholder
-        auto &pixelSize = wh.pixelSize;
-        auto ph = shapeAllowedSpace;
+        auto &pixelSize = constraints().pixelSize();
+        auto ph = availableSpace;
 
         // size with padding
         auto size = THICKNESS_PX + PADDING_PX * 2;
@@ -139,19 +132,19 @@ class Scroller : public Hoverable {
         switch (_stickness) {
             case StickTo::Left :
                 ph.max().x() = ph.min().x() + (pixelSize.x() * size);
-                shapeAllowedSpace.min().x() = ph.max().x();
+                availableSpace.min().x() = ph.max().x();
                 break;
             case StickTo::Top :
                 ph.min().y() = ph.max().y() - (pixelSize.y() * size);
-                shapeAllowedSpace.max().y() = ph.min().y();
+                availableSpace.max().y() = ph.min().y();
                 break;
             case StickTo::Right :
                 ph.min().x() = ph.max().x() - (pixelSize.x() * size);
-                shapeAllowedSpace.max().x() = ph.min().x();
+                availableSpace.max().x() = ph.min().x();
                 break;
             case StickTo::Bottom :
                 ph.max().y() = ph.min().y() + (pixelSize.y() * size);
-                shapeAllowedSpace.min().y() = ph.max().y();
+                availableSpace.min().y() = ph.max().y();
                 break;
         }
 
@@ -160,9 +153,9 @@ class Scroller : public Hoverable {
 
         // reduce size with padding
         Magnum::Range2D phMarginless = ph;
-        phMarginless = ph.padded({ 
-            - (pixelSize.x() * PADDING_PX), 
-            - (pixelSize.y() * PADDING_PX) 
+        phMarginless = ph.padded({
+            - (pixelSize.x() * PADDING_PX),
+            - (pixelSize.y() * PADDING_PX)
         });
 
         // placeholder
@@ -172,6 +165,7 @@ class Scroller : public Hoverable {
         _vertices[3] = {phMarginless.topLeft(),        0xFFFFFF66_rgbaf};
 
         // scroller
+        // TODO relative to content size
         _vertices[4].position = phMarginless.bottomLeft();
         _vertices[5].position = phMarginless.bottomRight();
         _vertices[6].position = phMarginless.topRight();
@@ -208,9 +202,12 @@ class Scroller : public Hoverable {
         // define panel mesh
         _mesh.setCount(bIndices.size())
                 .setIndexBuffer (std::move(bIndices),   0, Magnum::MeshIndexType::UnsignedInt)
-                .addVertexBuffer(_buffer,               0, Magnum::Shaders::Flat2D::Position{}, 
+                .addVertexBuffer(_buffer,               0, Magnum::Shaders::Flat2D::Position{},
                                                            Magnum::Shaders::Flat2D::Color4{}
                 );
+
+        //
+        _updateGeometry();
     }
 };
 

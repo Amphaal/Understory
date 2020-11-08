@@ -25,6 +25,8 @@
 
 #include <utility>
 
+#include "src/app/widgets/base/Constraints.hpp"
+
 namespace UnderStory {
 
 namespace Widget {
@@ -37,37 +39,31 @@ class Shape {
     Shape() {}
     friend class Container;
 
-    // defaults to update its geometry, but might require
-    virtual void onViewportChange(const Constraints &wh) {
-        _geometryUpdateRequested();
-    }
-
     // inplaced shape (eg within OpenGL original coordinates, mostly {-1.f} <> {1.f})
     const Magnum::Range2D& shape() const {
         return _shape;
     }
 
-    // shape with matrix transforms applied, allows to determine current position
-    const Magnum::Range2D& geometry() const {
-        return _geometry;
+    void setConstraints(const Magnum::Vector2i &windowSize) {
+        _currentConstraints = Widget::Constraints { windowSize };
     }
 
  protected:
-    virtual void _geometryUpdateRequested() = 0;
-
     void _updateShape(const Magnum::Range2D& shape) {
         _shape = shape;
     }
-    void _updateGeometry(const Magnum::Range2D& geometry) {
-        _geometry = geometry;
+
+    // to be overriden if size is relative to a parent Container size
+    virtual void _availableSpaceChanged(Magnum::Range2D& availableSpace) {}
+
+    static Constraints& constraints() {
+        return _currentConstraints;
     }
 
-    // can be called from Container, must update "shapeAllowedSpace" with remaining space
-    virtual void _updateShapeFromConstraints(const Constraints &wh, Magnum::Range2D& shapeAllowedSpace) {};
-
  private:
-    Magnum::Range2D _geometry;
     Magnum::Range2D _shape;
+
+    static inline Constraints _currentConstraints;
 };
 
 }  // namespace Widget

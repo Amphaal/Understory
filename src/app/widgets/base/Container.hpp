@@ -31,7 +31,7 @@ namespace Widget {
 // TODO(amphaal) when contained is moving out of cursor (animated / deleted), refresh hover
 class Container : public Hoverable {
  public:
-    explicit Container() {}
+    Container() {}
 
     void bind(std::initializer_list<UnderStory::Widget::Hoverable*> prioritized) {
         _innerShapes = Corrade::Containers::Array<Hoverable*>();
@@ -39,23 +39,25 @@ class Container : public Hoverable {
         Magnum::Containers::arrayAppend(_innerShapes, prioritized);
     }
 
-    virtual void onViewportChange(const Constraints &wh) {
-        Hoverable::onViewportChange(wh);
+    virtual void onViewportChange(Magnum::Range2D& shapeAllowedSpace) {
+        // might update shape
+        Hoverable::onViewportChange(shapeAllowedSpace);
 
-        auto shapeConstraints = this->shape();
+        // get new shape of container
+        auto shape = this->shape();
 
+        // apply new shape to innerShapes
         for(auto innerShape : _innerShapes) {
-            innerShape->_updateShapeFromConstraints(wh, shapeConstraints);
-            innerShape->onViewportChange(wh);
+            innerShape->onViewportChange(shape);
         }
     }
 
     void checkIfMouseOver(const Magnum::Vector2 &cursorPos) final {
        // always check if previously subshape hovered is still hovered or not
        if(_latestHoveredShape && _latestHoveredShape != this) {
-           _latestHoveredShape->checkIfMouseOver(cursorPos); 
+           _latestHoveredShape->checkIfMouseOver(cursorPos);
        }
-       
+
        // check if container is hovered
        Hoverable::checkIfMouseOver(cursorPos);
        if(!this->isHovered()) {
@@ -94,7 +96,6 @@ class Container : public Hoverable {
     void _updateLatestHoveredShape(Hoverable* hoverable) {
         if(_latestHoveredShape == hoverable) return;
         _latestHoveredShape = hoverable;
-        // Magnum::Debug{} << _latestHoveredShape;
     }
 };
 
@@ -109,11 +110,6 @@ class AppContainer : public Container {
 
         _updateShape(bounds);
         _updateGeometry(bounds);
-    }
-
- private:
-    void _geometryUpdateRequested() final {
-        // nothing special to do, geometry is hard-set and never changes
     }
 };
 

@@ -97,7 +97,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
         _stWidget.reset(new Widget::ShortcutsText(std::move(text)));
     }
 
-    // enable stencil for scrolling 
+    // enable stencil for scrolling
     // Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::ScissorTest);
 
     /* Set up premultiplied alpha blending to avoid overlapping text characters to cut into each other */
@@ -121,23 +121,24 @@ void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
     //
     Magnum::GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
 
-    //
-    Widget::Constraints wh {windowSize()};
+    // update constraints
+    Shape::setConstraints(windowSize());
 
     //
     _projectionWorld = Magnum::Matrix3::projection(
-        Magnum::Vector2::xScale(wh.ws.aspectRatio())
+        Magnum::Vector2::xScale(constraints().ws().aspectRatio())
     );
 
     // stick to top left corner + 5 pixels padding
-    _transformationProjectionDebugText = wh.baseProjMatrix *
+    _transformationProjectionDebugText = constraints().baseProjMatrix() *
         Magnum::Matrix3::translation(
-            wh.ws *
-            (Magnum::Vector2 {-.5f, .5f} - wh.pixelSize * 5 * Magnum::Vector2{-1.f, 1.f})
+            constraints().ws() *
+            (Magnum::Vector2 {-.5f, .5f} - constraints().pixelSize() * 5 * Magnum::Vector2{-1.f, 1.f})
         );
 
     //
-    AppContainer::onViewportChange(wh);
+    auto shape = this->shape();
+    AppContainer::onViewportChange(shape);
     _selectionRect.onViewportChange();
 }
 
@@ -196,7 +197,7 @@ void UnderStory::USApplication::drawEvent() {
 void UnderStory::USApplication::mouseScrollEvent(MouseScrollEvent& event) {
     auto lh = this->latestHovered();
 
-    // handle map scaling 
+    // handle map scaling
     if(lh == this) {
         _msh.mouseScrollEvent(event, this->framebufferSize());
     // handle panel scroll
