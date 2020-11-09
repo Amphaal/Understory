@@ -35,7 +35,8 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _kmh(&_transformationWorld),
     _selectionRect(_rs),
     _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT),
-    _atomSelectorPnl(this) {
+    _asPanel(),
+    _asGrid(&_asPanel) {
     // set minimum size
     SDL_SetWindowMinimumSize(this->window(), MINIMUM_WIDTH, MINIMUM_HEIGHT);
 
@@ -111,7 +112,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _updateDebugText();
 
     // bind widgets to container (order is important)
-    this->bind({&_atomSelector, &_atomSelectorPnl, _stWidget.get()}),
+    this->_initContaining({&_asButton, &_asPanel, _stWidget.get()}),
 
     //
     _timeline.start();
@@ -166,11 +167,11 @@ void UnderStory::USApplication::drawEvent() {
     // selection rect
     _selectionRect.mayDraw(_projectionWorld);
 
-    // panel
-    _atomSelectorPnl.mayDraw();
+    // atom selector panel
+    _asPanel.mayDraw();
 
-    // atom selector
-    _atomSelector.draw();
+    // atom selector button
+    _asButton.draw();
 
     // debug text
     _updateDebugText();
@@ -201,8 +202,8 @@ void UnderStory::USApplication::mouseScrollEvent(MouseScrollEvent& event) {
     if(lh == this) {
         _msh.mouseScrollEvent(event, this->framebufferSize());
     // handle panel scroll
-    } else if(lh == &_atomSelectorPnl) {
-        _atomSelectorPnl.onMouseScroll(event.offset());
+    } else if(lh == &_asPanel) {
+        _asPanel.onMouseScroll(event.offset());
     }
 }
 
@@ -301,9 +302,9 @@ void UnderStory::USApplication::mouseReleaseEvent(MouseEvent& event) {
                     this->setCursor(Cursor::Arrow);
                 }
 
-            } else if (_lockContext == &_atomSelector) {
-                _atomSelector.toggle();
-                _atomSelectorPnl.toggle();
+            } else if (_lockContext == &_asButton) {
+                _asButton.toggle();
+                _asPanel.toggle();
             }
         }
         break;

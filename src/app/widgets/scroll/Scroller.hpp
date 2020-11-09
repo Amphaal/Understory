@@ -83,7 +83,6 @@ class Scroller : public Hoverable {
     static constexpr float PADDING_PX = 10.f;
 
     const Magnum::Matrix3* _panelMatrix = nullptr;
-    const ScrollableContent* _content = nullptr;
 
     Magnum::GL::Buffer _buffer;
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};

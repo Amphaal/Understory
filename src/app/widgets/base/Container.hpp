@@ -19,10 +19,9 @@
 
 #pragma once
 
-#include "Hoverable.hpp"
+#include <vector>
 
-#include <Corrade/Containers/Array.h>
-#include <Corrade/Containers/GrowableArray.h>
+#include "Hoverable.hpp"
 
 namespace UnderStory {
 
@@ -32,12 +31,6 @@ namespace Widget {
 class Container : public Hoverable {
  public:
     Container() {}
-
-    void bind(std::initializer_list<UnderStory::Widget::Hoverable*> prioritized) {
-        _innerShapes = Corrade::Containers::Array<Hoverable*>();
-        Magnum::Containers::arrayReserve(_innerShapes, prioritized.size());
-        Magnum::Containers::arrayAppend(_innerShapes, prioritized);
-    }
 
     virtual void onViewportChange(Magnum::Range2D& shapeAllowedSpace) {
         // might update shape
@@ -89,13 +82,27 @@ class Container : public Hoverable {
         return _latestHoveredShape;
     }
 
+ protected:
+    void _initContaining(std::initializer_list<UnderStory::Widget::Hoverable*> prioritized) {
+        _innerShapes = prioritized;
+    }
+
+    void _pushContaining(UnderStory::Widget::Hoverable* toBeContained) {
+        _innerShapes.push_back(toBeContained);
+    }
+
  private:
-    Corrade::Containers::Array<Hoverable*> _innerShapes;
+    std::vector<Hoverable*> _innerShapes;
     Hoverable* _latestHoveredShape = nullptr;
 
     void _updateLatestHoveredShape(Hoverable* hoverable) {
         if(_latestHoveredShape == hoverable) return;
         _latestHoveredShape = hoverable;
+
+        // debug output
+        #ifdef _DEBUG
+            // _traceHovered(hoverable);
+        #endif
     }
 };
 

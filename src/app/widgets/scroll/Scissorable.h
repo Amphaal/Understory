@@ -19,23 +19,47 @@
 
 #pragma once
 
+#include <Magnum/Magnum.h>
+#include <Magnum/Math/Range.h>
+#include <Magnum/Math/Vector2.h>
+#include <Magnum/GL/Renderer.h>
+#include <Magnum/GL/DefaultFramebuffer.h>
+
+#include <stack>
+
 #include "src/app/widgets/base/Hoverable.hpp"
 
 namespace UnderStory {
 
 namespace Widget {
 
-class ScrollableContent : public Hoverable {
- public:
-    ScrollableContent(ScrollableContent&& content, const Magnum::Matrix3* panelMatrix, GrowableAxis ga) :
-        ScrollableContent(content), _ga(ga), _panelMatrix(panelMatrix) {}
+class ScrollablePanel;
 
-    virtual void draw() = 0;
-    virtual Hoverable* asHoverable() = 0;
+class Scissorable {
+ public:
+    explicit Scissorable(ScrollablePanel* associatedPanel);
+
+    virtual void _draw() = 0;
+
+ protected:
+    void _bindToPanel();
+
+    void _applyScissor();
+    void _undoScissor();
+
+    const ScrollablePanel* associatedPanel() const;
+
+    void _updateScissorTarget(const Magnum::Range2D &geometry);
 
  private:
-    GrowableAxis _ga;
-    const Magnum::Matrix3* _panelMatrix;
+    ScrollablePanel* _associatedPanel;
+
+    Magnum::Range2Di _scissorTarget;
+
+    static inline std::stack<Magnum::Range2Di> _scissorStack;
+
+    static Magnum::Range2Di framebufferSize();
+    static Magnum::Vector2i fromGLtoPixel(Magnum::Vector2 GLCoords);
 };
 
 }  // namespace Widget

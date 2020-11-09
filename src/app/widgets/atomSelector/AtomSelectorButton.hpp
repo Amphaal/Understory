@@ -173,6 +173,7 @@ class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hove
                 .addVertexBuffer(std::move(bVertices), 0, Magnum::Shaders::Flat2D::Position{});
 
         //
+        _updateShape({vertices[0].position, vertices[2].position});
         _updateGeometry();
 
         //

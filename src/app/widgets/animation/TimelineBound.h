@@ -31,7 +31,7 @@ class MatrixAnimator;
 
 class TimelineBound {
  public:
-    TimelineBound(Animation::MatrixAnimator* animated);
+    explicit TimelineBound(Animation::MatrixAnimator* animated);
 
     Magnum::Timeline* timeline();
 

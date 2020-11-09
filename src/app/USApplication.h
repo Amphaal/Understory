@@ -52,7 +52,8 @@
 #include "widgets/navigation/MouseState.hpp"
 
 #include "widgets/atomSelector/AtomSelectorButton.hpp"
-#include "widgets/scroll/ScrollablePanel.hpp"
+#include "widgets/scroll/ScrollablePanel.h"
+#include "widgets/atomSelector/AtomSelectorGrid.hpp"
 
 #include "widgets/helpers/SelectionRectangle.hpp"
 #include "widgets/helpers/Grid.hpp"
@@ -130,8 +131,9 @@ class USApplication : public Magnum::Platform::Application, public Widget::AppCo
     Widget::Helper::Enlighter _enlighter;
 
     Magnum::Containers::Pointer<Widget::ShortcutsText> _stWidget;
-    Widget::AtomSelectorButton _atomSelector;
-    Widget::ScrollablePanel _atomSelectorPnl;
+    Widget::AtomSelectorButton _asButton;
+    Widget::ScrollablePanel _asPanel;
+    Widget::AtomSelectorGrid _asGrid;
 
     Utility::UpdateChecker _updateChecker;
 };

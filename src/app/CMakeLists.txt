@@ -90,6 +90,8 @@ corrade_add_resource(appExec_RES
 target_sources(appExec PRIVATE
     widgets/animation/MatrixAnimator.cpp
     widgets/animation/TimelineBound.cpp
+    widgets/scroll/Scissorable.cpp
+    widgets/scroll/ScrollablePanel.cpp
     USApplication.cpp
     ${appExec_RES}
 )

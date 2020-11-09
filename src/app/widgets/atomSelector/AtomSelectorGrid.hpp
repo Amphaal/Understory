@@ -32,6 +32,7 @@
 
 #include "src/app/shaders/Shaders.hpp"
 #include "src/app/widgets/base/Hoverable.hpp"
+#include "src/app/widgets/scroll/Scissorable.h"
 
 namespace UnderStory {
 
@@ -39,21 +40,20 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class AtomSelectorGrid : public Hoverable {
+class AtomSelectorGrid : public Hoverable, public Scissorable {
  public:
-    explicit AtomSelectorGrid(const Magnum::Matrix3* parentMatrix) : _parentMatrix(parentMatrix) {
+    explicit AtomSelectorGrid(ScrollablePanel* associatedPanel) : Scissorable(associatedPanel) {
+        _bindToPanel();
         _setup();
     }
 
-    void draw() {
+    void _draw() final {
         Shaders::color
-            ->setTransformationProjectionMatrix(*_parentMatrix)
+            ->setTransformationProjectionMatrix(_panelMatrix())
             .draw(_mesh);
     }
 
  private:
-    const Magnum::Matrix3* _parentMatrix;
-
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
     Magnum::GL::Buffer _buffer;
 
@@ -63,12 +63,16 @@ class AtomSelectorGrid : public Hoverable {
     };
     Corrade::Containers::StaticArray<4, Vertex> _vertices;
 
+    const Magnum::Matrix3& _panelMatrix() const {
+        return associatedPanel()->matrix();
+    }
+
     void _updateGeometry() {
         // update buffer
         _buffer.setSubData(0, _vertices);
 
         // update geometry
-        Hoverable::_updateGeometry(*_parentMatrix);
+        Hoverable::_updateGeometry(_panelMatrix());
     }
 
     void _availableSpaceChanged(Magnum::Range2D& availableSpace) final {

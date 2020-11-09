@@ -34,20 +34,20 @@ namespace Widget {
 class StaticText : public Magnum::GL::Mesh {
  public:
     StaticText() {}
-    StaticText(Magnum::GL::Mesh &&mesh, Magnum::GL::Buffer &&indices, Magnum::GL::Buffer &&vertices, Magnum::Range2D &&geometry) :
+    StaticText(Magnum::GL::Mesh &&mesh, Magnum::GL::Buffer &&indices, Magnum::GL::Buffer &&vertices, Magnum::Range2D &&pixelsShape) :
         Magnum::GL::Mesh(std::move(mesh)),
         _indices(std::move(indices)),
         _vertices(std::move(vertices)),
-        _geometry(std::move(geometry)) {}
+        _pixelsShape(std::move(pixelsShape)) {}
 
-    const Magnum::Range2D& geometry() const {
-        return _geometry;
+    const Magnum::Range2D& pixelsShape() const {
+        return _pixelsShape;
     }
 
  private:
     Magnum::GL::Buffer _indices;
     Magnum::GL::Buffer _vertices;
-    Magnum::Range2D    _geometry;
+    Magnum::Range2D    _pixelsShape;
 };
 
 class StaticTextFactory {
@@ -60,10 +60,10 @@ class StaticTextFactory {
         Magnum::GL::Mesh mesh;
         Magnum::GL::Buffer indices;
         Magnum::GL::Buffer vertices;
-        Magnum::Range2D geometry;
+        Magnum::Range2D pixelsShape;
 
         //
-        std::tie(mesh, geometry) = Magnum::Text::Renderer2D::render(
+        std::tie(mesh, pixelsShape) = Magnum::Text::Renderer2D::render(
             *_font, *_cache,  // font + cache
             _fontSize, text,  // size + text
             vertices, indices,  // buffers
@@ -76,7 +76,7 @@ class StaticTextFactory {
             std::move(mesh),
             std::move(indices),
             std::move(vertices),
-            std::move(geometry)
+            std::move(pixelsShape)
         };
     }
 

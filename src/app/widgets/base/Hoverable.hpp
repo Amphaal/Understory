@@ -19,6 +19,13 @@
 
 #pragma once
 
+#ifdef _DEBUG
+#include <cxxabi.h>
+
+#include <string>
+#include <memory>
+#endif
+
 #include "src/app/utility/AppBound.hpp"
 #include "Shape.hpp"
 
@@ -75,6 +82,40 @@ class Hoverable : public Shape, public AppBound {
 
     virtual void _onHoverChanged(bool isHovered) {}
     virtual void _mouseIsOver(const Magnum::Vector2 &cursorPos) {}
+
+
+    #ifdef _DEBUG
+        void _traceSelf() const {
+            auto self = _demangle(typeid(*this).name());
+            self = "[" + self + "]";
+            Magnum::Debug{} << self.c_str();
+        }
+
+        void _traceHoverable(Hoverable* hoverable) const {
+            auto self = _demangle(typeid(*this).name());
+            self = "[" + self + "]";
+
+            //
+            if(!hoverable) {
+                Magnum::Debug{}
+                    << self.c_str()
+                    << ": Out-of-frame";
+            } else {
+                Magnum::Debug{}
+                    << self.c_str()
+                    << ":"
+                    << _demangle(typeid(*hoverable).name()).c_str();
+            }
+        }
+
+        std::string _demangle(char const* mangled) const {
+            auto ptr = std::unique_ptr<char, decltype(& std::free)>{
+                abi::__cxa_demangle(mangled, nullptr, nullptr, nullptr),
+                std::free
+            };
+            return {ptr.get()};
+        }
+    #endif
 
  private:
     Magnum::Range2D _geometry;

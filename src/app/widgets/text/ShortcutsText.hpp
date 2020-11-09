@@ -45,6 +45,7 @@ class ShortcutsText : public Animation::PlayerMatrixAnimator<STHStateComponent>,
  public:
     explicit ShortcutsText(StaticText&& associatedText) : PlayerMatrixAnimator(&_moveAnim, .2f, &_defaultAnimationCallback),
         _text(std::move(associatedText)) {
+         _updateShape(_text.pixelsShape());
          _updateColors();
     }
 
@@ -115,7 +116,7 @@ class ShortcutsText : public Animation::PlayerMatrixAnimator<STHStateComponent>,
         _matrix = _responsiveMatrix * _moveAnim;
 
         // update geom
-        Hoverable::_updateGeometry(_text.geometry());
+        Hoverable::_updateGeometry(_matrix);
     }
 
     void _onHoverChanged(bool isHovered) final {
