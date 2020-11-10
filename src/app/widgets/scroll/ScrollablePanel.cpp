@@ -24,10 +24,10 @@
 using namespace Magnum::Math::Literals;
 
 UnderStory::Widget::ScrollablePanel::ScrollablePanel(StickTo stickness, float thickness) :
-    PlayerMatrixAnimator(&_matrix, .2f, &_defaultAnimationCallback),
+    PlayerMatrixAnimator(&_matrix, .1f, &_defaultAnimationCallback),
     _stickness(stickness),
     _thickness(thickness),
-    _scroller(&_matrix, _scrollerStickyness()) {
+    _scroller(this) {
     // set collapsed state as default
     _definePanelPosition(_collapsedTransform());
 
@@ -58,7 +58,7 @@ void UnderStory::Widget::ScrollablePanel::mayDraw() {
         .draw(_mesh);
 
     // draw scroller
-    _scroller.draw();
+    _scroller.mayDraw();
 
     // draw content
     _content->_draw();
@@ -73,15 +73,8 @@ void UnderStory::Widget::ScrollablePanel::onMouseScroll(const Magnum::Vector2& s
     _scroller.onMouseScroll(scrollOffset);
 }
 
-const UnderStory::Widget::GrowableAxis UnderStory::Widget::ScrollablePanel::_contentGrowableAxis() const {
-    switch (_stickness) {
-        case StickTo::Left :
-        case StickTo::Right :
-            return GrowableAxis::Height;
-        case StickTo::Top :
-        case StickTo::Bottom :
-            return GrowableAxis::Width;
-    }
+const UnderStory::Widget::StickTo UnderStory::Widget::ScrollablePanel::stickyness() const {
+    return _stickness;
 }
 
 void UnderStory::Widget::ScrollablePanel::_defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<Magnum::Vector2>& state) {
@@ -129,18 +122,8 @@ void UnderStory::Widget::ScrollablePanel::_definePanelPosition(const Magnum::Vec
     );
 }
 
-// scroller position within panel
-const UnderStory::Widget::StickTo UnderStory::Widget::ScrollablePanel::_scrollerStickyness() const {
-    switch (_stickness) {
-        case StickTo::Left :
-            return StickTo::Right;
-        case StickTo::Top :
-            return StickTo::Bottom;
-        case StickTo::Right :
-            return StickTo::Right;
-        case StickTo::Bottom :
-            return StickTo::Bottom;
-    }
+UnderStory::Widget::Scroller& UnderStory::Widget::ScrollablePanel::scroller() {
+    return _scroller;
 }
 
 const Magnum::Vector2 UnderStory::Widget::ScrollablePanel::_collapsedTransform() const {

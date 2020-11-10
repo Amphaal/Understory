@@ -239,8 +239,8 @@ void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
             _selectionRect.update(event, this->framebufferSize());
         }
 
-    // no locked context, update hover context
-    } else if(!_lockContext) {
+    // no specific locked context, update hover context
+    } else {
         auto cursorPos = _cursorPosition(event);
         this->checkIfMouseOver(cursorPos);
     }

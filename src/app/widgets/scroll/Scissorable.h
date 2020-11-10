@@ -39,24 +39,30 @@ class Scissorable {
  public:
     explicit Scissorable(ScrollablePanel* associatedPanel);
 
-    virtual void _draw() = 0;
+    void _draw();
 
  protected:
+    virtual void _drawInbetweenScissor() = 0;
+
     void _bindToPanel();
 
-    void _applyScissor();
-    void _undoScissor();
-
-    const ScrollablePanel* associatedPanel() const;
+    void _signalContentSizeChanged(const Magnum::Float& newContentSize);
+    const Magnum::Matrix3& _panelMatrix() const;
+    const GrowableAxis _growableAxis() const;
 
     void _updateScissorTarget(const Magnum::Range2D &geometry);
 
  private:
     ScrollablePanel* _associatedPanel;
+    GrowableAxis _grwblAxis;
+    const GrowableAxis _getGrowableAxis() const;
 
     Magnum::Range2Di _scissorTarget;
 
     static inline std::stack<Magnum::Range2Di> _scissorStack;
+
+    void _applyScissor();
+    void _undoScissor();
 
     static Magnum::Range2Di framebufferSize();
     static Magnum::Vector2i fromGLtoPixel(Magnum::Vector2 GLCoords);

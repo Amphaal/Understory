@@ -47,12 +47,6 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
         _setup();
     }
 
-    void _draw() final {
-        Shaders::color
-            ->setTransformationProjectionMatrix(_panelMatrix())
-            .draw(_mesh);
-    }
-
  private:
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
     Magnum::GL::Buffer _buffer;
@@ -63,8 +57,10 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
     };
     Corrade::Containers::StaticArray<4, Vertex> _vertices;
 
-    const Magnum::Matrix3& _panelMatrix() const {
-        return associatedPanel()->matrix();
+    void _drawInbetweenScissor() final {
+        Shaders::color
+            ->setTransformationProjectionMatrix(_panelMatrix())
+            .draw(_mesh);
     }
 
     void _updateGeometry() {
@@ -73,18 +69,46 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
 
         // update geometry
         Hoverable::_updateGeometry(_panelMatrix());
+
+        // update scissor
+        _updateScissorTarget(geometry());
     }
 
     void _availableSpaceChanged(Magnum::Range2D& availableSpace) final {
         // take all remaining space
+        switch(_growableAxis()) {
+            case GrowableAxis::Width:
+                availableSpace.max().x() *= 2.f;
+            break;
+            case GrowableAxis::Height:
+                availableSpace.min().y() *= 2.f;
+            break;
+        }
         _updateShape(availableSpace);
-        availableSpace = {};
 
         // update vertices
         _vertices[0] = {shape().bottomLeft(),     0xFF000099_rgbaf};
         _vertices[1] = {shape().bottomRight(),    0xFF000099_rgbaf};
         _vertices[2] = {shape().topRight(),       0x00FF0099_rgbaf};
         _vertices[3] = {shape().topLeft(),        0x00FF0099_rgbaf};
+
+        //
+        _updateGeometry();
+
+        //
+        switch(_growableAxis()) {
+            case GrowableAxis::Width:
+                _signalContentSizeChanged(
+                    availableSpace.x().size()
+                );
+            break;
+            case GrowableAxis::Height:
+                _signalContentSizeChanged(
+                    availableSpace.y().size()
+                );
+            break;
+        }
+        availableSpace = {};
     }
 
     void _setup() {

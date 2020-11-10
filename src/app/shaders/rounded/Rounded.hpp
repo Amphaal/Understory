@@ -38,22 +38,22 @@ namespace UnderStory {
 
 namespace Shader {
 
-class AtomSelector : public Magnum::GL::AbstractShaderProgram {
+class Rounded : public Magnum::GL::AbstractShaderProgram {
  public:
     typedef Magnum::GL::Attribute<0, Magnum::Vector2> Position;
     struct Vertex {
         Magnum::Vector2 position;
     };
-    explicit AtomSelector(Magnum::NoCreateT): Magnum::GL::AbstractShaderProgram{Magnum::NoCreate} {}
+    explicit Rounded(Magnum::NoCreateT): Magnum::GL::AbstractShaderProgram{Magnum::NoCreate} {}
 
-    explicit AtomSelector(const Magnum::Utility::Resource &rs) {
+    explicit Rounded(const Magnum::Utility::Resource &rs) {
             MAGNUM_ASSERT_GL_VERSION_SUPPORTED(Magnum::GL::Version::GL330);
 
             Magnum::GL::Shader vert{Magnum::GL::Version::GL330, Magnum::GL::Shader::Type::Vertex};
             Magnum::GL::Shader frag{Magnum::GL::Version::GL330, Magnum::GL::Shader::Type::Fragment};
 
-            vert.addSource(rs.get("AtomSelector.vert"));
-            frag.addSource(rs.get("AtomSelector.frag"));
+            vert.addSource(rs.get("Rounded.vert"));
+            frag.addSource(rs.get("Rounded.frag"));
 
             CORRADE_INTERNAL_ASSERT_OUTPUT(Magnum::GL::Shader::compile({vert, frag}));
 
@@ -66,12 +66,12 @@ class AtomSelector : public Magnum::GL::AbstractShaderProgram {
             _projectionMatrixUniform = uniformLocation("u_projMatrix");
         }
 
-        AtomSelector& setInnerRect(const Magnum::Vector4& borderRect) {
+        Rounded& setInnerRect(const Magnum::Vector4& borderRect) {
             setUniform(_innerRectUniform, borderRect);
             return *this;
         }
 
-        AtomSelector& setProjectionMatrix(const Magnum::Matrix3& projectionMatrix) {
+        Rounded& setProjectionMatrix(const Magnum::Matrix3& projectionMatrix) {
             setUniform(_projectionMatrixUniform, Magnum::Matrix4{projectionMatrix});
             return *this;
         }

@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <Corrade/Containers/StaticArray.h>
+
 #include <Magnum/GL/Buffer.h>
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/Math/Vector2.h>
@@ -31,63 +33,68 @@
 #include "src/app/widgets/animation/PlayerMatrixAnimator.hpp"
 
 #include "src/app/widgets/base/Constraints.hpp"
-#include "src/app/widgets/base/Container.hpp"
-#include "src/app/widgets/base/Toggleable.hpp"
-
-#include "Scroller.h"
+#include "src/app/widgets/base/Hoverable.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
-
-#include "Scissorable.h"
 
 namespace UnderStory {
 
 namespace Widget {
 
-class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container, public Toggleable {
+using namespace Magnum::Math::Literals;
+
+class ScrollablePanel;
+
+class Scroller : public Hoverable {
  public:
-    explicit ScrollablePanel(StickTo stickness = StickTo::Left, float thickness = .6f);
+    explicit Scroller(const ScrollablePanel* panel);
 
     void mayDraw();
 
-    const Magnum::Matrix3& matrix() const;
-    const StickTo stickyness() const;
-    Scroller& scroller();
-
-    void _bindContent(Scissorable* content);
-
     void onMouseScroll(const Magnum::Vector2& scrollOffset);
 
+    void onContentSizeChanged(const Magnum::Float& newContentSize);
+
+    void reveal();
+
+    void fade();
+
  private:
+    const ScrollablePanel* _associatedPanel;
     StickTo _stickness;
-    float _thickness;
+    static constexpr float THICKNESS_PX = 20.f;
+    static constexpr float PADDING_PX = 10.f;
+    static inline Magnum::Color4 PH_COLOR = 0xFFFFFF44_rgbaf;
+    static inline Magnum::Color4 SCRLL_COLOR_IDLE = 0xCCCCCCFF_rgbaf;
+    static inline Magnum::Color4 SCRLL_COLOR_ACTIVE = 0xFFFFFFFF_rgbaf;
+    bool _contentBigEnough = false;
 
-    Scroller _scroller;
-    Scissorable* _content;
-
-    Magnum::Matrix3 _matrix;
-
+    Magnum::GL::Buffer _buffer;
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
 
-    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<Magnum::Vector2>& state);
+    bool _isScrollerHovered = false;
+    Magnum::Range2D _scrollerShape;
+    Magnum::Range2D _phShape;
 
-    void _onHoverChanged(bool isHovered) final;
+    struct Vertex {
+        Magnum::Vector2 position;
+        Magnum::Color4 color;
+    };
+    Corrade::Containers::StaticArray<8, Vertex> _vertices;
 
-    void _onAnimationProgress() final;
+    // scroller position within panel
+    const StickTo _scrollerStickyness() const;
 
-    void _onToggled(bool isToggled) final;
-
-    // helper
     void _updateGeometry();
 
-    void onViewportChange(Magnum::Range2D& shapeAllowedSpace) final;
+    // if mouse is over placeholder
+    void _mouseIsOver(const Magnum::Vector2 &cursorPos) final;
 
-    void _definePanelPosition(const Magnum::Vector2 &pos);
-
-    const Magnum::Vector2 _collapsedTransform() const;
-
-    bool _setupDone = false;
     void _availableSpaceChanged(Magnum::Range2D& availableSpace) final;
+
+    void _updateScrollColor();
+
+    void _setup();
 };
 
 }  // namespace Widget

@@ -44,7 +44,7 @@ using namespace Magnum::Math::Literals;
 
 class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hoverable, public Toggleable {
  public:
-    AtomSelectorButton() : PlayerMatrixAnimator(&_moveAnim, .2f, &_defaultAnimationCallback) {}
+    AtomSelectorButton() : PlayerMatrixAnimator(&_moveAnim, .1f, &_defaultAnimationCallback) {}
 
     void onViewportChange(Magnum::Range2D& shapeAllowedSpace) final {
         Hoverable::onViewportChange(shapeAllowedSpace);

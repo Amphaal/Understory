@@ -20,15 +20,42 @@
 #include "Scissorable.h"
 #include "ScrollablePanel.h"
 
-UnderStory::Widget::Scissorable::Scissorable(ScrollablePanel* associatedPanel) : _associatedPanel(associatedPanel) {}
+UnderStory::Widget::Scissorable::Scissorable(ScrollablePanel* associatedPanel) :
+    _associatedPanel(associatedPanel), _grwblAxis(_getGrowableAxis()) {}
 
 void UnderStory::Widget::Scissorable::_applyScissor() {
     _scissorStack.push(_scissorTarget);
     Magnum::GL::Renderer::setScissor(_scissorTarget);
 }
 
-const UnderStory::Widget::ScrollablePanel* UnderStory::Widget::Scissorable::associatedPanel() const {
-    return _associatedPanel;
+void UnderStory::Widget::Scissorable::_draw() {
+    // TODO
+    // _applyScissor();
+        _drawInbetweenScissor();
+    // _undoScissor();
+}
+
+const UnderStory::Widget::GrowableAxis UnderStory::Widget::Scissorable::_growableAxis() const {
+    return _grwblAxis;
+}
+
+void UnderStory::Widget::Scissorable::_signalContentSizeChanged(const Magnum::Float& newContentSize) {
+    _associatedPanel->scroller().onContentSizeChanged(newContentSize);
+}
+
+const Magnum::Matrix3& UnderStory::Widget::Scissorable::_panelMatrix() const {
+    return _associatedPanel->matrix();
+}
+
+const UnderStory::Widget::GrowableAxis UnderStory::Widget::Scissorable::_getGrowableAxis() const {
+    switch (_associatedPanel->stickyness()) {
+        case StickTo::Left :
+        case StickTo::Right :
+            return GrowableAxis::Height;
+        case StickTo::Top :
+        case StickTo::Bottom :
+            return GrowableAxis::Width;
+    }
 }
 
 void UnderStory::Widget::Scissorable::_bindToPanel() {
