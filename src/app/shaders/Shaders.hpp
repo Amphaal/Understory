@@ -23,6 +23,8 @@
 #include <Magnum/Shaders/Flat.h>
 #include <Magnum/Shaders/VertexColor.h>
 
+#include "src/app/shaders/rounded/Rounded.hpp"
+
 namespace UnderStory {
 
 class Shaders {
@@ -30,6 +32,7 @@ class Shaders {
     static inline Magnum::Shaders::DistanceFieldVector2D* distanceField = nullptr;
     static inline Magnum::Shaders::Flat2D* flat = nullptr;
     static inline Magnum::Shaders::VertexColor2D* color = nullptr;
+    static inline Shader::Rounded* rounded = nullptr;
 };
 
 }  // namespace UnderStory

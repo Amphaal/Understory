@@ -28,10 +28,17 @@ void UnderStory::Widget::Scroller::mayDraw() {
     //
     if(!_contentBigEnough) return;
 
-    //
-    Shaders::color
-        ->setTransformationProjectionMatrix(_associatedPanel->matrix())
-        .draw(_mesh);
+    // ph
+    Shaders::rounded
+        ->setProjectionMatrix(_associatedPanel->matrix())
+        .setColor(PH_COLOR)
+        .draw(_meshPh);
+
+    // scroller
+    Shaders::rounded
+        ->setProjectionMatrix(_associatedPanel->matrix())
+        .setColor(_scrollerColor)
+        .draw(_meshScroller);
 }
 
 void UnderStory::Widget::Scroller::onMouseScroll(const Magnum::Vector2& scrollOffset) {
@@ -52,7 +59,7 @@ const UnderStory::Widget::StickTo UnderStory::Widget::Scroller::_scrollerStickyn
     }
 }
 
-void UnderStory::Widget::Scroller::onContentSizeChanged(const Magnum::Float& newContentSize) {
+void UnderStory::Widget::Scroller::_updateScrollerShape() {
     // determine placeholder size
     Magnum::Float phSize;
     switch (_stickness) {
@@ -68,8 +75,8 @@ void UnderStory::Widget::Scroller::onContentSizeChanged(const Magnum::Float& new
 
     // check if scroller is required
     Magnum::Float prcSize = 1.f;
-    if(phSize && newContentSize) {
-        prcSize = phSize / newContentSize;
+    if(phSize && _registeredContentSize) {
+        prcSize = phSize / _registeredContentSize;
     }
     _contentBigEnough = prcSize < 1.f;
     if(!_contentBigEnough) return;
@@ -89,22 +96,27 @@ void UnderStory::Widget::Scroller::onContentSizeChanged(const Magnum::Float& new
     }
 
     // set scroller vertices
-    _vertices[4].position = scrollerShape.bottomLeft();
-    _vertices[5].position = scrollerShape.bottomRight();
-    _vertices[6].position = scrollerShape.topRight();
-    _vertices[7].position = scrollerShape.topLeft();
+    _verticesScroller[0].position = scrollerShape.bottomLeft();
+    _verticesScroller[1].position = scrollerShape.bottomRight();
+    _verticesScroller[2].position = scrollerShape.topRight();
+    _verticesScroller[3].position = scrollerShape.topLeft();
 
     // update scroller shape...
     _scrollerShape = {
-        _vertices[4].position,
-        _vertices[6].position
+        _verticesScroller[0].position,
+        _verticesScroller[2].position
     };
 
     // ... and state...
     _updateScrollColor();
 
     // ... then finally update buffer
-    _buffer.setSubData(0, _vertices);
+    _bufferScroller.setSubData(0, _verticesScroller);
+}
+
+void UnderStory::Widget::Scroller::onContentSizeChanged(const Magnum::Float& newContentSize) {
+    _registeredContentSize = newContentSize;
+    _updateScrollerShape();
 }
 
 void UnderStory::Widget::Scroller::reveal() {
@@ -126,12 +138,9 @@ void UnderStory::Widget::Scroller::_mouseIsOver(const Magnum::Vector2 &cursorPos
     auto isScrollerHovered = _scrollerShape.contains(cursorPos);
     if(isScrollerHovered == _isScrollerHovered) return;
 
-    // change state
+    // change color
     _isScrollerHovered = isScrollerHovered;
     _updateScrollColor();
-
-    // update buffer
-    _buffer.setSubData(0, _vertices);
 }
 
 void UnderStory::Widget::Scroller::_availableSpaceChanged(Magnum::Range2D& availableSpace) {
@@ -177,43 +186,44 @@ void UnderStory::Widget::Scroller::_availableSpaceChanged(Magnum::Range2D& avail
     }
 
     // placeholder
-    _vertices[0] = {_phShape.bottomLeft(),     PH_COLOR};
-    _vertices[1] = {_phShape.bottomRight(),    PH_COLOR};
-    _vertices[2] = {_phShape.topRight(),       PH_COLOR};
-    _vertices[3] = {_phShape.topLeft(),        PH_COLOR};
-    _buffer.setSubData(0, _vertices);
+    _verticesPh[0] = {_phShape.bottomLeft()};
+    _verticesPh[1] = {_phShape.bottomRight()};
+    _verticesPh[2] = {_phShape.topRight()};
+    _verticesPh[3] = {_phShape.topLeft()};
+    _bufferPh.setSubData(0, _verticesPh);
 
     //
+
+    // update geometry
     _updateGeometry();
 }
 
 void UnderStory::Widget::Scroller::_updateScrollColor() {
-    Magnum::Color4 color = _isScrollerHovered ? SCRLL_COLOR_ACTIVE : SCRLL_COLOR_IDLE;
-    _vertices[4].color = color;
-    _vertices[5].color = color;
-    _vertices[6].color = color;
-    _vertices[7].color = color;
+    _scrollerColor = _isScrollerHovered ? SCRLL_COLOR_ACTIVE : SCRLL_COLOR_IDLE;
 }
 
 void UnderStory::Widget::Scroller::_setup() {
     // define indices
-    Magnum::GL::Buffer bIndices;
-    bIndices.setData({
-        // placeholder
+    Magnum::GL::Buffer phIndices, scrollerIndices;
+    phIndices.setData({
         0, 1, 2,
-        2, 3, 0,
-        // scroller
-        4, 5, 6,
-        6, 7, 4
+        2, 3, 0
+    });
+    scrollerIndices.setData({
+        0, 1, 2,
+        2, 3, 0
     });
 
     // bind buffer
-    _buffer.setData(_vertices, Magnum::GL::BufferUsage::DynamicDraw);
+    _bufferPh      .setData(_verticesPh,       Magnum::GL::BufferUsage::DynamicDraw);
+    _bufferScroller.setData(_verticesScroller, Magnum::GL::BufferUsage::DynamicDraw);
 
-    // define panel mesh
-    _mesh.setCount(bIndices.size())
-            .setIndexBuffer (std::move(bIndices),   0, Magnum::MeshIndexType::UnsignedInt)
-            .addVertexBuffer(_buffer,               0, Magnum::Shaders::Flat2D::Position{},
-                                                        Magnum::Shaders::Flat2D::Color4{}
-            );
+    // define meshes
+    _meshPh.setCount(phIndices.size())
+            .setIndexBuffer (std::move(phIndices),          0, Magnum::MeshIndexType::UnsignedInt)
+            .addVertexBuffer(_bufferPh,                     0, Magnum::Shaders::Flat2D::Position{});
+
+    _meshScroller.setCount(scrollerIndices.size())
+            .setIndexBuffer (std::move(scrollerIndices),    0, Magnum::MeshIndexType::UnsignedInt)
+            .addVertexBuffer(_bufferScroller,               0, Magnum::Shaders::Flat2D::Position{});
 }

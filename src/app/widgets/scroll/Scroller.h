@@ -60,27 +60,33 @@ class Scroller : public Hoverable {
     void fade();
 
  private:
-    const ScrollablePanel* _associatedPanel;
-    StickTo _stickness;
     static constexpr float THICKNESS_PX = 20.f;
     static constexpr float PADDING_PX = 10.f;
     static inline Magnum::Color4 PH_COLOR = 0xFFFFFF44_rgbaf;
     static inline Magnum::Color4 SCRLL_COLOR_IDLE = 0xCCCCCCFF_rgbaf;
     static inline Magnum::Color4 SCRLL_COLOR_ACTIVE = 0xFFFFFFFF_rgbaf;
+
+    const ScrollablePanel* _associatedPanel;
+    StickTo _stickness;
     bool _contentBigEnough = false;
-
-    Magnum::GL::Buffer _buffer;
-    Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
-
     bool _isScrollerHovered = false;
-    Magnum::Range2D _scrollerShape;
-    Magnum::Range2D _phShape;
+    Magnum::Float _registeredContentSize = 0.f;
 
     struct Vertex {
         Magnum::Vector2 position;
-        Magnum::Color4 color;
     };
-    Corrade::Containers::StaticArray<8, Vertex> _vertices;
+
+    Magnum::GL::Buffer _bufferPh;
+    Corrade::Containers::StaticArray<4, Vertex> _verticesPh;
+    Magnum::GL::Mesh _meshPh{Magnum::GL::MeshPrimitive::Triangles};
+    Magnum::Range2D _phShape;
+
+    Magnum::GL::Buffer _bufferScroller;
+    Corrade::Containers::StaticArray<4, Vertex> _verticesScroller;
+    Magnum::GL::Mesh _meshScroller{Magnum::GL::MeshPrimitive::Triangles};
+    Magnum::Range2D _scrollerShape;
+    Magnum::Color4 _scrollerColor;
+    void _updateScrollerShape();
 
     // scroller position within panel
     const StickTo _scrollerStickyness() const;

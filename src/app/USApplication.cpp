@@ -36,7 +36,8 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     _selectionRect(_rs),
     _grid(_rs, MAP_SIZE, MINIMUM_HEIGHT),
     _asPanel(),
-    _asGrid(&_asPanel) {
+    _asGrid(&_asPanel),
+    _rounded(_rs) {
     // set minimum size
     SDL_SetWindowMinimumSize(this->window(), MINIMUM_WIDTH, MINIMUM_HEIGHT);
 
@@ -44,6 +45,7 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     Shaders::distanceField = &_distanceField;
     Shaders::flat = &_flat;
     Shaders::color = &_color;
+    Shaders::rounded = &_rounded;
 
     //
     AppBound::setupApp(this);

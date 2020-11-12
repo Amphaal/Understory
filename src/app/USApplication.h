@@ -125,6 +125,7 @@ class USApplication : public Magnum::Platform::Application, public Widget::AppCo
     Magnum::Shaders::DistanceFieldVector2D _distanceField;
     Magnum::Shaders::Flat2D _flat;
     Magnum::Shaders::VertexColor2D _color;
+    Shader::Rounded _rounded{Magnum::NoCreate};
 
     Widget::Helper::SelectionRectangle _selectionRect;
     Widget::Helper::Grid _grid;
