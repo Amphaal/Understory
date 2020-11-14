@@ -118,6 +118,9 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
 
     //
     _timeline.start();
+
+    //
+    spdlog::info("APP OK !");
 }
 
 void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {

@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <spdlog/spdlog.h>
+
 #include <Corrade/PluginManager/Manager.h>
 #include <Corrade/Utility/FormatStl.h>
 #include <Corrade/Utility/Resource.h>

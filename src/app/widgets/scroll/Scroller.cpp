@@ -36,13 +36,19 @@ void UnderStory::Widget::Scroller::mayDraw() {
 
     // scroller
     Shaders::rounded
-        ->setProjectionMatrix(_associatedPanel->matrix())
+        ->setProjectionMatrix(
+            _associatedPanel->matrix() * _scrollerMatrix
+        )
         .setColor(_scrollerColor)
         .draw(_meshScroller);
 }
 
 void UnderStory::Widget::Scroller::onMouseScroll(const Magnum::Vector2& scrollOffset) {
-    // TODO
+    _scrollerMatrix =
+        _scrollerMatrix *
+        Magnum::Matrix3::translation(
+            Magnum::Vector2::yAxis(scrollOffset.y() / 10)
+        );
 }
 
 // scroller position within panel
@@ -57,6 +63,7 @@ const UnderStory::Widget::StickTo UnderStory::Widget::Scroller::_scrollerStickyn
         case StickTo::Bottom :
             return StickTo::Bottom;
     }
+    return StickTo::Undefined;
 }
 
 void UnderStory::Widget::Scroller::_updateScrollerShape() {
@@ -101,17 +108,18 @@ void UnderStory::Widget::Scroller::_updateScrollerShape() {
     _verticesScroller[2].position = scrollerShape.topRight();
     _verticesScroller[3].position = scrollerShape.topLeft();
 
-    // update scroller shape...
-    _scrollerShape = {
-        _verticesScroller[0].position,
-        _verticesScroller[2].position
-    };
+    // update its geometry
+    _updateScrollerGeometry();
 
     // ... and state...
     _updateScrollColor();
 
     // ... then finally update buffer
     _bufferScroller.setSubData(0, _verticesScroller);
+}
+
+void UnderStory::Widget::Scroller::_updateScrollerGeometry() {
+    // TODO
 }
 
 void UnderStory::Widget::Scroller::onContentSizeChanged(const Magnum::Float& newContentSize) {
@@ -127,15 +135,14 @@ void UnderStory::Widget::Scroller::fade() {
     // TODO
 }
 
-void UnderStory::Widget::Scroller::_updateGeometry() {
-    // update geometry
+void UnderStory::Widget::Scroller::_updatePhGeometry() {
     Hoverable::_updateGeometry(_associatedPanel->matrix());
 }
 
 // if mouse is over placeholder
 void UnderStory::Widget::Scroller::_mouseIsOver(const Magnum::Vector2 &cursorPos) {
     // check if over scroller
-    auto isScrollerHovered = _scrollerShape.contains(cursorPos);
+    auto isScrollerHovered = _scrollerGeometry.contains(cursorPos);
     if(isScrollerHovered == _isScrollerHovered) return;
 
     // change color
@@ -192,10 +199,8 @@ void UnderStory::Widget::Scroller::_availableSpaceChanged(Magnum::Range2D& avail
     _verticesPh[3] = {_phShape.topLeft()};
     _bufferPh.setSubData(0, _verticesPh);
 
-    //
-
-    // update geometry
-    _updateGeometry();
+    // update Placeholder geometry
+    _updatePhGeometry();
 }
 
 void UnderStory::Widget::Scroller::_updateScrollColor() {

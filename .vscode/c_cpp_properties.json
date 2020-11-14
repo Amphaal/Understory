@@ -18,10 +18,10 @@
                 "${workspaceFolder}/src/app/magnum-plugins/src",
                 "${workspaceFolder}/src/app/corrade/src",
                 "${workspaceFolder}/src/app/RxCpp/Rx/v2/src",
-                "${workspaceFolder}/src/base/spdlog/include",
                 "${workspaceFolder}/src/core/tiny-process-library",
                 "${workspaceFolder}/build",
-                "${workspaceFolder}/build/src/app/magnum/src"
+                "${workspaceFolder}/build/src/app/magnum/src",
+                "${workspaceFolder}/src/base/spdlog/include"
             ],
             "defines": [
                 "_DEBUG",
@@ -36,8 +36,7 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceFolder}/**",
-                "/usr/local/Cellar/miniupnpc/2.1/include"
+                "${workspaceFolder}/**"
             ],
             "defines": [
                 "_DEBUG",

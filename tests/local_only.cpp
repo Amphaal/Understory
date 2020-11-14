@@ -28,33 +28,12 @@ using UnderStory::UpdateChecker_Private;
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include <catch2/catch.hpp>
 
-// #include "src/network/uPnPHdlr.hpp"
-
 // #include "src/network/USServer.hpp"
 // #include "src/network/USClient.hpp"
 
 //
 // Test cases
 //
-
-/* TEST_CASE("Test uPnP", "[network]") {
-    UnderStory::UPnPHandler handler(
-        UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT,
-        UnderStory::Defaults::UPNP_REQUEST_DESCRIPTION
-    );
-
-    // request redirect
-    auto redirectRequest = handler.run();
-    auto status = redirectRequest.wait_for(std::chrono::seconds(5));
-    REQUIRE(status != std::future_status::timeout);
-    REQUIRE(handler.hasSucceded());
-
-    // request undirect
-    auto undirectRequest = handler.stop();
-    status = undirectRequest.wait_for(std::chrono::seconds(5));
-    REQUIRE(status != std::future_status::timeout);
-    REQUIRE(undirectRequest.get() == 0);
-} */
 
 /* using UnderStory::Network::Server::USServer;
 using UnderStory::Network::USClient;

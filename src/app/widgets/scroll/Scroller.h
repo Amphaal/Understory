@@ -71,6 +71,7 @@ class Scroller : public Hoverable {
     bool _contentBigEnough = false;
     bool _isScrollerHovered = false;
     Magnum::Float _registeredContentSize = 0.f;
+    Magnum::Matrix3 _scrollerMatrix;
 
     struct Vertex {
         Magnum::Vector2 position;
@@ -85,13 +86,15 @@ class Scroller : public Hoverable {
     Corrade::Containers::StaticArray<4, Vertex> _verticesScroller;
     Magnum::GL::Mesh _meshScroller{Magnum::GL::MeshPrimitive::Triangles};
     Magnum::Range2D _scrollerShape;
+    Magnum::Range2D _scrollerGeometry;
     Magnum::Color4 _scrollerColor;
     void _updateScrollerShape();
 
     // scroller position within panel
     const StickTo _scrollerStickyness() const;
 
-    void _updateGeometry();
+    void _updatePhGeometry();
+    void _updateScrollerGeometry();
 
     // if mouse is over placeholder
     void _mouseIsOver(const Magnum::Vector2 &cursorPos) final;

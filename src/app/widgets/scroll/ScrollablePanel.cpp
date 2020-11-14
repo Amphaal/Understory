@@ -137,6 +137,7 @@ const Magnum::Vector2 UnderStory::Widget::ScrollablePanel::_collapsedTransform()
         case StickTo::Bottom :
             return {.0f, -_thickness};
     }
+    return {};
 }
 
 void UnderStory::Widget::ScrollablePanel::_availableSpaceChanged(Magnum::Range2D& availableSpace) {

@@ -2,6 +2,7 @@ mingw64/mingw-w64-x86_64-protobuf
 mingw64/mingw-w64-x86_64-asio
 mingw64/mingw-w64-x86_64-gettext
 mingw64/mingw-w64-x86_64-miniupnpc
+mingw64/mingw-w64-x86_64-spdlog
 mingw64/mingw-w64-x86_64-corrade
 mingw64/mingw-w64-x86_64-magnum
 mingw64/mingw-w64-x86_64-magnum-plugins

@@ -56,6 +56,7 @@ const UnderStory::Widget::GrowableAxis UnderStory::Widget::Scissorable::_getGrow
         case StickTo::Bottom :
             return GrowableAxis::Width;
     }
+    return GrowableAxis::Unknown;
 }
 
 void UnderStory::Widget::Scissorable::_bindToPanel() {

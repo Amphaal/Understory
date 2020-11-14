@@ -8,7 +8,6 @@ target_link_libraries(appNetwork INTERFACE UnderStory::base)
 #############
 
 target_sources(appNetwork INTERFACE 
-    uPnPHdlr.hpp
     USClient.hpp
     USServer.hpp
     SocketHelper.hpp
@@ -28,17 +27,6 @@ IF(WIN32)
 endif()
 
 target_link_libraries(appNetwork INTERFACE asio)
-
-######################
-## Deps : miniupnpc ##
-######################
-
-#find miniupnpc
-find_package(miniupnpc REQUIRED)
-
-#link
-target_link_libraries(appNetwork INTERFACE miniupnpc)
-
 #WSA functions !
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_link_libraries(appNetwork INTERFACE ws2_32) 

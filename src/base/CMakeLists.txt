@@ -28,8 +28,10 @@ target_link_libraries(appBase INTERFACE ${Intl_LIBRARIES})
 ## Deps : spdlog ##
 ###################
 
-add_library(spdlog INTERFACE)
-target_include_directories(spdlog INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/spdlog/include")
+if(NOT TARGET spdlog)
+    #find
+    find_package(spdlog REQUIRED)
+endif()
 
 #link
-target_link_libraries(appBase INTERFACE spdlog)
+target_link_libraries(appBase INTERFACE spdlog::spdlog)
