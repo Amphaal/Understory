@@ -1,10 +1,6 @@
 [submodule "src/core/tiny-process-library"]
 	path = src/core/tiny-process-library
 	url = https://gitlab.com/Amphaal/tiny-process-library
-[submodule "src/base/spdlog"]
-	path = src/base/spdlog
-	url = https://github.com/gabime/spdlog
-	branch = v1.x
 [submodule "src/core/stb"]
 	path = src/core/stb
 	url = https://github.com/nothings/stb
