@@ -28,6 +28,7 @@
 
 #include <Corrade/Containers/StaticArray.h>
 
+#include <stdexcept>
 #include <utility>
 
 #include "src/app/shaders/Shaders.hpp"

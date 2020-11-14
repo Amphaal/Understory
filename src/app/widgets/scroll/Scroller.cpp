@@ -63,7 +63,6 @@ const UnderStory::Widget::StickTo UnderStory::Widget::Scroller::_scrollerStickyn
         case StickTo::Bottom :
             return StickTo::Bottom;
     }
-    return StickTo::Undefined;
 }
 
 void UnderStory::Widget::Scroller::_updateScrollerShape() {

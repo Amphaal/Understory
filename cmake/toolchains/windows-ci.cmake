@@ -34,6 +34,8 @@ SET (CMAKE_RC_COMPILER                      "llvm-rc")
 SET (CMAKE_C_FLAGS                          "-Wno-ignored-attributes -fuse-ld=lld -femulated-tls")
 SET (CMAKE_CXX_FLAGS                        ${CMAKE_C_FLAGS})
 
+SET (CMAKE_EXE_LINKER_FLAGS                 "-Wl,/force:multiple")
+
 SET (CMAKE_C_COMPILER_TARGET                "x86_64-w64-mingw32")
 SET (CMAKE_CXX_COMPILER_TARGET              ${CMAKE_C_COMPILER_TARGET})
 

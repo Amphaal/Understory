@@ -28,7 +28,6 @@ namespace UnderStory {
 namespace Widget {
 
 enum class StickTo {
-    Undefined,
     Left,
     Top,
     Right,
@@ -36,7 +35,6 @@ enum class StickTo {
 };
 
 enum class GrowableAxis {
-    Unknown,
     Width,
     Height
 };
