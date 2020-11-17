@@ -31,16 +31,18 @@ void UnderStory::Widget::Scroller::mayDraw() {
     // ph
     Shaders::rounded
         ->setProjectionMatrix(_associatedPanel->matrix())
+        .setPixelGeometry(_phGeomPixel)
         .setColor(PH_COLOR)
         .draw(_meshPh);
 
     // scroller
-    Shaders::rounded
-        ->setProjectionMatrix(
-            _associatedPanel->matrix() * _scrollerMatrix
-        )
-        .setColor(_scrollerColor)
-        .draw(_meshScroller);
+    // Shaders::rounded
+    //     ->setProjectionMatrix(
+    //         _associatedPanel->matrix() * _scrollerMatrix
+    //     )
+    //     .setShapeSize()
+    //     .setColor(_scrollerColor)
+    //     .draw(_meshScroller);
 }
 
 void UnderStory::Widget::Scroller::onMouseScroll(const Magnum::Vector2& scrollOffset) {
@@ -136,6 +138,10 @@ void UnderStory::Widget::Scroller::fade() {
 
 void UnderStory::Widget::Scroller::_updatePhGeometry() {
     Hoverable::_updateGeometry(_associatedPanel->matrix());
+    _phGeomPixel = {
+        geometry().min() + Magnum::Vector2 {1.f} / 2.f / constraints().pixelSize(),
+        geometry().max() + Magnum::Vector2 {1.f} / 2.f / constraints().pixelSize(),
+    };
 }
 
 // if mouse is over placeholder

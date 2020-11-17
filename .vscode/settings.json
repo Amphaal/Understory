@@ -12,7 +12,7 @@
         "MSVSCODE": "1"
     },
     "search.exclude": {
-        // "src/app/corrade": true,
+        "src/app/corrade": true,
         "src/app/magnum": true,
         "src/app/magnum-plugins": true,
         "src/app/RxCpp": true,

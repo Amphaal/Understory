@@ -73,7 +73,7 @@ struct SelectionRectState {
         _isSelecting = false;
     }
 
-    void onViewportChange() {
+    void resetSelection() {
         _isSelecting = false;  // reset selection
     }
 

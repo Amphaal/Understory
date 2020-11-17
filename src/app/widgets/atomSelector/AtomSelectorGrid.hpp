@@ -59,9 +59,9 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
     Corrade::Containers::StaticArray<4, Vertex> _vertices;
 
     void _drawInbetweenScissor() final {
-        Shaders::color
-            ->setTransformationProjectionMatrix(_panelMatrix())
-            .draw(_mesh);
+        // Shaders::color
+        //     ->setTransformationProjectionMatrix(_panelMatrix())
+        //     .draw(_mesh);
     }
 
     void _updateGeometry() {

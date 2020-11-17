@@ -61,9 +61,11 @@ class Rounded : public Magnum::GL::AbstractShaderProgram {
 
             CORRADE_INTERNAL_ASSERT_OUTPUT(link());
 
-            /* Matrices: view, transformation, projection, normal */
-            _colorUniform            = uniformLocation("u_color");
+            // get uniforms in correct order
             _projectionMatrixUniform = uniformLocation("u_projMatrix");
+            _colorUniform            = uniformLocation("u_color");
+            _geomPixelMinUniform     = uniformLocation("u_geomPixel_min");
+            _geomPixelMaxUniform     = uniformLocation("u_geomPixel_max");
         }
 
         Rounded& setColor(const Magnum::Color4& color) {
@@ -76,8 +78,14 @@ class Rounded : public Magnum::GL::AbstractShaderProgram {
             return *this;
         }
 
+        Rounded& setPixelGeometry(const Magnum::Range2D& geomInPixels) {
+            setUniform(_geomPixelMinUniform, geomInPixels.min());
+            setUniform(_geomPixelMaxUniform, geomInPixels.max());
+            return *this;
+        }
+
  private:
-    Magnum::Int _colorUniform, _projectionMatrixUniform;
+    Magnum::Int _colorUniform, _projectionMatrixUniform, _geomPixelMinUniform, _geomPixelMaxUniform;
 };
 
 }  // namespace Shader

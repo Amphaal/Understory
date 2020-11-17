@@ -124,28 +124,30 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
 }
 
 void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
-    //
+    // set viewport
     Magnum::GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
 
     // update constraints
     Shape::setConstraints(windowSize());
 
-    //
+    // reset selection for SelectionRect
+    _selectionRect.resetSelection();
+
+    // update main project
     _projectionWorld = Magnum::Matrix3::projection(
         Magnum::Vector2::xScale(constraints().ws().aspectRatio())
     );
 
-    // stick to top left corner + 5 pixels padding
+    // for the debug text, stick to top left corner + 5 pixels padding
     _transformationProjectionDebugText = constraints().baseProjMatrix() *
         Magnum::Matrix3::translation(
             constraints().ws() *
             (Magnum::Vector2 {-.5f, .5f} - constraints().pixelSize() * 5 * Magnum::Vector2{-1.f, 1.f})
         );
 
-    //
+    // assign an allowed space
     auto shape = this->shape();
     AppContainer::onViewportChange(shape);
-    _selectionRect.onViewportChange();
 }
 
 void UnderStory::USApplication::drawEvent() {

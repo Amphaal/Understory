@@ -61,7 +61,7 @@ class SelectionRect : public Magnum::GL::AbstractShaderProgram {
 
             CORRADE_INTERNAL_ASSERT_OUTPUT(link());
 
-            /* Matrices: view, transformation, projection, normal */
+            // get uniforms in correct order
             _innerRectUniform       = uniformLocation("u_innerRect");
             _projectionMatrixUniform = uniformLocation("u_projMatrix");
         }
