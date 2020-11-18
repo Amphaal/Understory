@@ -31,7 +31,7 @@ void UnderStory::Widget::Scroller::mayDraw() {
     // ph
     Shaders::rounded
         ->setProjectionMatrix(_associatedPanel->matrix())
-        .setPixelGeometry(_phGeomPixel)
+        .setRectPx(_phShapePx)
         .setColor(PH_COLOR)
         .draw(_meshPh);
 
@@ -138,10 +138,6 @@ void UnderStory::Widget::Scroller::fade() {
 
 void UnderStory::Widget::Scroller::_updatePhGeometry() {
     Hoverable::_updateGeometry(_associatedPanel->matrix());
-    _phGeomPixel = {
-        geometry().min() + Magnum::Vector2 {1.f} / 2.f / constraints().pixelSize(),
-        geometry().max() + Magnum::Vector2 {1.f} / 2.f / constraints().pixelSize(),
-    };
 }
 
 // if mouse is over placeholder
@@ -188,20 +184,21 @@ void UnderStory::Widget::Scroller::_availableSpaceChanged(Magnum::Range2D& avail
     this->_updateShape(ph);
 
     // reduce size with padding
-    {
-        Magnum::Range2D phMarginless = ph;
-        phMarginless = ph.padded({
-            - (pixelSize.x() * PADDING_PX),
-            - (pixelSize.y() * PADDING_PX)
-        });
-        _phShape = phMarginless;
-    }
+    _phShape = ph.padded({
+        - (pixelSize.x() * PADDING_PX),
+        - (pixelSize.y() * PADDING_PX)
+    });
+
+    // deduce pixel shape coordinates
+    _phShapePx.min() = (_phShapePx.min() + Magnum::Vector2{1.f}) / 2.f / constraints().pixelSize();
+    _phShapePx.max() = (_phShapePx.max() + Magnum::Vector2{1.f}) / 2.f / constraints().pixelSize();
+    Magnum::Debug{} << _phShapePx;
 
     // placeholder
-    _verticesPh[0] = {_phShape.bottomLeft()};
-    _verticesPh[1] = {_phShape.bottomRight()};
-    _verticesPh[2] = {_phShape.topRight()};
-    _verticesPh[3] = {_phShape.topLeft()};
+    _verticesPh[0].position = {-1.f, -1.f};
+    _verticesPh[1].position = {-1.f, 1.f};
+    _verticesPh[2].position = {1.f, 1.f};
+    _verticesPh[3].position = {1.f, -1.f};
     _bufferPh.setSubData(0, _verticesPh);
 
     // update Placeholder geometry

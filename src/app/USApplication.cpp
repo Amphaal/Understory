@@ -130,6 +130,9 @@ void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
     // update constraints
     Shape::setConstraints(windowSize());
 
+    // update shaders
+    Shaders::rounded->setResolution(constraints().ws());
+
     // reset selection for SelectionRect
     _selectionRect.resetSelection();
 

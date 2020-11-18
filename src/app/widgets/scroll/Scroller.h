@@ -81,7 +81,7 @@ class Scroller : public Hoverable {
     Corrade::Containers::StaticArray<4, Vertex> _verticesPh;
     Magnum::GL::Mesh _meshPh{Magnum::GL::MeshPrimitive::Triangles};
     Magnum::Range2D _phShape;
-    Magnum::Range2D _phGeomPixel;
+    Magnum::Range2D _phShapePx;
 
     Magnum::GL::Buffer _bufferScroller;
     Corrade::Containers::StaticArray<4, Vertex> _verticesScroller;

@@ -62,30 +62,36 @@ class Rounded : public Magnum::GL::AbstractShaderProgram {
             CORRADE_INTERNAL_ASSERT_OUTPUT(link());
 
             // get uniforms in correct order
-            _projectionMatrixUniform = uniformLocation("u_projMatrix");
-            _colorUniform            = uniformLocation("u_color");
-            _geomPixelMinUniform     = uniformLocation("u_geomPixel_min");
-            _geomPixelMaxUniform     = uniformLocation("u_geomPixel_max");
-        }
-
-        Rounded& setColor(const Magnum::Color4& color) {
-            setUniform(_colorUniform, color);
-            return *this;
+            _projMatrix         = uniformLocation("u_projMatrix");
+            _color              = uniformLocation("u_color");
+            _rectBottomLeftPx   = uniformLocation("u_rectBottomLeftPx");
+            _rectSizePx         = uniformLocation("u_rectSizePx");
+            _resolutionPx       = uniformLocation("u_resolutionPx");
         }
 
         Rounded& setProjectionMatrix(const Magnum::Matrix3& projectionMatrix) {
-            setUniform(_projectionMatrixUniform, Magnum::Matrix4{projectionMatrix});
+            setUniform(_projMatrix, Magnum::Matrix4{projectionMatrix});
+            return *this;
+        }
+        
+        Rounded& setColor(const Magnum::Color4& color) {
+            setUniform(_color, color);
             return *this;
         }
 
-        Rounded& setPixelGeometry(const Magnum::Range2D& geomInPixels) {
-            setUniform(_geomPixelMinUniform, geomInPixels.min());
-            setUniform(_geomPixelMaxUniform, geomInPixels.max());
+        Rounded& setRectPx(const Magnum::Range2D& rectInPx) {
+            setUniform(_rectBottomLeftPx, rectInPx.min());
+            setUniform(_rectSizePx, rectInPx.size());
+            return *this;
+        }
+
+        Rounded& setResolution(const Magnum::Vector2& resolutionInPx) {
+            setUniform(_resolutionPx, resolutionInPx);
             return *this;
         }
 
  private:
-    Magnum::Int _colorUniform, _projectionMatrixUniform, _geomPixelMinUniform, _geomPixelMaxUniform;
+    Magnum::Int _projMatrix, _color, _rectBottomLeftPx, _rectSizePx, _resolutionPx;
 };
 
 }  // namespace Shader
