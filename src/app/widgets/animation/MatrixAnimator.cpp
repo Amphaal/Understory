@@ -19,8 +19,8 @@
 
 #include "MatrixAnimator.h"
 
-UnderStory::Animation::MatrixAnimator::MatrixAnimator(Magnum::Matrix3* mainMatrix) :
- Animation::TimelineBound(this), _mainMatrix(mainMatrix) {}
+UnderStory::Animation::MatrixAnimator::MatrixAnimator(Magnum::Matrix3* animatedMatrix) :
+ Animation::TimelineBound(this), _animatedMatrix(animatedMatrix) {}
 
 void UnderStory::Animation::MatrixAnimator::setExcludedWhenPlaying(std::initializer_list<MatrixAnimator*> list) {
     _excluded = list;

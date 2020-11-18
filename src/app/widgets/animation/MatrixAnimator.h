@@ -33,7 +33,7 @@ namespace Animation {
 
 class MatrixAnimator : public TimelineBound {
  public:
-    MatrixAnimator(Magnum::Matrix3* mainMatrix);
+    explicit MatrixAnimator(Magnum::Matrix3* animatedMatrix);
 
     virtual void stopAnim() = 0;
     virtual void advance() = 0;
@@ -41,7 +41,7 @@ class MatrixAnimator : public TimelineBound {
     void setExcludedWhenPlaying(std::initializer_list<MatrixAnimator*> list);
 
  protected:
-    Magnum::Matrix3* _mainMatrix = nullptr;
+    Magnum::Matrix3* _animatedMatrix = nullptr;
 
     // must be overriden and reused
     virtual void _startAnim();

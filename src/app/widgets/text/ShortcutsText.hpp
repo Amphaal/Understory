@@ -54,9 +54,9 @@ class ShortcutsText : public Animation::PlayerMatrixAnimator<STHStateComponent>,
 
         // stick to top right corner + 5 pixels padding
             auto& ws = constraints().ws();
-            auto& baseProjMatrix = constraints().baseProjMatrix();
+            auto& pixelProjMatrix = constraints().pixelProjMatrix();
             auto& pixelSize = constraints().pixelSize();
-        _responsiveMatrix = baseProjMatrix *
+        _responsiveMatrix = pixelProjMatrix *
             Magnum::Matrix3::translation(
                 ws *
                 (Magnum::Vector2 {.5f} - pixelSize * 5)
@@ -132,7 +132,7 @@ class ShortcutsText : public Animation::PlayerMatrixAnimator<STHStateComponent>,
     }
 
     void _onAnimationProgress() final {
-        _replaceMainMatrix(Magnum::Matrix3::scaling(currentAnim().scaling));
+        _updateAnimatedMatrix(Magnum::Matrix3::scaling(currentAnim().scaling));
         _updateColors();
         _updateGeometry();
     }

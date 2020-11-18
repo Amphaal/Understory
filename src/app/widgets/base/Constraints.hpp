@@ -45,15 +45,20 @@ class Constraints {
 
     explicit Constraints(const Magnum::Vector2i &windowSize) :
         _ws(windowSize),
-        _baseProjMatrix(Magnum::Matrix3::projection(_ws)),
+        _pixelProjMatrix(Magnum::Matrix3::projection(_ws)),
+        _projMatrix(Magnum::Matrix3::projection(Magnum::Vector2 { _ws.aspectRatio(), 1.f } * 2.f)),
         _pixelSize(Magnum::Vector2 {1.f} / _ws) {}
 
     const Magnum::Vector2& ws() const {
         return _ws;
     }
 
-    const Magnum::Matrix3& baseProjMatrix() const {
-        return _baseProjMatrix;
+    const Magnum::Matrix3& pixelProjMatrix() const {
+        return _pixelProjMatrix;
+    }
+
+    const Magnum::Matrix3& projMatrix() const {
+        return _projMatrix;
     }
 
     const Magnum::Vector2& pixelSize() const {
@@ -62,7 +67,8 @@ class Constraints {
 
  private:
     Magnum::Vector2 _ws;
-    Magnum::Matrix3 _baseProjMatrix;
+    Magnum::Matrix3 _pixelProjMatrix;
+    Magnum::Matrix3 _projMatrix;
     Magnum::Vector2 _pixelSize;
 };
 

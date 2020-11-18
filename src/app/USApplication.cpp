@@ -142,7 +142,7 @@ void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
     );
 
     // for the debug text, stick to top left corner + 5 pixels padding
-    _transformationProjectionDebugText = constraints().baseProjMatrix() *
+    _transformationProjectionDebugText = constraints().pixelProjMatrix() *
         Magnum::Matrix3::translation(
             constraints().ws() *
             (Magnum::Vector2 {-.5f, .5f} - constraints().pixelSize() * 5 * Magnum::Vector2{-1.f, 1.f})

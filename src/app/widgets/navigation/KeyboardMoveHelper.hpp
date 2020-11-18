@@ -34,7 +34,7 @@ namespace Navigation {
 
 class KeyboardMoveHelper : public Animation::MatrixAnimator {
  public:
-     KeyboardMoveHelper(Magnum::Matrix3* mainMatrix) : MatrixAnimator(mainMatrix) {}
+     KeyboardMoveHelper(Magnum::Matrix3* animatedMatrix) : MatrixAnimator(animatedMatrix) {}
 
     void stopAnim() override {
         _km = KeyboardMovements();
@@ -90,7 +90,7 @@ class KeyboardMoveHelper : public Animation::MatrixAnimator {
     void _updateMatrix(const AxisMomentum &axis, float frameDuration, bool deceleration) const {
         auto &v = deceleration ? axis.momentumDirection : axis.currentDirection;
         auto translationMatrix = Magnum::Matrix3::translation(v * Magnum::Vector2{axis.speed * frameDuration});
-        (*_mainMatrix) = translationMatrix * (*_mainMatrix);
+        (*_animatedMatrix) = translationMatrix * (*_animatedMatrix);
     }
 
     void _updateSpeed(AxisMomentum &axis, bool deceleration) {

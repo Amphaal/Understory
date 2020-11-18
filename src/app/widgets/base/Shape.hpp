@@ -44,6 +44,11 @@ class Shape {
         return _shape;
     }
 
+    // in screen pixel coordinates, with origin starting from bottom left screen
+    const Magnum::Range2D& pixelShape() const {
+        return _shape;
+    }
+
     void setConstraints(const Magnum::Vector2i &windowSize) {
         _currentConstraints = Widget::Constraints { windowSize };
     }
@@ -51,6 +56,7 @@ class Shape {
  protected:
     void _updateShape(const Magnum::Range2D& shape) {
         _shape = shape;
+        _pixelShape = _shapeIntoPixel(shape);
     }
 
     // to be overriden if size is relative to a parent Container size
@@ -62,8 +68,19 @@ class Shape {
 
  private:
     Magnum::Range2D _shape;
+    Magnum::Range2D _pixelShape;
 
     static inline Constraints _currentConstraints;
+
+    static const Magnum::Range2D _shapeIntoPixel(Magnum::Range2D shape) {
+        _vectorIntoPixel(shape.min());
+        _vectorIntoPixel(shape.max());
+        return shape;
+    }
+
+    static void _vectorIntoPixel(Magnum::Vector2 &vector) {
+        vector = (vector + Magnum::Vector2{1.f}) / 2.f / constraints().pixelSize();
+    }
 };
 
 }  // namespace Widget

@@ -32,7 +32,7 @@ namespace Navigation {
 
 class MouseMoveHelper : public Animation::PlayerMatrixAnimator<> {
  public:
-     MouseMoveHelper(Magnum::Matrix3* mainMatrix) : PlayerMatrixAnimator(mainMatrix, .2f) {}
+     MouseMoveHelper(Magnum::Matrix3* animatedMatrix) : PlayerMatrixAnimator(animatedMatrix, .2f) {}
 
     void stopAnim() final {
        PlayerMatrixAnimator::stopAnim();
@@ -67,16 +67,16 @@ class MouseMoveHelper : public Animation::PlayerMatrixAnimator<> {
     }
 
     void _updateAnimationFromMoveVectorAndPlay(const Magnum::Vector2 &moveTr) {
-        auto from = mainMatrix()->translation();
+        auto from = animatedMatrix()->translation();
         PlayerMatrixAnimator::_updateAnimationAndPlay(from, from + moveTr);
     }
 
     void _translateTo(const Magnum::Vector2 &translationVector) {
-        _multiplyWithMainMatrix(Magnum::Matrix3::translation(translationVector - mainMatrix()->translation()));
+        _multiplyAnimatedMatrix(Magnum::Matrix3::translation(translationVector - animatedMatrix()->translation()));
     }
 
     void _translateToAbs(const Magnum::Vector2 &translationVector) {
-        _multiplyWithMainMatrix(Magnum::Matrix3::translation(translationVector));
+        _multiplyAnimatedMatrix(Magnum::Matrix3::translation(translationVector));
     }
 };
 

@@ -117,7 +117,7 @@ void UnderStory::Widget::ScrollablePanel::onViewportChange(Magnum::Range2D& shap
 }
 
 void UnderStory::Widget::ScrollablePanel::_definePanelPosition(const Magnum::Vector2 &pos) {
-    _replaceMainMatrix(
+    _updateAnimatedMatrix(
         Magnum::Matrix3::translation(pos)
     );
 }

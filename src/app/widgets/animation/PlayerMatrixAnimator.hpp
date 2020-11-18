@@ -37,8 +37,8 @@ class PlayerMatrixAnimator : public MatrixAnimator {
     using AnimationCallback = void(*)(Magnum::Float, const float &, State<T>&);
 
     //
-    PlayerMatrixAnimator(Magnum::Matrix3* mainMatrix, float animDurationInSecs, AnimationCallback animCb = &_defaultAnimationCallback)
-    : MatrixAnimator(mainMatrix),
+    PlayerMatrixAnimator(Magnum::Matrix3* animatedMatrix, float animDurationInSecs, AnimationCallback animCb = &_defaultAnimationCallback)
+    : MatrixAnimator(animatedMatrix),
     _track({
         {.0f, .0f},
         {animDurationInSecs, 1.0f}
@@ -64,16 +64,16 @@ class PlayerMatrixAnimator : public MatrixAnimator {
  protected:
     void virtual _onAnimationProgress() = 0;
 
-    const Magnum::Matrix3* mainMatrix() const { return _mainMatrix; }
+    const Magnum::Matrix3* animatedMatrix() const { return _animatedMatrix; }
     const T& currentAnim() const { return _animState.current; }
     const State<T>& animState() const { return _animState; }
 
-    void _multiplyWithMainMatrix(const Magnum::Matrix3& factorMatrix) {
-        (*_mainMatrix) = factorMatrix * (*_mainMatrix);
+    void _multiplyAnimatedMatrix(const Magnum::Matrix3& factorMatrix) {
+        (*_animatedMatrix) = factorMatrix * (*_animatedMatrix);
     }
 
-    void _replaceMainMatrix(const Magnum::Matrix3& replacingMatrix) {
-        (*_mainMatrix) = replacingMatrix;
+    void _updateAnimatedMatrix(const Magnum::Matrix3& replacingMatrix) {
+        (*_animatedMatrix) = replacingMatrix;
     }
 
     void _updateAnimationAndPlay(const T &from, const T &to) {

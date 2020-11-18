@@ -38,8 +38,8 @@ struct ScrollAnimStateComponent {
 
 class MapScaleHelper : public Animation::PlayerMatrixAnimator<ScrollAnimStateComponent> {
  public:
-    explicit MapScaleHelper(Magnum::Matrix3* mainMatrix)
-    : PlayerMatrixAnimator(mainMatrix, SMOOTHING_AS_SECONDS, &_defaultAnimationCallback) {}
+    explicit MapScaleHelper(Magnum::Matrix3* animatedMatrix)
+    : PlayerMatrixAnimator(animatedMatrix, SMOOTHING_AS_SECONDS, &_defaultAnimationCallback) {}
 
     void keyPressEvent(Sdl2Application::KeyEvent& event) {
         switch (event.key()) {
@@ -61,7 +61,7 @@ class MapScaleHelper : public Animation::PlayerMatrixAnimator<ScrollAnimStateCom
         ScrollAnimStateComponent from, to;
 
         auto scalingFactor = 1.f / abs(zoomRect.sizeY());
-        from.scaling = mainMatrix()->scaling();
+        from.scaling = animatedMatrix()->scaling();
         to.scaling = from.scaling * scalingFactor;
         _thresholdScaling(to.scaling);
 
@@ -81,7 +81,7 @@ class MapScaleHelper : public Animation::PlayerMatrixAnimator<ScrollAnimStateCom
         ScrollAnimStateComponent from, to;
 
         // determine scaling
-        from.scaling = mainMatrix()->scaling();
+        from.scaling = animatedMatrix()->scaling();
         to.scaling = _scalingVectorFromDirection(direction);
 
         // define transform only on zoom-in
@@ -136,7 +136,7 @@ class MapScaleHelper : public Animation::PlayerMatrixAnimator<ScrollAnimStateCom
     }
 
     Magnum::Vector2 _scalingVectorFromDirection(Magnum::Float direction, bool asFactor = false) {
-        const auto fromScaling = mainMatrix()->scaling();
+        const auto fromScaling = animatedMatrix()->scaling();
         auto targetScale = fromScaling * _getScrollDeltaVector(direction);
 
         _thresholdScaling(targetScale);
@@ -150,15 +150,15 @@ class MapScaleHelper : public Animation::PlayerMatrixAnimator<ScrollAnimStateCom
 
         // get and apply factor without anim
         const auto scaleFactor = _scalingVectorFromDirection(direction, true);
-        _multiplyWithMainMatrix(Magnum::Matrix3::scaling(scaleFactor));
+        _multiplyAnimatedMatrix(Magnum::Matrix3::scaling(scaleFactor));
     }
 
     void _onAnimationProgress() final {
         // scaling
         auto currentAnimSc = currentAnim().scaling;
         if (!currentAnimSc.isZero()) {
-            auto scalingFactor = currentAnimSc / mainMatrix()->scaling();
-            _multiplyWithMainMatrix(Magnum::Matrix3::scaling(scalingFactor));
+            auto scalingFactor = currentAnimSc / animatedMatrix()->scaling();
+            _multiplyAnimatedMatrix(Magnum::Matrix3::scaling(scalingFactor));
         }
 
         // translate
@@ -169,7 +169,7 @@ class MapScaleHelper : public Animation::PlayerMatrixAnimator<ScrollAnimStateCom
             step /= animState().from.scaling;
 
             // move
-            _multiplyWithMainMatrix(Magnum::Matrix3::translation(step * currentAnimSc * _zoomAccuracy));
+            _multiplyAnimatedMatrix(Magnum::Matrix3::translation(step * currentAnimSc * _zoomAccuracy));
         }
     }
 

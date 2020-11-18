@@ -31,16 +31,14 @@ void UnderStory::Widget::Scroller::mayDraw() {
     // ph
     Shaders::rounded
         ->setProjectionMatrix(_associatedPanel->matrix())
-        .setRectPx(_phShapePx)
+        .setRectPx(pixelShape())
         .setColor(PH_COLOR)
         .draw(_meshPh);
 
     // scroller
     // Shaders::rounded
-    //     ->setProjectionMatrix(
-    //         _associatedPanel->matrix() * _scrollerMatrix
-    //     )
-    //     .setShapeSize()
+    //     ->setProjectionMatrix(_associatedPanel->matrix() * _scrollerMatrix)
+    //     .setShapeSize(_scrollerShapePx)
     //     .setColor(_scrollerColor)
     //     .draw(_meshScroller);
 }
@@ -73,11 +71,11 @@ void UnderStory::Widget::Scroller::_updateScrollerShape() {
     switch (_stickness) {
         case StickTo::Left :
         case StickTo::Right :
-            phSize = _phShape.y().size();
+            phSize = shape().y().size();
             break;
         case StickTo::Top :
         case StickTo::Bottom :
-            phSize = _phShape.x().size();
+            phSize = shape().x().size();
             break;
     }
 
@@ -91,7 +89,7 @@ void UnderStory::Widget::Scroller::_updateScrollerShape() {
     auto scrollerSize = phSize * prcSize;
 
     // determine new scroller size
-    auto scrollerShape = _phShape;
+    auto scrollerShape = shape();
     switch (_stickness) {
         case StickTo::Left :
         case StickTo::Right :
@@ -181,24 +179,18 @@ void UnderStory::Widget::Scroller::_availableSpaceChanged(Magnum::Range2D& avail
     }
 
     // update shape with placeholder
-    this->_updateShape(ph);
-
-    // reduce size with padding
-    _phShape = ph.padded({
-        - (pixelSize.x() * PADDING_PX),
-        - (pixelSize.y() * PADDING_PX)
-    });
-
-    // deduce pixel shape coordinates
-    _phShapePx.min() = (_phShapePx.min() + Magnum::Vector2{1.f}) / 2.f / constraints().pixelSize();
-    _phShapePx.max() = (_phShapePx.max() + Magnum::Vector2{1.f}) / 2.f / constraints().pixelSize();
-    Magnum::Debug{} << _phShapePx;
+    this->_updateShape(
+        ph.padded({
+            - (pixelSize.x() * PADDING_PX),
+            - (pixelSize.y() * PADDING_PX)
+        })
+    );
 
     // placeholder
-    _verticesPh[0].position = {-1.f, -1.f};
-    _verticesPh[1].position = {-1.f, 1.f};
-    _verticesPh[2].position = {1.f, 1.f};
-    _verticesPh[3].position = {1.f, -1.f};
+    _verticesPh[0].position = {-1.f, -1.f};  // shape().bottomLeft();
+    _verticesPh[1].position = {-1.f, 1.f};   // shape().topLeft();
+    _verticesPh[2].position = {1.f, 1.f};    // shape().topRight();
+    _verticesPh[3].position = {1.f, -1.f};   // shape().bottomRight();
     _bufferPh.setSubData(0, _verticesPh);
 
     // update Placeholder geometry
@@ -228,9 +220,9 @@ void UnderStory::Widget::Scroller::_setup() {
     // define meshes
     _meshPh.setCount(phIndices.size())
             .setIndexBuffer (std::move(phIndices),          0, Magnum::MeshIndexType::UnsignedInt)
-            .addVertexBuffer(_bufferPh,                     0, Magnum::Shaders::Flat2D::Position{});
+            .addVertexBuffer(_bufferPh,                     0, Shader::Rounded::Position{});
 
     _meshScroller.setCount(scrollerIndices.size())
             .setIndexBuffer (std::move(scrollerIndices),    0, Magnum::MeshIndexType::UnsignedInt)
-            .addVertexBuffer(_bufferScroller,               0, Magnum::Shaders::Flat2D::Position{});
+            .addVertexBuffer(_bufferScroller,               0, Shader::Rounded::Position{});
 }

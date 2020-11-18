@@ -44,25 +44,23 @@ using namespace Magnum::Math::Literals;
 
 class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hoverable, public Toggleable {
  public:
-    AtomSelectorButton() : PlayerMatrixAnimator(&_moveAnim, .1f, &_defaultAnimationCallback) {}
+    AtomSelectorButton() : PlayerMatrixAnimator(&_moveAnim, .1f, &_defaultAnimationCallback) {
+        _updateCurrentColor();
+    }
 
     void onViewportChange(Magnum::Range2D& shapeAllowedSpace) final {
         Hoverable::onViewportChange(shapeAllowedSpace);
 
-        //
-        auto asXPadding = 15.f;
-        auto targetPrcXSize = .025f;
-
         // update responsive matrix
-            auto& ws = constraints().ws();
-            auto& baseProjMatrix = constraints().baseProjMatrix();
+            auto& projMatrix = constraints().projMatrix();
             auto& pixelSize = constraints().pixelSize();
-            auto asSize = ws.x() * (targetPrcXSize / 2);
-        _responsiveMatrix = baseProjMatrix *
-            Magnum::Matrix3::translation(
-                ws * (Magnum::Vector2{-.5f} + Magnum::Vector2{pixelSize.x() * (asSize + asXPadding), 0.f})
-            ) *
-            Magnum::Matrix3::scaling(Magnum::Vector2{asSize});
+            auto pixelLeftPadding = 15.f;
+
+        _responsiveMatrix =
+            Magnum::Matrix3::translation(Magnum::Vector2{-1.f, -1.f}) *  // anchor to BottomLeft
+            Magnum::Matrix3::translation(Magnum::Vector2::xAxis(pixelSize.x() * 2.f * pixelLeftPadding)) *  // add pixel relative padding
+            Magnum::Matrix3::translation(-_halfButtonSizeHeightAxis()) *  // duck half button size beneath window
+            projMatrix;
 
         //
         _updateGeometry();
@@ -71,7 +69,7 @@ class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hove
     void draw() {
         Shaders::flat
             ->setTransformationProjectionMatrix(_matrix)
-            .setColor(isHovered() || isToggled() ? 0xFFFFFF_rgbf : 0x000000_rgbf)
+            .setColor(_currentColor)
             .draw(_mesh);
     }
 
@@ -81,6 +79,11 @@ class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hove
     Magnum::Matrix3 _matrix;
 
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
+
+    Magnum::Color4 _currentColor;
+    void _updateCurrentColor() {
+        _currentColor = isHovered() || isToggled() ? 0xFFFFFF_rgbf : 0x000000_rgbf;
+    }
 
     static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<Magnum::Vector2>& state) {
         //
@@ -100,17 +103,23 @@ class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hove
         }
 
         //
+        _updateCurrentColor();
+
+        //
         _updateAnimationYTarget();
     }
 
     void _onToggled(bool isToggled) final {
+        //
+        _updateCurrentColor();
+
         //
         _updateAnimationYTarget();
     }
 
     void _onAnimationProgress() final {
         // update matrix
-        _replaceMainMatrix(
+        _updateAnimatedMatrix(
             Magnum::Matrix3::translation(
                 currentAnim()
             )
@@ -124,13 +133,17 @@ class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hove
         //
         Magnum::Vector2 target;
         if(isToggled()) {
-            target = Magnum::Vector2::yAxis(2.f);
+            target = _halfButtonSizeHeightAxis() * 2.f;
         } else if(isHovered()) {
-            target = Magnum::Vector2::yAxis(.5f);
+            target = _halfButtonSizeHeightAxis() * .5f;
         }
 
         //
         _updateAnimationAndPlay(_moveAnim.translation(), target);
+    }
+
+    const Magnum::Vector2 _halfButtonSizeHeightAxis() const {
+        return Magnum::Vector2::yAxis(shape().size().y() * .5f);
     }
 
     void _updateGeometry() {
@@ -158,10 +171,10 @@ class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hove
             Magnum::Vector2 position;
         };
         const Vertex vertices[]{
-            {{-1.f, -1.f}},
-            {{ 1.f, -1.f}},
-            {{ 1.f,  1.f}},
-            {{-1.f,  1.f}}
+            {{  0.f, 0.f }},
+            {{ .1f,  0.f }},
+            {{ .1f,  .1f }},
+            {{  0.f, .1f }}
         };
 
         // bind buffer
