@@ -20,13 +20,13 @@
                 "${workspaceFolder}/src/app/RxCpp/Rx/v2/src",
                 "${workspaceFolder}/src/core/tiny-process-library",
                 "${workspaceFolder}/build",
-                "${workspaceFolder}/build/src/app/magnum/src",
-                "${workspaceFolder}/src/base/spdlog/include"
+                "${workspaceFolder}/build/src/app/magnum/src"
             ],
             "defines": [
                 "_DEBUG",
                 "UNICODE",
-                "_UNICODE"
+                "_UNICODE",
+                "SPDLOG_FMT_EXTERNAL"
             ],
             "compilerPath": "C:/msys64/mingw64/bin/clang++.exe",
             "cStandard": "c11",

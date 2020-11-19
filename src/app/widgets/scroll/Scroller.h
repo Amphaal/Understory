@@ -33,9 +33,11 @@
 #include "src/app/widgets/animation/PlayerMatrixAnimator.hpp"
 
 #include "src/app/widgets/base/Constraints.hpp"
-#include "src/app/widgets/base/Hoverable.hpp"
+#include "src/app/widgets/base/Container.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
+
+#include "ScrollerHandle.hpp"
 
 namespace UnderStory {
 
@@ -45,13 +47,15 @@ using namespace Magnum::Math::Literals;
 
 class ScrollablePanel;
 
-class Scroller : public Hoverable {
+class Scroller : public Container {
  public:
     explicit Scroller(const ScrollablePanel* panel);
 
     void mayDraw();
 
-    void onMouseScroll(const Magnum::Vector2& scrollOffset);
+    void updateGeometry();
+
+    void onMouseScroll(const Magnum::Matrix3& scrollMatrix);
 
     void onContentSizeChanged(const Magnum::Float& newContentSize);
 
@@ -63,15 +67,12 @@ class Scroller : public Hoverable {
     static constexpr float THICKNESS_PX = 20.f;
     static constexpr float PADDING_PX = 10.f;
     static inline Magnum::Color4 PH_COLOR = 0xFFFFFF44_rgbaf;
-    static inline Magnum::Color4 SCRLL_COLOR_IDLE = 0xCCCCCCFF_rgbaf;
-    static inline Magnum::Color4 SCRLL_COLOR_ACTIVE = 0xFFFFFFFF_rgbaf;
 
     const ScrollablePanel* _associatedPanel;
+    ScrollerHandle _handle;
     StickTo _stickness;
+
     bool _contentBigEnough = false;
-    bool _isScrollerHovered = false;
-    Magnum::Float _registeredContentSize = 0.f;
-    Magnum::Matrix3 _scrollerMatrix;
 
     struct Vertex {
         Magnum::Vector2 position;
@@ -80,27 +81,12 @@ class Scroller : public Hoverable {
     Magnum::GL::Buffer _bufferPh;
     Corrade::Containers::StaticArray<4, Vertex> _verticesPh;
     Magnum::GL::Mesh _meshPh{Magnum::GL::MeshPrimitive::Triangles};
-
-    Magnum::GL::Buffer _bufferScroller;
-    Corrade::Containers::StaticArray<4, Vertex> _verticesScroller;
-    Magnum::GL::Mesh _meshScroller{Magnum::GL::MeshPrimitive::Triangles};
-    Magnum::Range2D _scrollerShape;
-    Magnum::Range2D _scrollerGeometry;
-    Magnum::Color4 _scrollerColor;
-    void _updateScrollerShape();
+    Magnum::Range2D _geomPhPx;
 
     // scroller position within panel
     const StickTo _scrollerStickyness() const;
 
-    void _updatePhGeometry();
-    void _updateScrollerGeometry();
-
-    // if mouse is over placeholder
-    void _mouseIsOver(const Magnum::Vector2 &cursorPos) final;
-
     void _availableSpaceChanged(Magnum::Range2D& availableSpace) final;
-
-    void _updateScrollColor();
 
     void _setup();
 };

@@ -101,7 +101,7 @@ class Container : public Hoverable {
 
         // debug output
         #ifdef _DEBUG
-            // _traceHovered(hoverable);
+            // _traceHoverable(hoverable);
         #endif
     }
 };

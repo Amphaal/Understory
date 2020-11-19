@@ -59,9 +59,9 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
     Corrade::Containers::StaticArray<4, Vertex> _vertices;
 
     void _drawInbetweenScissor() final {
-        // Shaders::color
-        //     ->setTransformationProjectionMatrix(_panelMatrix())
-        //     .draw(_mesh);
+        Shaders::color
+            ->setTransformationProjectionMatrix(_panelMatrix() * scrollMatrix())
+            .draw(_mesh);
     }
 
     void _updateGeometry() {
@@ -97,18 +97,18 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
         _updateGeometry();
 
         //
+        Magnum::Float size;
         switch(_growableAxis()) {
             case GrowableAxis::Width:
-                _signalContentSizeChanged(
-                    availableSpace.x().size()
-                );
+                size = availableSpace.x().size();
             break;
             case GrowableAxis::Height:
-                _signalContentSizeChanged(
-                    availableSpace.y().size()
-                );
+                size = availableSpace.y().size();
             break;
         }
+
+        //
+        _signalContentSizeChanged(size);
         availableSpace = {};
     }
 

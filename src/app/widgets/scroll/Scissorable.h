@@ -39,7 +39,9 @@ class Scissorable {
  public:
     explicit Scissorable(ScrollablePanel* associatedPanel);
 
-    void _draw();
+    void draw();
+    void onMouseScroll(const Magnum::Vector2& scrollOffset);
+    const Magnum::Matrix3& scrollMatrix() const;
 
  protected:
     virtual void _drawInbetweenScissor() = 0;
@@ -55,6 +57,7 @@ class Scissorable {
  private:
     ScrollablePanel* _associatedPanel;
     GrowableAxis _grwblAxis;
+    Magnum::Matrix3 _scrollMatrix;
     const GrowableAxis _getGrowableAxis() const;
 
     Magnum::Range2Di _scissorTarget;

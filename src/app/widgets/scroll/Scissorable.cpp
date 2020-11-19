@@ -28,11 +28,23 @@ void UnderStory::Widget::Scissorable::_applyScissor() {
     Magnum::GL::Renderer::setScissor(_scissorTarget);
 }
 
-void UnderStory::Widget::Scissorable::_draw() {
+void UnderStory::Widget::Scissorable::draw() {
     // TODO
     // _applyScissor();
         _drawInbetweenScissor();
     // _undoScissor();
+}
+
+void UnderStory::Widget::Scissorable::onMouseScroll(const Magnum::Vector2& scrollOffset) {
+    // TODO stop at min/max
+    _scrollMatrix = _scrollMatrix *
+        Magnum::Matrix3::translation(
+            Magnum::Vector2::yAxis(-scrollOffset.y() / 10)
+        );
+}
+
+const Magnum::Matrix3& UnderStory::Widget::Scissorable::scrollMatrix() const {
+    return _scrollMatrix;
 }
 
 const UnderStory::Widget::GrowableAxis UnderStory::Widget::Scissorable::_growableAxis() const {

@@ -83,7 +83,6 @@ class Hoverable : public Shape, public AppBound {
     virtual void _onHoverChanged(bool isHovered) {}
     virtual void _mouseIsOver(const Magnum::Vector2 &cursorPos) {}
 
-
     #ifdef _DEBUG
         void _traceSelf() const {
             auto self = _demangle(typeid(*this).name());

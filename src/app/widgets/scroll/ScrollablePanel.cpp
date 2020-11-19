@@ -61,7 +61,7 @@ void UnderStory::Widget::ScrollablePanel::mayDraw() {
     _scroller.mayDraw();
 
     // draw content
-    _content->_draw();
+    _content->draw();
 }
 
 const Magnum::Matrix3& UnderStory::Widget::ScrollablePanel::matrix() const {
@@ -69,8 +69,8 @@ const Magnum::Matrix3& UnderStory::Widget::ScrollablePanel::matrix() const {
 }
 
 void UnderStory::Widget::ScrollablePanel::onMouseScroll(const Magnum::Vector2& scrollOffset) {
-    // TODO
-    _scroller.onMouseScroll(scrollOffset);
+    _content->onMouseScroll(scrollOffset);
+    _scroller.onMouseScroll(_content->scrollMatrix());
 }
 
 const UnderStory::Widget::StickTo UnderStory::Widget::ScrollablePanel::stickyness() const {
@@ -109,6 +109,7 @@ void UnderStory::Widget::ScrollablePanel::_onToggled(bool isToggled) {
 // helper
 void UnderStory::Widget::ScrollablePanel::_updateGeometry() {
     Hoverable::_updateGeometry(_matrix);
+    _scroller.updateGeometry();
 }
 
 void UnderStory::Widget::ScrollablePanel::onViewportChange(Magnum::Range2D& shapeAllowedSpace) {
