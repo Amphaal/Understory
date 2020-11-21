@@ -20,7 +20,8 @@
                 "${workspaceFolder}/src/app/RxCpp/Rx/v2/src",
                 "${workspaceFolder}/src/core/tiny-process-library",
                 "${workspaceFolder}/build",
-                "${workspaceFolder}/build/src/app/magnum/src"
+                "${workspaceFolder}/build/src/app/magnum/src",
+                "${workspaceFolder}/src/core/stb"
             ],
             "defines": [
                 "_DEBUG",

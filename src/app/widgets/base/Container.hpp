@@ -52,7 +52,7 @@ class Container : public Hoverable {
 
  protected:
     void _initContaining(std::initializer_list<UnderStory::Widget::Hoverable*> prioritized) {
-        for(auto tcc : prioritized) 
+        for(auto &tcc : prioritized) 
             _pushContaining(tcc);
     }
 
@@ -64,8 +64,9 @@ class Container : public Hoverable {
     // same as ::Hoverable, but returns deepest child hovered instead of direct child
     Hoverable* _checkIfMouseOver(const Magnum::Vector2 &cursorPos) final {
        // always check if previously subshape hovered is still hovered or not
+       Hoverable* deepestLatest = nullptr;
        if(_latestHoveredShape && _latestHoveredShape != this) {
-           _latestHoveredShape->_checkIfMouseOver(cursorPos);
+           deepestLatest = _latestHoveredShape->_checkIfMouseOver(cursorPos);
        }
 
        // check if container is hovered
@@ -77,10 +78,10 @@ class Container : public Hoverable {
         }
 
         // iterate through innerShapes
-        for(auto innerShape : _innerShapes) {
+        for(const auto& innerShape : _innerShapes) {
             // since 'latest' is always checked first, no changes happened
             if(innerShape == _latestHoveredShape && innerShape->isHovered()) 
-                return _latestHoveredShape;
+                return deepestLatest;
 
             // check
             auto deeperHovered = innerShape->_checkIfMouseOver(cursorPos);

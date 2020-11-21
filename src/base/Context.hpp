@@ -129,8 +129,8 @@ class ContextImplementation {
  public:
     explicit ContextImplementation(const Context &context, const std::vector<std::string> &linkedSubfolders) : _context(context) {
         // create subfolders
-        for(auto &subfolder : linkedSubfolders) {
-            auto concat = context.path() / "resources";
+        for(const auto &subfolder : linkedSubfolders) {
+            const auto concat = context.path() / subfolder;
             fs::create_directories(concat);
             if(!fs::exists(concat)) throw std::exception();
         }

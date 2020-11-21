@@ -41,8 +41,11 @@ class AppContainer : public Container, public ScrollEventHandler {
 
  protected:
     void _traverseForHovered(const Magnum::Vector2 &cursorPos) {
-        _deepestHoveredShape = _checkIfMouseOver(cursorPos);
-        // _traceHoverable(_deepestHoveredShape);
+        auto deepHovered = _checkIfMouseOver(cursorPos);
+        if(_deepestHoveredShape != deepHovered) {
+            _deepestHoveredShape = deepHovered;
+            _traceHoverable(_deepestHoveredShape);
+        }
     }
 
     void _propagateScrollEvent(ScrollEventHandler::EventType &event) {
