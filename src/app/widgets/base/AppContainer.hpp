@@ -19,18 +19,15 @@
 
 #pragma once
 
-#include <Magnum/Platform/Sdl2Application.h>
-
+#include "EventHandlers.hpp"
 #include "Container.hpp"
-
-using Magnum::Platform::Sdl2Application;
 
 namespace UnderStory {
 
 namespace Widget {
 
 // Container with static shape and geometry
-class AppContainer : public Container {
+class AppContainer : public Container, public ScrollEventHandler {
  public:
     AppContainer() {
         Magnum::Range2D bounds {
@@ -42,21 +39,29 @@ class AppContainer : public Container {
         _updateGeometry(bounds);
     }
 
-    // get the 'latestHovered', but searching through the deepest in the stack
-    const Hoverable* deepestHovered() const {
-        return _deepestHoveredShape;
-    }
-
-    void traverseForHovered(const Magnum::Vector2 &cursorPos) {
+ protected:
+    void _traverseForHovered(const Magnum::Vector2 &cursorPos) {
         _deepestHoveredShape = _checkIfMouseOver(cursorPos);
+        // _traceHoverable(_deepestHoveredShape);
     }
 
-    void dispatchEvent(Sdl2Application::MouseScrollEvent& event) {
-        
+    void _propagateScrollEvent(ScrollEventHandler::EventType &event) {
+        _propagateEvent<ScrollEventHandler, ScrollEventHandler::EventType>(_deepestHoveredShape, event);
     }
 
  private:
-    const Hoverable* _deepestHoveredShape = nullptr;
+    // get the 'latestHovered', but searching through the deepest in the stack
+    Hoverable* _deepestHoveredShape = nullptr;
+
+    template<class Hndlr, class EvT>
+    void _propagateEvent(Hoverable* target, EvT &event) {
+        if(!target) return;
+        if(auto e = dynamic_cast<Hndlr*>(target)) {
+            e->_handleEvent(event);
+            return;
+        }
+        _propagateEvent<Hndlr, EvT>(target->parent(), event);
+    }
 };
 
 }  // namespace Widget

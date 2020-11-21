@@ -78,9 +78,11 @@ class USApplication : public Magnum::Platform::Application, public Widget::AppCo
  private:
     void drawEvent() override;
     void viewportEvent(ViewportEvent& event) override;
-    void mouseScrollEvent(MouseScrollEvent& event) override;
+
     void keyPressEvent(KeyEvent& event) override;
     void keyReleaseEvent(KeyEvent& event) override;
+
+    void mouseScrollEvent(MouseScrollEvent& event) override;
 
     void mousePressEvent(MouseEvent& event) override;
     void mouseReleaseEvent(MouseEvent& event) override;
@@ -89,6 +91,8 @@ class USApplication : public Magnum::Platform::Application, public Widget::AppCo
 
     void _updateDebugText();
     void _resetWorldMatrix();
+
+    void handleScrollEvent(MouseScrollEvent &event) final;
 
     Magnum::PluginManager::Manager<Magnum::Text::AbstractFont> _fontManager;
     Magnum::Containers::Pointer<Magnum::Text::AbstractFont> _defaultFont;

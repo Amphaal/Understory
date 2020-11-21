@@ -68,7 +68,8 @@ const Magnum::Matrix3& UnderStory::Widget::ScrollablePanel::matrix() const {
     return _matrix;
 }
 
-void UnderStory::Widget::ScrollablePanel::onMouseScroll(const Magnum::Vector2& scrollOffset) {
+void UnderStory::Widget::ScrollablePanel::handleScrollEvent(ScrollEventHandler::EventType &event) {
+    auto scrollOffset = event.offset();
     _content->onMouseScroll(scrollOffset);
     _scroller.onMouseScroll(_content->scrollMatrix());
 }

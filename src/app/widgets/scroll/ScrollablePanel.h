@@ -34,6 +34,8 @@
 #include "src/app/widgets/base/Container.hpp"
 #include "src/app/widgets/base/Toggleable.hpp"
 
+#include "src/app/widgets/base/EventHandlers.hpp"
+
 #include "Scroller.h"
 
 #include "src/app/shaders/Shaders.hpp"
@@ -44,7 +46,7 @@ namespace UnderStory {
 
 namespace Widget {
 
-class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container, public Toggleable {
+class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container, public Toggleable, public ScrollEventHandler {
  public:
     explicit ScrollablePanel(StickTo stickness = StickTo::Left, float thickness = .6f);
 
@@ -55,8 +57,6 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
     Scroller& scroller();
 
     void _bindContent(Scissorable* content);
-
-    void onMouseScroll(const Magnum::Vector2& scrollOffset);
 
  private:
     StickTo _stickness;
@@ -76,6 +76,8 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
     void _onAnimationProgress() final;
 
     void _onToggled(bool isToggled) final;
+
+    void handleScrollEvent(ScrollEventHandler::EventType &event) final;
 
     // helper
     void _updateGeometry();

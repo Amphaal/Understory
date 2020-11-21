@@ -206,15 +206,11 @@ void UnderStory::USApplication::drawEvent() {
 }
 
 void UnderStory::USApplication::mouseScrollEvent(MouseScrollEvent& event) {
-    auto lh = this->latestHovered();
+    _propagateScrollEvent(event);
+}
 
-    // handle map scaling
-    if(lh == this) {
-        _msh.mouseScrollEvent(event, this->framebufferSize());
-    // handle panel scroll
-    } else if(lh == &_asPanel) {
-        _asPanel.onMouseScroll(event.offset());
-    }
+void UnderStory::USApplication::handleScrollEvent(MouseScrollEvent &event) {
+    _msh.mouseScrollEvent(event, this->framebufferSize());
 }
 
 void UnderStory::USApplication::keyReleaseEvent(KeyEvent& event) {
@@ -252,7 +248,7 @@ void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
     // no specific locked context, update hover context
     } else {
         auto cursorPos = _cursorPosition(event);
-        this->traverseForHovered(cursorPos);
+        this->_traverseForHovered(cursorPos);
     }
 }
 

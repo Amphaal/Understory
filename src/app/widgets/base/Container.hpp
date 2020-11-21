@@ -62,7 +62,7 @@ class Container : public Hoverable {
     }
 
     // same as ::Hoverable, but returns deepest child hovered instead of direct child
-    const Hoverable* _checkIfMouseOver(const Magnum::Vector2 &cursorPos) final {
+    Hoverable* _checkIfMouseOver(const Magnum::Vector2 &cursorPos) final {
        // always check if previously subshape hovered is still hovered or not
        if(_latestHoveredShape && _latestHoveredShape != this) {
            _latestHoveredShape->_checkIfMouseOver(cursorPos);

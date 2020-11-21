@@ -5,6 +5,7 @@
         "-i"
     ],
     "glsllint.glslangValidatorPath": "C:/msys64/mingw64/bin/glslangValidator.exe",
+    "cpplint.cpplintPath": "%LOCALAPPDATA%/Programs/Python/Python38/Scripts/cpplint.exe",
     "terminal.integrated.env.windows": {
         "MSYSTEM": "MINGW64",
         "MSYS2_PATH_TYPE": "inherit",

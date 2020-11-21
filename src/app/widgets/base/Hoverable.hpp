@@ -29,7 +29,7 @@
 #include "src/app/utility/AppBound.hpp"
 #include "Shape.hpp"
 
-namespace UnderStory {namespace Widget {class Container;}}
+namespace UnderStory {namespace Widget { class Container; }}
 
 namespace UnderStory {
 
@@ -55,12 +55,12 @@ class Hoverable : public Shape, public AppBound {
         return _geometry;
     }
 
-    const Container* parent() const {
+    Container* parent() const {
         return _parent;
     }
 
  protected:
-    void _setAsParent(const Container* parent) {
+    void _setAsParent(Container* parent) {
         _parent = parent;
     }
 
@@ -76,7 +76,7 @@ class Hoverable : public Shape, public AppBound {
     }
 
     // returns 'this' if mouse is over, else 'nullptr'
-    virtual const Hoverable* _checkIfMouseOver(const Magnum::Vector2 &cursorPos) {
+    virtual Hoverable* _checkIfMouseOver(const Magnum::Vector2 &cursorPos) {
         // check geom
         auto hovered = this->geometry().contains(cursorPos);
 
@@ -95,12 +95,6 @@ class Hoverable : public Shape, public AppBound {
 
     // reimplement this callback to know when hover changed
     virtual void _onHoverChanged(bool isHovered) {}
-    
-    // event callbacks
-    virtual bool _mayHandleScroll() { return false; }
-    virtual bool _mayHandleMouseMove() { return false; }
-    virtual bool _mayHandleMousePress() { return false; }
-    virtual bool _mayHandleMouseRelease() { return false; }
 
     #ifdef _DEBUG
         void _traceSelf() const {
@@ -136,7 +130,7 @@ class Hoverable : public Shape, public AppBound {
     #endif
 
  private:
-    const Container* _parent = nullptr;
+    Container* _parent = nullptr;
     Magnum::Range2D _geometry;
     bool _isHovered = false;
 };
