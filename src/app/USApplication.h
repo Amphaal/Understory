@@ -29,7 +29,6 @@
 #include <Magnum/GL/Mesh.h>
 #include <Magnum/GL/Renderer.h>
 #include <Magnum/GL/Renderbuffer.h>
-#include <Magnum/Platform/Sdl2Application.h>
 #include <Magnum/Text/AbstractFont.h>
 #include <Magnum/Text/DistanceFieldGlyphCache.h>
 #include <Magnum/Text/Renderer.h>
@@ -66,7 +65,7 @@
 
 #include "src/app/utility/AppBound.hpp"
 #include "src/app/widgets/animation/TimelineBound.h"
-#include "src/app/widgets/base/Container.hpp"
+#include "src/app/widgets/base/AppContainer.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
 
@@ -114,8 +113,8 @@ class USApplication : public Magnum::Platform::Application, public Widget::AppCo
     // mouse state
     Navigation::MouseState _mouseState {DOUBLE_CLICK_DELAY_MS};
 
-    // mouse lock context
-    Widget::Hoverable* _lockContext = nullptr;
+    // locked hoverable context
+    const Widget::Hoverable* _lockContext = nullptr;
 
     Magnum::Utility::Resource _rs;
     Magnum::Timeline _timeline;

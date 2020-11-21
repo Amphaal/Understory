@@ -22,20 +22,35 @@
 #include <chrono>
 
 namespace UnderStory {
+    class USApplication;
+}
+
+namespace UnderStory {
 
 namespace Navigation {
 
-struct MouseState {
+class MouseState {
+ friend class UnderStory::USApplication;
+
  public:
     using IsDoubleClick = bool;
     using IsLeftPressed = bool;
     using HasLeftDragged = bool;
 
     //
-    explicit MouseState(int msDoubleClickDelay) : _msDoubleClickDelay(msDoubleClickDelay) {}
+    explicit MouseState(int msDoubleClickDelay) : _ms_lDoubleClickDelay(msDoubleClickDelay) {}
 
+    IsLeftPressed hasLeftClick() const {
+        return _lPressed;
+    }
+
+    HasLeftDragged hasLeftDragged() const {
+        return _lMoved;
+    }
+
+ protected:
     // returns if considered as a double click
-    IsDoubleClick leftPressed() {
+    IsDoubleClick _leftPressed() {
         //
         _lPressed = true;
 
@@ -46,34 +61,39 @@ struct MouseState {
         _lMoved = false;
 
         //
-        return elapsedMs.count() < _msDoubleClickDelay;
+        _lDblClick = elapsedMs.count() < _ms_lDoubleClickDelay;
+        return _lDblClick;
     }
 
-    HasLeftDragged leftReleased() {
+    HasLeftDragged _leftReleased() {
+        _lDblClick = false;
         _lPressed = false;
         return _lMoved;
     }
 
-    void rightPressed() {
+    void _rightPressed() {
         _rPressed = true;
     }
 
-    void rightReleased() {
+    void _rightReleased() {
         _rPressed = false;
     }
 
     // when mouse is dragging
-    IsLeftPressed dragging() {
+    IsLeftPressed _dragging() {
         auto lp = _lPressed;
         if(lp) _lMoved = true;
         return lp;
     }
 
  private:
-    int _msDoubleClickDelay = 0;
-    bool _lPressed = false;
     bool _rPressed = false;
+    
+    bool _lPressed = false;
     bool _lMoved = false;
+
+    bool _lDblClick = false;
+    int _ms_lDoubleClickDelay = 0;
     std::chrono::system_clock::time_point _lPressedT;
 };
 

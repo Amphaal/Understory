@@ -56,13 +56,14 @@ class Scissorable {
 
  private:
     ScrollablePanel* _associatedPanel;
-    GrowableAxis _grwblAxis;
+
     Magnum::Matrix3 _scrollMatrix;
-    const GrowableAxis _getGrowableAxis() const;
 
     Magnum::Range2Di _scissorTarget;
-
     static inline std::stack<Magnum::Range2Di> _scissorStack;
+
+    GrowableAxis _grwblAxis;
+    const GrowableAxis _getGrowableAxis() const;
 
     void _applyScissor();
     void _undoScissor();

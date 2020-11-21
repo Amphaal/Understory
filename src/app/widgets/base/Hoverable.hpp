@@ -20,20 +20,24 @@
 #pragma once
 
 #ifdef _DEBUG
-#include <cxxabi.h>
+    #include <cxxabi.h>
 
-#include <string>
-#include <memory>
+    #include <string>
+    #include <memory>
 #endif
 
 #include "src/app/utility/AppBound.hpp"
 #include "Shape.hpp"
+
+namespace UnderStory {namespace Widget {class Container;}}
 
 namespace UnderStory {
 
 namespace Widget {
 
 class Hoverable : public Shape, public AppBound {
+ friend class Container;
+
  public:
     Hoverable() {}
 
@@ -46,29 +50,20 @@ class Hoverable : public Shape, public AppBound {
         _availableSpaceChanged(shapeAllowedSpace);
     }
 
-    virtual void checkIfMouseOver(const Magnum::Vector2 &cursorPos) {
-        // prevent updating if state did not change
-        auto hovered = this->geometry().contains(cursorPos);
-
-        // check subelements hovering
-        _mouseIsOver(cursorPos);
-
-        // dont go further if state did not change
-        if(_isHovered == hovered) return;
-
-        // update state
-        _isHovered = hovered;
-
-        //
-        _onHoverChanged(_isHovered);
-    }
-
     // shape with matrix transforms applied, allows to determine current position
     const Magnum::Range2D& geometry() const {
         return _geometry;
     }
 
+    const Container* parent() const {
+        return _parent;
+    }
+
  protected:
+    void _setAsParent(const Container* parent) {
+        _parent = parent;
+    }
+
     void _updateGeometry(const Magnum::Matrix3 &matrix) {
         _updateGeometry(Magnum::Range2D {
             matrix.transformPoint(shape().min()),
@@ -80,8 +75,32 @@ class Hoverable : public Shape, public AppBound {
         _geometry = geometry;
     }
 
+    // returns 'this' if mouse is over, else 'nullptr'
+    virtual const Hoverable* _checkIfMouseOver(const Magnum::Vector2 &cursorPos) {
+        // check geom
+        auto hovered = this->geometry().contains(cursorPos);
+
+        // if state changed
+        if(_isHovered != hovered) {
+            // update state
+            _isHovered = hovered;
+
+            // callback...
+            _onHoverChanged(_isHovered);
+        }
+
+        //
+        return hovered ? this : nullptr;
+    }
+
+    // reimplement this callback to know when hover changed
     virtual void _onHoverChanged(bool isHovered) {}
-    virtual void _mouseIsOver(const Magnum::Vector2 &cursorPos) {}
+    
+    // event callbacks
+    virtual bool _mayHandleScroll() { return false; }
+    virtual bool _mayHandleMouseMove() { return false; }
+    virtual bool _mayHandleMousePress() { return false; }
+    virtual bool _mayHandleMouseRelease() { return false; }
 
     #ifdef _DEBUG
         void _traceSelf() const {
@@ -117,6 +136,7 @@ class Hoverable : public Shape, public AppBound {
     #endif
 
  private:
+    const Container* _parent = nullptr;
     Magnum::Range2D _geometry;
     bool _isHovered = false;
 };

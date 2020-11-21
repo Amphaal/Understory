@@ -28,6 +28,7 @@
 #include <Magnum/Math/Color.h>
 #include <Magnum/Timeline.h>
 
+#include <functional>
 #include <utility>
 
 #include "src/app/widgets/animation/PlayerMatrixAnimator.hpp"
@@ -45,7 +46,8 @@ using namespace Magnum::Math::Literals;
 
 class ScrollerHandle : public Hoverable {
  public:
-    explicit ScrollerHandle(StickTo stickness, const Magnum::Matrix3* parentMatrix) : _stickness(stickness), _parentMatrix(parentMatrix) {
+    explicit ScrollerHandle(StickTo stickness, const Magnum::Matrix3* parentMatrix) :
+        _stickness(stickness), _parentMatrix(parentMatrix), _axisFn(_getAxisFunction()) {
         _setup();
     }
 
@@ -65,7 +67,7 @@ class ScrollerHandle : public Hoverable {
 
     void onMouseScroll(const Magnum::Matrix3& scrollMatrix) {
         // TODO animate
-        _contentScrollMatrix = scrollMatrix;
+        _contentScrollMatrix = scrollMatrix.inverted();
         
         //
         updateGeometry();
@@ -122,7 +124,18 @@ class ScrollerHandle : public Hoverable {
     Magnum::GL::Mesh _meshScroller{Magnum::GL::MeshPrimitive::Triangles};
     Magnum::Range2D _geomScrollerPx;
 
-    Magnum::Color4 _scrollerColor;
+    using AxisFunction = std::function<Magnum::Vector2(Magnum::Float)>;
+    AxisFunction _axisFn;
+    const AxisFunction _getAxisFunction() const {
+        switch (_stickness) {
+            case StickTo::Left :
+            case StickTo::Right :
+                return Magnum::Vector2::yAxis;
+            case StickTo::Top :
+            case StickTo::Bottom :
+                return Magnum::Vector2::xAxis;
+        }
+    }
 
     // if mouse is over placeholder
     void _onHoverChanged(bool isHovered) final {
@@ -134,6 +147,7 @@ class ScrollerHandle : public Hoverable {
         _updateShape(availableSpace);
     }
 
+    Magnum::Color4 _scrollerColor;
     void _updateScrollColor() {
         _scrollerColor = isHovered() ? SCRLL_COLOR_ACTIVE : SCRLL_COLOR_IDLE;
     }

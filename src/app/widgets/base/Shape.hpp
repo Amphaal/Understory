@@ -34,10 +34,11 @@ namespace Widget {
 class Container;
 
 class Shape {
+ friend class Container;
+
  public:
     // no constructor, since shapes are set within screen constraints
     Shape() {}
-    friend class Container;
 
     // inplaced shape (eg within OpenGL original coordinates, mostly {-1.f} <> {1.f})
     const Magnum::Range2D& shape() const {

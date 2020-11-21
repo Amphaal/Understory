@@ -237,7 +237,7 @@ void UnderStory::USApplication::keyPressEvent(KeyEvent& event) {
 void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
     // check if locked context
     if(_lockContext == this) {
-        if (_mouseState.dragging()) {
+        if (_mouseState._dragging()) {
             //
             this->setCursor(Cursor::ResizeAll);
 
@@ -252,7 +252,7 @@ void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
     // no specific locked context, update hover context
     } else {
         auto cursorPos = _cursorPosition(event);
-        this->checkIfMouseOver(cursorPos);
+        this->traverseForHovered(cursorPos);
     }
 }
 
@@ -264,7 +264,7 @@ void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {
     switch (event.button()) {
         case MouseEvent::Button::Left: {
             //
-            auto isDoubleClick = _mouseState.leftPressed();
+            auto isDoubleClick = _mouseState._leftPressed();
 
             //
             if(_lockContext == this) {
@@ -278,7 +278,7 @@ void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {
 
         case MouseEvent::Button::Right: {
             //
-            _mouseState.rightPressed();
+            _mouseState._rightPressed();
 
             //
             if(_lockContext == this) {
@@ -303,7 +303,7 @@ void UnderStory::USApplication::mouseReleaseEvent(MouseEvent& event) {
     switch (event.button()) {
         case MouseEvent::Button::Left: {
             //
-            auto dragged = _mouseState.leftReleased();
+            auto dragged = _mouseState._leftReleased();
 
             //
             if(_lockContext == this) {
@@ -328,7 +328,7 @@ void UnderStory::USApplication::mouseReleaseEvent(MouseEvent& event) {
             }
 
             //
-            _mouseState.rightReleased();
+            _mouseState._rightReleased();
         }
         break;
 

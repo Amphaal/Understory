@@ -35,12 +35,12 @@ void UnderStory::Widget::Scissorable::draw() {
     // _undoScissor();
 }
 
-void UnderStory::Widget::Scissorable::onMouseScroll(const Magnum::Vector2& scrollOffset) {
+void UnderStory::Widget::Scissorable::onMouseScroll(const Magnum::Vector2& scrollOffset) {   
     // TODO stop at min/max
-    _scrollMatrix = _scrollMatrix *
-        Magnum::Matrix3::translation(
-            Magnum::Vector2::yAxis(-scrollOffset.y() / 10)
-        );
+    // _scrollMatrix = _scrollMatrix *
+    //     Magnum::Matrix3::translation(
+    //         _axisFn(-scrollOffset.y() / 10)
+    //     );
 }
 
 const Magnum::Matrix3& UnderStory::Widget::Scissorable::scrollMatrix() const {

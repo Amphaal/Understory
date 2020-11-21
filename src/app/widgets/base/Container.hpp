@@ -45,50 +45,56 @@ class Container : public Hoverable {
         }
     }
 
-    void checkIfMouseOver(const Magnum::Vector2 &cursorPos) final {
-       // always check if previously subshape hovered is still hovered or not
-       if(_latestHoveredShape && _latestHoveredShape != this) {
-           _latestHoveredShape->checkIfMouseOver(cursorPos);
-       }
-
-       // check if container is hovered
-       Hoverable::checkIfMouseOver(cursorPos);
-       if(!this->isHovered()) {
-           // if not, reset state and return
-           _updateLatestHoveredShape(nullptr);
-           return;
-        }
-
-        // iterate through innerShapes
-        for(auto innerShape : _innerShapes) {
-            //
-            if(innerShape == _latestHoveredShape && innerShape->isHovered()) return;
-
-            // check
-            innerShape->checkIfMouseOver(cursorPos);
-
-            // found hovering, update state and immediate return
-            if(innerShape->isHovered()) {
-                _updateLatestHoveredShape(innerShape);
-                return;
-            }
-        }
-
-        // if no shapes fills, set state to self
-        _updateLatestHoveredShape(this);
-    }
-
-    Hoverable* latestHovered() const {
+    // parent - children hovered : can be 'this' (parent is hovered), 'nullptr' (parent is not hovered), or any child ptr
+    const Hoverable* latestHovered() const {
         return _latestHoveredShape;
     }
 
  protected:
     void _initContaining(std::initializer_list<UnderStory::Widget::Hoverable*> prioritized) {
-        _innerShapes = prioritized;
+        for(auto tcc : prioritized) 
+            _pushContaining(tcc);
     }
 
     void _pushContaining(UnderStory::Widget::Hoverable* toBeContained) {
         _innerShapes.push_back(toBeContained);
+        toBeContained->_setAsParent(this);
+    }
+
+    // same as ::Hoverable, but returns deepest child hovered instead of direct child
+    const Hoverable* _checkIfMouseOver(const Magnum::Vector2 &cursorPos) final {
+       // always check if previously subshape hovered is still hovered or not
+       if(_latestHoveredShape && _latestHoveredShape != this) {
+           _latestHoveredShape->_checkIfMouseOver(cursorPos);
+       }
+
+       // check if container is hovered
+       Hoverable::_checkIfMouseOver(cursorPos);
+       if(!this->isHovered()) {
+           // if not, reset state and return
+           _updateLatestHoveredShape(nullptr);
+           return nullptr;
+        }
+
+        // iterate through innerShapes
+        for(auto innerShape : _innerShapes) {
+            // since 'latest' is always checked first, no changes happened
+            if(innerShape == _latestHoveredShape && innerShape->isHovered()) 
+                return _latestHoveredShape;
+
+            // check
+            auto deeperHovered = innerShape->_checkIfMouseOver(cursorPos);
+
+            // found hovering, update state and immediate return
+            if(innerShape->isHovered()) {
+                _updateLatestHoveredShape(innerShape);
+                return deeperHovered;
+            }
+        }
+
+        // if no shapes fills, set state to self
+        _updateLatestHoveredShape(this);
+        return this;
     }
 
  private:
@@ -103,20 +109,6 @@ class Container : public Hoverable {
         #ifdef _DEBUG
             // _traceHoverable(hoverable);
         #endif
-    }
-};
-
-// Container with static shape and geometry
-class AppContainer : public Container {
- public:
-    AppContainer() {
-        Magnum::Range2D bounds {
-            {-1.f, -1.f},
-            {1.f, 1.f}
-        };
-
-        _updateShape(bounds);
-        _updateGeometry(bounds);
     }
 };
 
