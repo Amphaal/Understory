@@ -44,7 +44,7 @@ class AppContainer : public Container, public ScrollEventHandler {
         auto deepHovered = _checkIfMouseOver(cursorPos);
         if(_deepestHoveredShape != deepHovered) {
             _deepestHoveredShape = deepHovered;
-            _traceHoverable(_deepestHoveredShape);
+            // _traceHoverable(_deepestHoveredShape);
         }
     }
 

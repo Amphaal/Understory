@@ -36,20 +36,19 @@ namespace Widget {
 class ScrollablePanel;
 
 class Scissorable {
+ friend class ScrollablePanel;
+
  public:
     explicit Scissorable(ScrollablePanel* associatedPanel);
 
-    void draw();
-    void onMouseScroll(const Magnum::Vector2& scrollOffset);
-    const Magnum::Matrix3& scrollMatrix() const;
-
  protected:
+    void _draw();
     virtual void _drawInbetweenScissor() = 0;
 
-    void _bindToPanel();
+    void _translateView(const Magnum::Vector2& scrollOffset);
+    const Magnum::Matrix3& _scrollMatrix() const;
 
     void _signalContentSizeChanged(const Magnum::Float& newContentSize);
-    const Magnum::Matrix3& _panelMatrix() const;
     const GrowableAxis _growableAxis() const;
 
     void _updateScissorTarget(const Magnum::Range2D &geometry);
@@ -57,7 +56,7 @@ class Scissorable {
  private:
     ScrollablePanel* _associatedPanel;
 
-    Magnum::Matrix3 _scrollMatrix;
+    Magnum::Matrix3 _scrllMatrix;
 
     Magnum::Range2Di _scissorTarget;
     static inline std::stack<Magnum::Range2Di> _scissorStack;

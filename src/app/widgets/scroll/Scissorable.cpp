@@ -28,14 +28,14 @@ void UnderStory::Widget::Scissorable::_applyScissor() {
     Magnum::GL::Renderer::setScissor(_scissorTarget);
 }
 
-void UnderStory::Widget::Scissorable::draw() {
+void UnderStory::Widget::Scissorable::_draw() {
     // TODO
     // _applyScissor();
         _drawInbetweenScissor();
     // _undoScissor();
 }
 
-void UnderStory::Widget::Scissorable::onMouseScroll(const Magnum::Vector2& scrollOffset) {   
+void UnderStory::Widget::Scissorable::_translateView(const Magnum::Vector2& scrollOffset) {   
     // TODO stop at min/max
     // _scrollMatrix = _scrollMatrix *
     //     Magnum::Matrix3::translation(
@@ -43,8 +43,8 @@ void UnderStory::Widget::Scissorable::onMouseScroll(const Magnum::Vector2& scrol
     //     );
 }
 
-const Magnum::Matrix3& UnderStory::Widget::Scissorable::scrollMatrix() const {
-    return _scrollMatrix;
+const Magnum::Matrix3& UnderStory::Widget::Scissorable::_scrollMatrix() const {
+    return _scrllMatrix;
 }
 
 const UnderStory::Widget::GrowableAxis UnderStory::Widget::Scissorable::_growableAxis() const {
@@ -53,10 +53,6 @@ const UnderStory::Widget::GrowableAxis UnderStory::Widget::Scissorable::_growabl
 
 void UnderStory::Widget::Scissorable::_signalContentSizeChanged(const Magnum::Float& newContentSize) {
     _associatedPanel->scroller().onContentSizeChanged(newContentSize);
-}
-
-const Magnum::Matrix3& UnderStory::Widget::Scissorable::_panelMatrix() const {
-    return _associatedPanel->matrix();
 }
 
 const UnderStory::Widget::GrowableAxis UnderStory::Widget::Scissorable::_getGrowableAxis() const {
@@ -68,10 +64,6 @@ const UnderStory::Widget::GrowableAxis UnderStory::Widget::Scissorable::_getGrow
         case StickTo::Bottom :
             return GrowableAxis::Width;
     }
-}
-
-void UnderStory::Widget::Scissorable::_bindToPanel() {
-    _associatedPanel->_bindContent(this);
 }
 
 void UnderStory::Widget::Scissorable::_undoScissor() {

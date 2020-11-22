@@ -46,17 +46,20 @@ namespace UnderStory {
 
 namespace Widget {
 
-class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, public Container, public Toggleable, public ScrollEventHandler {
+class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, 
+                        public Container, 
+                        public Toggleable, 
+                        public ScrollEventHandler {
+ friend class Scissorable;
+
  public:
     explicit ScrollablePanel(StickTo stickness = StickTo::Left, float thickness = .6f);
 
     void mayDraw();
+    void bindContent(Scissorable* content);
 
-    const Magnum::Matrix3& matrix() const;
     const StickTo stickyness() const;
     Scroller& scroller();
-
-    void _bindContent(Scissorable* content);
 
  private:
     StickTo _stickness;
@@ -90,6 +93,7 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
 
     bool _setupDone = false;
     void _availableSpaceChanged(Magnum::Range2D& availableSpace) final;
+    const Magnum::Matrix3* _matrixUpdateRequested(const Magnum::Matrix3* parentMatrix) final;
 };
 
 }  // namespace Widget

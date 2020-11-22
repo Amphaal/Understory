@@ -61,6 +61,20 @@ class Container : public Hoverable {
         toBeContained->_setAsParent(this);
     }
 
+    void _propagateMatrixChanges(const Magnum::Matrix3* matrix) {
+        // apply changes to matrix
+        auto changedMatrix = this->_matrixUpdateRequested(matrix);
+
+        // propagate
+        for(auto innerShape : _innerShapes) {
+            if(auto container = dynamic_cast<Container*>(innerShape)) {
+                container->_propagateMatrixChanges(changedMatrix);
+            } else {
+                innerShape->_matrixUpdateRequested(changedMatrix);
+            }
+        }
+    }
+
     // same as ::Hoverable, but returns deepest child hovered instead of direct child
     Hoverable* _checkIfMouseOver(const Magnum::Vector2 &cursorPos) final {
        // always check if previously subshape hovered is still hovered or not

@@ -35,7 +35,7 @@ UnderStory::Widget::ScrollablePanel::ScrollablePanel(StickTo stickness, float th
     _initContaining({&_scroller});
 }
 
-void UnderStory::Widget::ScrollablePanel::_bindContent(Scissorable* content) {
+void UnderStory::Widget::ScrollablePanel::bindContent(Scissorable* content) {
     //
     _content = content;
 
@@ -61,17 +61,13 @@ void UnderStory::Widget::ScrollablePanel::mayDraw() {
     _scroller.mayDraw();
 
     // draw content
-    _content->draw();
-}
-
-const Magnum::Matrix3& UnderStory::Widget::ScrollablePanel::matrix() const {
-    return _matrix;
+    _content->_draw();
 }
 
 void UnderStory::Widget::ScrollablePanel::handleScrollEvent(ScrollEventHandler::EventType &event) {
     auto scrollOffset = event.offset();
-    _content->onMouseScroll(scrollOffset);
-    _scroller.onMouseScroll(_content->scrollMatrix());
+    _content->_translateView(scrollOffset);
+    // _scroller.onMouseScroll(_content->scrollMatrix());
 }
 
 const UnderStory::Widget::StickTo UnderStory::Widget::ScrollablePanel::stickyness() const {
@@ -97,7 +93,12 @@ void UnderStory::Widget::ScrollablePanel::_onHoverChanged(bool isHovered) {
 
 void UnderStory::Widget::ScrollablePanel::_onAnimationProgress() {
     _definePanelPosition(currentAnim());
+    _propagateMatrixChanges(&_matrix);
+}
+
+const Magnum::Matrix3* UnderStory::Widget::ScrollablePanel::_matrixUpdateRequested(const Magnum::Matrix3* parentMatrix) {
     _updateGeometry();
+    return parentMatrix;
 }
 
 void UnderStory::Widget::ScrollablePanel::_onToggled(bool isToggled) {
@@ -110,7 +111,6 @@ void UnderStory::Widget::ScrollablePanel::_onToggled(bool isToggled) {
 // helper
 void UnderStory::Widget::ScrollablePanel::_updateGeometry() {
     Hoverable::_updateGeometry(_matrix);
-    _scroller.updateGeometry();
 }
 
 void UnderStory::Widget::ScrollablePanel::onViewportChange(Magnum::Range2D& shapeAllowedSpace) {

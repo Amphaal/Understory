@@ -19,12 +19,7 @@
 
 #pragma once
 
-#ifdef _DEBUG
-    #include <cxxabi.h>
-
-    #include <string>
-    #include <memory>
-#endif
+#include "src/base/Debug.hpp"
 
 #include "src/app/utility/AppBound.hpp"
 #include "Shape.hpp"
@@ -75,6 +70,11 @@ class Hoverable : public Shape, public AppBound {
         _geometry = geometry;
     }
 
+    // update current matrix and returns a reference of it
+    virtual const Magnum::Matrix3* _matrixUpdateRequested(const Magnum::Matrix3* parentMatrix) {
+        return parentMatrix;
+    }
+
     // returns 'this' if mouse is over, else 'nullptr'
     virtual Hoverable* _checkIfMouseOver(const Magnum::Vector2 &cursorPos) {
         // check geom
@@ -98,13 +98,13 @@ class Hoverable : public Shape, public AppBound {
 
     #ifdef _DEBUG
         void _traceSelf() const {
-            auto self = _demangle(typeid(*this).name());
+            auto self = Debug::demanglePtr(this);
             self = "[" + self + "]";
             Magnum::Debug{} << self.c_str();
         }
 
         void _traceHoverable(Hoverable* hoverable) const {
-            auto self = _demangle(typeid(*this).name());
+            auto self = Debug::demanglePtr(this);
             self = "[" + self + "]";
 
             //
@@ -116,16 +116,8 @@ class Hoverable : public Shape, public AppBound {
                 Magnum::Debug{}
                     << self.c_str()
                     << ":"
-                    << _demangle(typeid(*hoverable).name()).c_str();
+                    << Debug::demanglePtr(hoverable).c_str();
             }
-        }
-
-        std::string _demangle(char const* mangled) const {
-            auto ptr = std::unique_ptr<char, decltype(& std::free)>{
-                abi::__cxa_demangle(mangled, nullptr, nullptr, nullptr),
-                std::free
-            };
-            return {ptr.get()};
         }
     #endif
 

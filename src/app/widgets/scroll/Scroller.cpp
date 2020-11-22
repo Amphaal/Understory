@@ -20,7 +20,10 @@
 #include "Scroller.h"
 #include "src/app/widgets/scroll/ScrollablePanel.h"
 
-UnderStory::Widget::Scroller::Scroller(const ScrollablePanel* panel) : _stickness(_scrollerStickyness()), _associatedPanel(panel), _handle(_scrollerStickyness(), &panel->matrix()) {
+UnderStory::Widget::Scroller::Scroller(const ScrollablePanel* panel) :
+    _stickness(_scrollerStickyness()), 
+    _associatedPanel(panel), 
+    _handle(_scrollerStickyness()) {
     _initContaining({&_handle});
     _setup();
 }
@@ -31,7 +34,7 @@ void UnderStory::Widget::Scroller::mayDraw() {
 
     // ph
     Shaders::rounded
-        ->setProjectionMatrix(_associatedPanel->matrix())
+        ->setProjectionMatrix(_matrix)
         .setRectPx(_geomPhPx)
         .setColor(PH_COLOR)
         .draw(_meshPh);
@@ -138,16 +141,19 @@ void UnderStory::Widget::Scroller::_availableSpaceChanged(Magnum::Range2D& avail
     _bufferPh.setSubData(0, _verticesPh);
 
     // update geometry
-    updateGeometry();
+    _updateGeometry();
 }
 
-void UnderStory::Widget::Scroller::updateGeometry() {
+void UnderStory::Widget::Scroller::_updateGeometry() {
     // update geometry and pixel geometry
-    Hoverable::_updateGeometry(_associatedPanel->matrix());
+    Hoverable::_updateGeometry(_matrix);
     _geomPhPx = _shapeIntoPixel(geometry());
+}
 
-    // update handle geom
-    _handle.updateGeometry();
+const Magnum::Matrix3* UnderStory::Widget::Scroller::_matrixUpdateRequested(const Magnum::Matrix3* parentMatrix) {
+    _matrix = *parentMatrix;
+    _updateGeometry();
+    return parentMatrix;
 }
 
 void UnderStory::Widget::Scroller::_setup() {

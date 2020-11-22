@@ -53,8 +53,6 @@ class Scroller : public Container {
 
     void mayDraw();
 
-    void updateGeometry();
-
     void onMouseScroll(const Magnum::Matrix3& scrollMatrix);
 
     void onContentSizeChanged(const Magnum::Float& newContentSize);
@@ -67,6 +65,8 @@ class Scroller : public Container {
     static constexpr float THICKNESS_PX = 20.f;
     static constexpr float PADDING_PX = 10.f;
     static inline Magnum::Color4 PH_COLOR = 0xFFFFFF44_rgbaf;
+
+    Magnum::Matrix3 _matrix;
 
     const ScrollablePanel* _associatedPanel;
     ScrollerHandle _handle;
@@ -87,6 +87,9 @@ class Scroller : public Container {
     const StickTo _scrollerStickyness() const;
 
     void _availableSpaceChanged(Magnum::Range2D& availableSpace) final;
+    const Magnum::Matrix3* _matrixUpdateRequested(const Magnum::Matrix3* parentMatrix) final;
+
+    void _updateGeometry();
 
     void _setup();
 };

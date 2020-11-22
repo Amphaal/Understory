@@ -44,7 +44,7 @@ using namespace Magnum::Math::Literals;
 class AtomSelectorGrid : public Hoverable, public Scissorable {
  public:
     explicit AtomSelectorGrid(ScrollablePanel* associatedPanel) : Scissorable(associatedPanel) {
-        _bindToPanel();
+         associatedPanel->bindContent(this); // automatic bind to panel
         _setup();
     }
 
@@ -58,21 +58,28 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
     };
     Corrade::Containers::StaticArray<4, Vertex> _vertices;
 
+    Magnum::Matrix3 _matrix;
+    const Magnum::Matrix3* _parentMatrix;
+
     void _drawInbetweenScissor() final {
         Shaders::color
-            ->setTransformationProjectionMatrix(_panelMatrix() * scrollMatrix())
+            ->setTransformationProjectionMatrix(_matrix)
             .draw(_mesh);
     }
 
     void _updateGeometry() {
-        // update buffer
-        _buffer.setSubData(0, _vertices);
-
         // update geometry
-        Hoverable::_updateGeometry(_panelMatrix());
+        _matrix = *_parentMatrix * _scrollMatrix();
+        Hoverable::_updateGeometry(_matrix);
 
         // update scissor
         _updateScissorTarget(geometry());
+    }
+
+    const Magnum::Matrix3* _matrixUpdateRequested(const Magnum::Matrix3* parentMatrix) final {
+        _parentMatrix = parentMatrix;
+        _updateGeometry();
+        return parentMatrix;
     }
 
     void _availableSpaceChanged(Magnum::Range2D& availableSpace) final {
@@ -92,6 +99,9 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
         _vertices[1] = {shape().bottomRight(),    0xFF000099_rgbaf};
         _vertices[2] = {shape().topRight(),       0x00FF0099_rgbaf};
         _vertices[3] = {shape().topLeft(),        0x00FF0099_rgbaf};
+
+        // update buffer
+        _buffer.setSubData(0, _vertices);
 
         //
         _updateGeometry();

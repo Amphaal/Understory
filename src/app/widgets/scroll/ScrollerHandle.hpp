@@ -46,23 +46,17 @@ using namespace Magnum::Math::Literals;
 
 class ScrollerHandle : public Hoverable {
  public:
-    explicit ScrollerHandle(StickTo stickness, const Magnum::Matrix3* parentMatrix) :
-        _stickness(stickness), _parentMatrix(parentMatrix), _axisFn(_getAxisFunction()) {
+    explicit ScrollerHandle(StickTo stickness) :
+        _stickness(stickness), _axisFn(_getAxisFunction()) {
         _setup();
     }
 
     void draw() {
         Shaders::rounded
-            ->setProjectionMatrix(*_parentMatrix * _contentScrollMatrix)
+            ->setProjectionMatrix(_matrix)
             .setRectPx(_geomScrollerPx)
             .setColor(_scrollerColor)
             .draw(_meshScroller);
-    }
-
-    void updateGeometry() {
-        // update geometry and pixel geometry
-        Hoverable::_updateGeometry(*_parentMatrix * _contentScrollMatrix);
-        _geomScrollerPx = _shapeIntoPixel(geometry());
     }
 
     void onMouseScroll(const Magnum::Matrix3& scrollMatrix) {
@@ -70,7 +64,7 @@ class ScrollerHandle : public Hoverable {
         _contentScrollMatrix = scrollMatrix.inverted();
         
         //
-        updateGeometry();
+        _updateGeometry();
     }
 
     void updateSize(const Magnum::Float& handleSize) {
@@ -97,7 +91,7 @@ class ScrollerHandle : public Hoverable {
         _updateShape(scrollerShape);
 
         // update its geometry
-        updateGeometry();
+        _updateGeometry();
 
         // ... and state...
         _updateScrollColor();
@@ -110,6 +104,7 @@ class ScrollerHandle : public Hoverable {
     static inline Magnum::Color4 SCRLL_COLOR_IDLE = 0xCCCCCCFF_rgbaf;
     static inline Magnum::Color4 SCRLL_COLOR_ACTIVE = 0xFFFFFFFF_rgbaf;
 
+    Magnum::Matrix3 _matrix;
     Magnum::Matrix3 _contentScrollMatrix;
     const Magnum::Matrix3* _parentMatrix;
 
@@ -147,9 +142,22 @@ class ScrollerHandle : public Hoverable {
         _updateShape(availableSpace);
     }
 
+    void _updateGeometry() {
+        // update geometry and pixel geometry
+        if(_parentMatrix) _matrix = *_parentMatrix * _contentScrollMatrix;
+        Hoverable::_updateGeometry(_matrix);
+        _geomScrollerPx = _shapeIntoPixel(geometry());
+    }
+
     Magnum::Color4 _scrollerColor;
     void _updateScrollColor() {
         _scrollerColor = isHovered() ? SCRLL_COLOR_ACTIVE : SCRLL_COLOR_IDLE;
+    }
+
+    const Magnum::Matrix3* _matrixUpdateRequested(const Magnum::Matrix3* parentMatrix) final {
+        _parentMatrix = parentMatrix;
+        _updateGeometry();
+        return parentMatrix;
     }
 
     void _setup() {

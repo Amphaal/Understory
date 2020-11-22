@@ -12,6 +12,7 @@ target_sources(appBase INTERFACE
     fs_compat.h
     Context.hpp
     Defaults.hpp
+    Debug.hpp
 )
 
 ###########################
