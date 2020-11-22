@@ -50,8 +50,6 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
                         public Container, 
                         public Toggleable, 
                         public ScrollEventHandler {
- friend class Scissorable;
-
  public:
     explicit ScrollablePanel(StickTo stickness = StickTo::Left, float thickness = .6f);
 

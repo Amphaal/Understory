@@ -28,7 +28,6 @@
 #include <Magnum/Math/Color.h>
 #include <Magnum/Timeline.h>
 
-#include <functional>
 #include <utility>
 
 #include "src/app/widgets/animation/PlayerMatrixAnimator.hpp"
@@ -37,6 +36,7 @@
 #include "src/app/widgets/base/Hoverable.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
+#include "Scrollable.hpp"
 
 namespace UnderStory {
 
@@ -44,10 +44,9 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class ScrollerHandle : public Hoverable {
+class ScrollerHandle : public Hoverable, public Scrollable {
  public:
-    explicit ScrollerHandle(StickTo stickness) :
-        _stickness(stickness), _axisFn(_getAxisFunction()) {
+    explicit ScrollerHandle(StickTo scrollerStickyness) : Scrollable(scrollerStickyness) {
         _setup();
     }
 
@@ -70,13 +69,11 @@ class ScrollerHandle : public Hoverable {
     void updateSize(const Magnum::Float& handleSize) {
         // determine new scroller size
         auto scrollerShape = shape();
-        switch (_stickness) {
-            case StickTo::Left :
-            case StickTo::Right :
+        switch (_growableAxis) {
+            case GrowableAxis::Height :
                 scrollerShape.min().y() = scrollerShape.topLeft().y() - handleSize;
                 break;
-            case StickTo::Top :
-            case StickTo::Bottom :
+            case GrowableAxis::Width :
                 scrollerShape.max().x() = scrollerShape.topLeft().x() + handleSize;
                 break;
         }
@@ -106,9 +103,7 @@ class ScrollerHandle : public Hoverable {
 
     Magnum::Matrix3 _matrix;
     Magnum::Matrix3 _contentScrollMatrix;
-    const Magnum::Matrix3* _parentMatrix;
-
-    StickTo _stickness;
+    const Magnum::Matrix3* _parentMatrix = nullptr;
 
     struct Vertex {
         Magnum::Vector2 position;
@@ -118,19 +113,6 @@ class ScrollerHandle : public Hoverable {
     Corrade::Containers::StaticArray<4, Vertex> _verticesScroller;
     Magnum::GL::Mesh _meshScroller{Magnum::GL::MeshPrimitive::Triangles};
     Magnum::Range2D _geomScrollerPx;
-
-    using AxisFunction = std::function<Magnum::Vector2(Magnum::Float)>;
-    AxisFunction _axisFn;
-    const AxisFunction _getAxisFunction() const {
-        switch (_stickness) {
-            case StickTo::Left :
-            case StickTo::Right :
-                return Magnum::Vector2::yAxis;
-            case StickTo::Top :
-            case StickTo::Bottom :
-                return Magnum::Vector2::xAxis;
-        }
-    }
 
     // if mouse is over placeholder
     void _onHoverChanged(bool isHovered) final {

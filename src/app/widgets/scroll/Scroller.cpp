@@ -21,9 +21,9 @@
 #include "src/app/widgets/scroll/ScrollablePanel.h"
 
 UnderStory::Widget::Scroller::Scroller(const ScrollablePanel* panel) :
-    _stickness(_scrollerStickyness()), 
-    _associatedPanel(panel), 
-    _handle(_scrollerStickyness()) {
+    _associatedPanel(panel),
+    _stickness(_stickynessFromPanel(panel)), 
+    _handle(_stickynessFromPanel(panel)) {
     _initContaining({&_handle});
     _setup();
 }
@@ -48,8 +48,8 @@ void UnderStory::Widget::Scroller::onMouseScroll(const Magnum::Matrix3& scrollMa
 }
 
 // scroller position within panel
-const UnderStory::Widget::StickTo UnderStory::Widget::Scroller::_scrollerStickyness() const {
-    switch (_associatedPanel->stickyness()) {
+UnderStory::Widget::StickTo UnderStory::Widget::Scroller::_stickynessFromPanel(const ScrollablePanel* panel) {
+    switch (panel->stickyness()) {
         case StickTo::Left :
             return StickTo::Right;
         case StickTo::Top :

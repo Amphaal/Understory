@@ -58,19 +58,20 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
     };
     Corrade::Containers::StaticArray<4, Vertex> _vertices;
 
-    Magnum::Matrix3 _matrix;
-    const Magnum::Matrix3* _parentMatrix;
+    const Magnum::Matrix3 _matrix() {
+        return _parentMatrix ? *_parentMatrix * _scrollMatrix() : Magnum::Matrix3{};
+    }
+    const Magnum::Matrix3* _parentMatrix = nullptr;
 
     void _drawInbetweenScissor() final {
         Shaders::color
-            ->setTransformationProjectionMatrix(_matrix)
+            ->setTransformationProjectionMatrix(_matrix())
             .draw(_mesh);
     }
 
     void _updateGeometry() {
         // update geometry
-        _matrix = *_parentMatrix * _scrollMatrix();
-        Hoverable::_updateGeometry(_matrix);
+        Hoverable::_updateGeometry(_matrix());
 
         // update scissor
         _updateScissorTarget(geometry());
@@ -83,8 +84,11 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
     }
 
     void _availableSpaceChanged(Magnum::Range2D& availableSpace) final {
-        // take all remaining space
-        switch(_growableAxis()) {
+        // take all remaining space as canevas size
+        _updateCanevasSize(availableSpace);
+
+        // extend
+        switch(_growableAxis) {
             case GrowableAxis::Width:
                 availableSpace.max().x() *= 2.f;
             break;
@@ -108,7 +112,7 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
 
         //
         Magnum::Float size;
-        switch(_growableAxis()) {
+        switch(_growableAxis) {
             case GrowableAxis::Width:
                 size = availableSpace.x().size();
             break;

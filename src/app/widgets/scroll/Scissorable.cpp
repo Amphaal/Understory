@@ -20,8 +20,9 @@
 #include "Scissorable.h"
 #include "ScrollablePanel.h"
 
-UnderStory::Widget::Scissorable::Scissorable(ScrollablePanel* associatedPanel) :
-    _associatedPanel(associatedPanel), _grwblAxis(_getGrowableAxis()) {}
+UnderStory::Widget::Scissorable::Scissorable(ScrollablePanel* associatedPanel) : 
+    Scrollable(associatedPanel->stickyness()),
+    _associatedPanel(associatedPanel) {}
 
 void UnderStory::Widget::Scissorable::_applyScissor() {
     _scissorStack.push(_scissorTarget);
@@ -35,35 +36,33 @@ void UnderStory::Widget::Scissorable::_draw() {
     // _undoScissor();
 }
 
-void UnderStory::Widget::Scissorable::_translateView(const Magnum::Vector2& scrollOffset) {   
-    // TODO stop at min/max
-    // _scrollMatrix = _scrollMatrix *
-    //     Magnum::Matrix3::translation(
-    //         _axisFn(-scrollOffset.y() / 10)
-    //     );
-}
-
 const Magnum::Matrix3& UnderStory::Widget::Scissorable::_scrollMatrix() const {
     return _scrllMatrix;
 }
 
-const UnderStory::Widget::GrowableAxis UnderStory::Widget::Scissorable::_growableAxis() const {
-    return _grwblAxis;
+Magnum::Float UnderStory::Widget::Scissorable::_getCanevasSize(const Magnum::Range2D &canevas) const {
+    switch(_growableAxis) {
+        case GrowableAxis::Width:
+            return canevas.size().x();
+        case GrowableAxis::Height:
+            return canevas.size().y();
+    }
+}
+
+void UnderStory::Widget::Scissorable::_updateCanevasSize(const Magnum::Range2D &canevas) {
+    _canevasSize = _getCanevasSize(canevas);
+}
+
+void UnderStory::Widget::Scissorable::_translateView(const Magnum::Vector2& scrollOffset) {   
+    // TODO stop at min/max
+    _scrllMatrix = _scrllMatrix *
+        Magnum::Matrix3::translation(
+            _axisFn(-scrollOffset.y())
+        );
 }
 
 void UnderStory::Widget::Scissorable::_signalContentSizeChanged(const Magnum::Float& newContentSize) {
     _associatedPanel->scroller().onContentSizeChanged(newContentSize);
-}
-
-const UnderStory::Widget::GrowableAxis UnderStory::Widget::Scissorable::_getGrowableAxis() const {
-    switch (_associatedPanel->stickyness()) {
-        case StickTo::Left :
-        case StickTo::Right :
-            return GrowableAxis::Height;
-        case StickTo::Top :
-        case StickTo::Bottom :
-            return GrowableAxis::Width;
-    }
 }
 
 void UnderStory::Widget::Scissorable::_undoScissor() {

@@ -84,7 +84,7 @@ class Scroller : public Container {
     Magnum::Range2D _geomPhPx;
 
     // scroller position within panel
-    const StickTo _scrollerStickyness() const;
+    static StickTo _stickynessFromPanel(const ScrollablePanel* panel);
 
     void _availableSpaceChanged(Magnum::Range2D& availableSpace) final;
     const Magnum::Matrix3* _matrixUpdateRequested(const Magnum::Matrix3* parentMatrix) final;

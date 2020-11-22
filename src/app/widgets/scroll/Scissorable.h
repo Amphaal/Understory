@@ -27,6 +27,7 @@
 
 #include <stack>
 
+#include "Scrollable.hpp"
 #include "src/app/widgets/base/Hoverable.hpp"
 
 namespace UnderStory {
@@ -35,7 +36,7 @@ namespace Widget {
 
 class ScrollablePanel;
 
-class Scissorable {
+class Scissorable : public Scrollable {
  friend class ScrollablePanel;
 
  public:
@@ -49,26 +50,27 @@ class Scissorable {
     const Magnum::Matrix3& _scrollMatrix() const;
 
     void _signalContentSizeChanged(const Magnum::Float& newContentSize);
-    const GrowableAxis _growableAxis() const;
 
+    void _updateCanevasSize(const Magnum::Range2D &canevas);
     void _updateScissorTarget(const Magnum::Range2D &geometry);
 
  private:
     ScrollablePanel* _associatedPanel;
 
     Magnum::Matrix3 _scrllMatrix;
+    Magnum::Float _canevasSize;
 
     Magnum::Range2Di _scissorTarget;
-    static inline std::stack<Magnum::Range2Di> _scissorStack;
 
-    GrowableAxis _grwblAxis;
-    const GrowableAxis _getGrowableAxis() const;
+    static inline std::stack<Magnum::Range2Di> _scissorStack;
 
     void _applyScissor();
     void _undoScissor();
 
     static Magnum::Range2Di framebufferSize();
     static Magnum::Vector2i fromGLtoPixel(Magnum::Vector2 GLCoords);
+
+    Magnum::Float _getCanevasSize(const Magnum::Range2D &canevas) const;
 };
 
 }  // namespace Widget

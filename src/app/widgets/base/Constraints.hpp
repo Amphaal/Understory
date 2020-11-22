@@ -34,11 +34,6 @@ enum class StickTo {
     Bottom
 };
 
-enum class GrowableAxis {
-    Width,
-    Height
-};
-
 class Constraints {
  public:
     Constraints() {}
