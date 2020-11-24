@@ -84,14 +84,6 @@ void UnderStory::Widget::Scroller::onContentRatioChanged(const Magnum::Float& co
     _handle.updateSize(handleSize, phSize - handleSize);
 }
 
-void UnderStory::Widget::Scroller::reveal() {
-    // TODO
-}
-
-void UnderStory::Widget::Scroller::fade() {
-    // TODO
-}
-
 void UnderStory::Widget::Scroller::_availableSpaceChanged(Magnum::Range2D& availableSpace) {
     // start and begin of scroller placeholder
     auto &pixelSize = constraints().pixelSize();

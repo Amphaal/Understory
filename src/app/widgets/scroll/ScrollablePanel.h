@@ -72,8 +72,6 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
 
     static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<Magnum::Vector2>& state);
 
-    void _onHoverChanged(bool isHovered) final;
-
     void _onAnimationProgress() final;
 
     void _onToggled(bool isToggled) final;

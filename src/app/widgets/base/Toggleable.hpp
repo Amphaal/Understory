@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <functional>
+
 namespace UnderStory {
 
 namespace Widget {
@@ -41,6 +43,22 @@ class Toggleable {
 
  private:
     bool _toggled = false;
+};
+
+class Button : public Toggleable {
+ public:
+    using ToggleCallback = std::function<void(bool)>;
+    void setToogleCallback(ToggleCallback cb) {
+        _toggleCb = cb;
+    }
+
+ protected:
+    void _onToggled(bool isToggled) override {
+        if(_toggleCb) _toggleCb(isToggled);
+    }
+
+ private:
+    ToggleCallback _toggleCb;
 };
 
 }  // namespace Widget

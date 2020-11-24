@@ -39,7 +39,7 @@ class Scrollable : public Animation::PlayerMatrixAnimator<float> {
  public:
     using AxisFunction = std::function<Magnum::Vector2(Magnum::Float)>;
     explicit Scrollable(StickTo parentStickness) : 
-        PlayerMatrixAnimator(&_scrllMatrix, .1f),
+        PlayerMatrixAnimator(&_scrllMatrix, .2f),
         _axisFn(_getAxisFunction(parentStickness)), 
         _growableAxis(_getGrowableAxis(parentStickness)) {}
  

@@ -38,7 +38,7 @@ class BasicEventHandler {
     virtual void _handleEvent(Ev &event) = 0;
 };
 
-class ScrollEventHandler : public BasicEventHandler<Sdl2Application::MouseScrollEvent>{
+class ScrollEventHandler : public BasicEventHandler<Sdl2Application::MouseScrollEvent> {
   friend class AppContainer;
  protected:
     virtual void handleScrollEvent(BasicEventHandler::EventType &event) = 0;

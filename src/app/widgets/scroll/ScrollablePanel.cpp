@@ -83,14 +83,6 @@ void UnderStory::Widget::ScrollablePanel::_defaultAnimationCallback(Magnum::Floa
     );
 }
 
-void UnderStory::Widget::ScrollablePanel::_onHoverChanged(bool isHovered) {
-    if(isHovered) {
-        _scroller.reveal();
-    } else {
-        _scroller.fade();
-    }
-}
-
 void UnderStory::Widget::ScrollablePanel::_onAnimationProgress() {
     _definePanelPosition(currentAnim());
     _propagateMatrixChanges(&_matrix);

@@ -30,7 +30,7 @@ void UnderStory::Widget::Scissorable::_applyScissor() {
 }
 
 void UnderStory::Widget::Scissorable::_draw() {
-    // TODO
+    // TODO(amphaal) use scissors
     // _applyScissor();
         _drawInbetweenScissor();
     // _undoScissor();
@@ -50,7 +50,7 @@ void UnderStory::Widget::Scissorable::_updateCanevasSize(const Magnum::Range2D &
 }
 
 float UnderStory::Widget::Scissorable::_scrollTick() const {
-    return 3.f;
+    return 1.f;
 }
 
 float UnderStory::Widget::Scissorable::_scrollByOffset(const Magnum::Vector2& scrollOffset) {   
@@ -59,7 +59,7 @@ float UnderStory::Widget::Scissorable::_scrollByOffset(const Magnum::Vector2& sc
     _translationFactor += -step;
     auto maxTranslate = _contentSize - _canevasSize;
 
-    // TODO stop at min/max
+    // stop at min/max
     if(_translationFactor < 0) {   // prevent backward
         _translationFactor = 0;
     }

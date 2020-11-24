@@ -116,6 +116,11 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     // bind widgets to container (order is important)
     this->_initContaining({&_asButton, &_asPanel, _stWidget.get()}),
 
+    // button callback
+    _asButton.setToogleCallback([this](bool) {
+        _asPanel.toggle();
+    });
+
     //
     _timeline.start();
 
@@ -310,7 +315,6 @@ void UnderStory::USApplication::mouseReleaseEvent(MouseEvent& event) {
 
             } else if (_lockContext == &_asButton) {
                 _asButton.toggle();
-                _asPanel.toggle();
             }
         }
         break;

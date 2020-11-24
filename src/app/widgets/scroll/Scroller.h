@@ -58,10 +58,6 @@ class Scroller : public Container {
     // callback when content ratio to canvas changed
     void onContentRatioChanged(const Magnum::Float& contentRatio);
 
-    void reveal();
-
-    void fade();
-
  private:
     static constexpr float THICKNESS_PX = 20.f;
     static constexpr float PADDING_PX = 10.f;

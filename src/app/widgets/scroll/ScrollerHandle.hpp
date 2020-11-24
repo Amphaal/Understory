@@ -61,12 +61,8 @@ class ScrollerHandle : public Hoverable, public Scrollable {
     }
 
     void scrollByPercentage(Magnum::Float percentTranslate) {
-        // TODO animate
         auto tr = -_translationGap * percentTranslate;
         _animateScrollByTr(tr);
-        
-        //
-        _updateGeometry();
     }
 
     // updates handle size
@@ -115,6 +111,11 @@ class ScrollerHandle : public Hoverable, public Scrollable {
         Magnum::Vector2 position;
     };
 
+    void _onAnimationProgress() final {
+        Scrollable::_onAnimationProgress();
+        _updateGeometry();
+    }
+
     Magnum::GL::Buffer _bufferScroller;
     Corrade::Containers::StaticArray<4, Vertex> _verticesScroller;
     Magnum::GL::Mesh _meshScroller{Magnum::GL::MeshPrimitive::Triangles};
@@ -149,6 +150,9 @@ class ScrollerHandle : public Hoverable, public Scrollable {
     }
 
     void _setup() {
+        // set default color
+        _updateScrollColor();
+
         // define indices
         Magnum::GL::Buffer scrollerIndices;
         scrollerIndices.setData({
