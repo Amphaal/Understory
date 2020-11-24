@@ -45,20 +45,22 @@ class Scissorable : public Scrollable {
  protected:
     void _draw();
     virtual void _drawInbetweenScissor() = 0;
+    virtual float _scrollTick() const;
+   
+    // returns progression as percent relative to min-max poles
+    float _scrollByOffset(const Magnum::Vector2& scrollOffset);
 
-    void _translateView(const Magnum::Vector2& scrollOffset);
-    const Magnum::Matrix3& _scrollMatrix() const;
-
-    void _signalContentSizeChanged(const Magnum::Float& newContentSize);
+    void _contentSizeChanged(const Magnum::Float& newContentSize);
 
     void _updateCanevasSize(const Magnum::Range2D &canevas);
     void _updateScissorTarget(const Magnum::Range2D &geometry);
 
  private:
     ScrollablePanel* _associatedPanel;
-
-    Magnum::Matrix3 _scrllMatrix;
+    
+    Magnum::Float _translationFactor;
     Magnum::Float _canevasSize;
+    Magnum::Float _contentSize;
 
     Magnum::Range2Di _scissorTarget;
 

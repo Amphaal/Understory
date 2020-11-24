@@ -49,13 +49,14 @@ class ScrollablePanel;
 
 class Scroller : public Container {
  public:
-    explicit Scroller(const ScrollablePanel* panel);
+    explicit Scroller(ScrollablePanel* panel);
 
     void mayDraw();
 
-    void onMouseScroll(const Magnum::Matrix3& scrollMatrix);
+    ScrollerHandle& handle();
 
-    void onContentSizeChanged(const Magnum::Float& newContentSize);
+    // callback when content ratio to canvas changed
+    void onContentRatioChanged(const Magnum::Float& contentRatio);
 
     void reveal();
 
@@ -68,7 +69,7 @@ class Scroller : public Container {
 
     Magnum::Matrix3 _matrix;
 
-    const ScrollablePanel* _associatedPanel;
+    ScrollablePanel* _associatedPanel;
     ScrollerHandle _handle;
     StickTo _stickness;
 

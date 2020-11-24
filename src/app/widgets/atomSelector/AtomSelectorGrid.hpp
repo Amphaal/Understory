@@ -90,10 +90,10 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
         // extend
         switch(_growableAxis) {
             case GrowableAxis::Width:
-                availableSpace.max().x() *= 2.f;
+                availableSpace.max().x() *= 7.5f;
             break;
             case GrowableAxis::Height:
-                availableSpace.min().y() *= 2.f;
+                availableSpace.min().y() *= 7.5f;
             break;
         }
         _updateShape(availableSpace);
@@ -122,7 +122,7 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
         }
 
         //
-        _signalContentSizeChanged(size);
+        _contentSizeChanged(size);
         availableSpace = {};
     }
 

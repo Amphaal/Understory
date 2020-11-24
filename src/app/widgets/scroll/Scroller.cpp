@@ -20,10 +20,10 @@
 #include "Scroller.h"
 #include "src/app/widgets/scroll/ScrollablePanel.h"
 
-UnderStory::Widget::Scroller::Scroller(const ScrollablePanel* panel) :
+UnderStory::Widget::Scroller::Scroller(ScrollablePanel* panel) :
     _associatedPanel(panel),
     _stickness(_stickynessFromPanel(panel)), 
-    _handle(_stickynessFromPanel(panel)) {
+    _handle(panel, _stickynessFromPanel(panel)) {
     _initContaining({&_handle});
     _setup();
 }
@@ -43,8 +43,8 @@ void UnderStory::Widget::Scroller::mayDraw() {
     _handle.draw();
 }
 
-void UnderStory::Widget::Scroller::onMouseScroll(const Magnum::Matrix3& scrollMatrix) {
-    _handle.onMouseScroll(scrollMatrix);
+UnderStory::Widget::ScrollerHandle& UnderStory::Widget::Scroller::handle() {
+    return _handle;
 }
 
 // scroller position within panel
@@ -61,7 +61,7 @@ UnderStory::Widget::StickTo UnderStory::Widget::Scroller::_stickynessFromPanel(c
     }
 }
 
-void UnderStory::Widget::Scroller::onContentSizeChanged(const Magnum::Float& newContentSize) {
+void UnderStory::Widget::Scroller::onContentRatioChanged(const Magnum::Float& contentRatio) {
     // determine placeholder size
     Magnum::Float phSize;
     switch (_stickness) {
@@ -76,16 +76,12 @@ void UnderStory::Widget::Scroller::onContentSizeChanged(const Magnum::Float& new
     }
 
     // check if scroller is required
-    Magnum::Float prcSize = 1.f;
-    if(phSize) {
-        prcSize = phSize / newContentSize;
-    }
-    _contentBigEnough = prcSize < 1.f;
+    _contentBigEnough = contentRatio < 1.f;
     if(!_contentBigEnough) return;
 
     // signals handle to update its size
-    auto handleSize = phSize * prcSize;
-    _handle.updateSize(handleSize);
+    auto handleSize = phSize * contentRatio;
+    _handle.updateSize(handleSize, phSize - handleSize);
 }
 
 void UnderStory::Widget::Scroller::reveal() {

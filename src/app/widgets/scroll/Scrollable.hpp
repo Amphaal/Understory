@@ -24,6 +24,8 @@
 
 #include "src/app/widgets/base/Constraints.hpp"
 
+#include "src/app/widgets/animation/PlayerMatrixAnimator.hpp"
+
 namespace UnderStory {
 
 namespace Widget {
@@ -33,18 +35,37 @@ enum class GrowableAxis {
     Height
 };
 
-class Scrollable {
+class Scrollable : public Animation::PlayerMatrixAnimator<float> {
  public:
     using AxisFunction = std::function<Magnum::Vector2(Magnum::Float)>;
     explicit Scrollable(StickTo parentStickness) : 
+        PlayerMatrixAnimator(&_scrllMatrix, .1f),
         _axisFn(_getAxisFunction(parentStickness)), 
         _growableAxis(_getGrowableAxis(parentStickness)) {}
  
  protected:
-    const AxisFunction _axisFn;
     const GrowableAxis _growableAxis;
 
+    const Magnum::Matrix3& _scrollMatrix() const {
+        return _scrllMatrix;
+    }
+
+    void _animateScrollByTr(Magnum::Float tr) {
+        _updateAnimationAndPlay(animState().current, tr);
+    }
+    
+    void _onAnimationProgress() override {
+        _scrllMatrix = _scrollTranslate(currentAnim());
+    }
+
  private:
+    const AxisFunction _axisFn;
+    Magnum::Matrix3 _scrllMatrix;
+
+    Magnum::Matrix3 _scrollTranslate(Magnum::Float val) {
+        return Magnum::Matrix3::translation(_axisFn(val));
+    }
+
     static AxisFunction _getAxisFunction(StickTo parentStickness) {
         switch (parentStickness) {
             case StickTo::Left :

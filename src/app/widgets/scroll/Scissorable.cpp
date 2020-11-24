@@ -36,10 +36,6 @@ void UnderStory::Widget::Scissorable::_draw() {
     // _undoScissor();
 }
 
-const Magnum::Matrix3& UnderStory::Widget::Scissorable::_scrollMatrix() const {
-    return _scrllMatrix;
-}
-
 Magnum::Float UnderStory::Widget::Scissorable::_getCanevasSize(const Magnum::Range2D &canevas) const {
     switch(_growableAxis) {
         case GrowableAxis::Width:
@@ -53,16 +49,42 @@ void UnderStory::Widget::Scissorable::_updateCanevasSize(const Magnum::Range2D &
     _canevasSize = _getCanevasSize(canevas);
 }
 
-void UnderStory::Widget::Scissorable::_translateView(const Magnum::Vector2& scrollOffset) {   
-    // TODO stop at min/max
-    _scrllMatrix = _scrllMatrix *
-        Magnum::Matrix3::translation(
-            _axisFn(-scrollOffset.y())
-        );
+float UnderStory::Widget::Scissorable::_scrollTick() const {
+    return 3.f;
 }
 
-void UnderStory::Widget::Scissorable::_signalContentSizeChanged(const Magnum::Float& newContentSize) {
-    _associatedPanel->scroller().onContentSizeChanged(newContentSize);
+float UnderStory::Widget::Scissorable::_scrollByOffset(const Magnum::Vector2& scrollOffset) {   
+    // apply factor
+    auto step = scrollOffset.y() * _scrollTick();
+    _translationFactor += -step;
+    auto maxTranslate = _contentSize - _canevasSize;
+
+    // TODO stop at min/max
+    if(_translationFactor < 0) {   // prevent backward
+        _translationFactor = 0;
+    }
+    else if(_translationFactor > maxTranslate) {   // prevent going too far
+        _translationFactor = maxTranslate; 
+    }
+    
+    // update scroll matrix
+    _animateScrollByTr(_translationFactor);
+
+    // prc eq
+    return _translationFactor / maxTranslate;
+}
+
+void UnderStory::Widget::Scissorable::_contentSizeChanged(const Magnum::Float& newContentSize) {
+    // reset scroll matrix
+    _translationFactor = 0.f;
+    _animateScrollByTr(_translationFactor);
+    
+    // update cached content size
+    _contentSize = newContentSize;
+
+    // define content ratio and pass it to the scroller
+    auto contentRatio = _canevasSize / _contentSize;
+    _associatedPanel->scroller().onContentRatioChanged(contentRatio);
 }
 
 void UnderStory::Widget::Scissorable::_undoScissor() {

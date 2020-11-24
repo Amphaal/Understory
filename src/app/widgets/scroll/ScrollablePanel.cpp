@@ -66,8 +66,8 @@ void UnderStory::Widget::ScrollablePanel::mayDraw() {
 
 void UnderStory::Widget::ScrollablePanel::handleScrollEvent(ScrollEventHandler::EventType &event) {
     auto scrollOffset = event.offset();
-    _content->_translateView(scrollOffset);
-    // _scroller.onMouseScroll(_content->scrollMatrix());
+    auto prc = _content->_scrollByOffset(scrollOffset);
+    _scroller.handle().scrollByPercentage(prc);
 }
 
 const UnderStory::Widget::StickTo UnderStory::Widget::ScrollablePanel::stickyness() const {

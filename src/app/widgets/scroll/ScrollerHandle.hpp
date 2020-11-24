@@ -44,9 +44,11 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
+class ScrollablePanel;
+
 class ScrollerHandle : public Hoverable, public Scrollable {
  public:
-    explicit ScrollerHandle(StickTo scrollerStickyness) : Scrollable(scrollerStickyness) {
+    explicit ScrollerHandle(ScrollablePanel* panel, StickTo scrollerStickyness) : Scrollable(scrollerStickyness), _panel(panel) {
         _setup();
     }
 
@@ -58,15 +60,20 @@ class ScrollerHandle : public Hoverable, public Scrollable {
             .draw(_meshScroller);
     }
 
-    void onMouseScroll(const Magnum::Matrix3& scrollMatrix) {
+    void scrollByPercentage(Magnum::Float percentTranslate) {
         // TODO animate
-        _contentScrollMatrix = scrollMatrix.inverted();
+        auto tr = -_translationGap * percentTranslate;
+        _animateScrollByTr(tr);
         
         //
         _updateGeometry();
     }
 
-    void updateSize(const Magnum::Float& handleSize) {
+    // updates handle size
+    void updateSize(const Magnum::Float& handleSize, const Magnum::Float& trGap) {
+        //
+        _translationGap = trGap;
+        
         // determine new scroller size
         auto scrollerShape = shape();
         switch (_growableAxis) {
@@ -88,10 +95,7 @@ class ScrollerHandle : public Hoverable, public Scrollable {
         _updateShape(scrollerShape);
 
         // update its geometry
-        _updateGeometry();
-
-        // ... and state...
-        _updateScrollColor();
+        scrollByPercentage(0.f);
 
         // ... then finally update buffer
         _bufferScroller.setSubData(0, _verticesScroller);
@@ -101,9 +105,11 @@ class ScrollerHandle : public Hoverable, public Scrollable {
     static inline Magnum::Color4 SCRLL_COLOR_IDLE = 0xCCCCCCFF_rgbaf;
     static inline Magnum::Color4 SCRLL_COLOR_ACTIVE = 0xFFFFFFFF_rgbaf;
 
+    ScrollablePanel* _panel;
+
     Magnum::Matrix3 _matrix;
-    Magnum::Matrix3 _contentScrollMatrix;
     const Magnum::Matrix3* _parentMatrix = nullptr;
+    Magnum::Float _translationGap = .0f;
 
     struct Vertex {
         Magnum::Vector2 position;
@@ -126,7 +132,7 @@ class ScrollerHandle : public Hoverable, public Scrollable {
 
     void _updateGeometry() {
         // update geometry and pixel geometry
-        if(_parentMatrix) _matrix = *_parentMatrix * _contentScrollMatrix;
+        if(_parentMatrix) _matrix = *_parentMatrix * _scrollMatrix();
         Hoverable::_updateGeometry(_matrix);
         _geomScrollerPx = _shapeIntoPixel(geometry());
     }
