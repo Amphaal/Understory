@@ -51,7 +51,7 @@ class Scrollable : public Animation::PlayerMatrixAnimator<float> {
     }
 
     void _animateScrollByTr(Magnum::Float tr) {
-        _updateAnimationAndPlay(animState().current, tr);
+        _updateAnimationAndPlay(currentAnim(), tr);
     }
     
     void _onAnimationProgress() override {

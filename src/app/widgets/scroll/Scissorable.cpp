@@ -60,7 +60,11 @@ float UnderStory::Widget::Scissorable::_scrollTick() const {
 float UnderStory::Widget::Scissorable::_scrollByOffset(const Magnum::Vector2& scrollOffset) {   
     // apply factor
     auto step = scrollOffset.y() * _scrollTick();
-    _translationFactor += -step;
+    return _scrollByContentSize(step);
+}
+
+float UnderStory::Widget::Scissorable::_scrollByContentSize(Magnum::Float contentSizeTick) {
+    _translationFactor += -contentSizeTick;
     auto maxTranslate = _contentSize - _canvasSize;
 
     // stop at min/max
@@ -75,7 +79,8 @@ float UnderStory::Widget::Scissorable::_scrollByOffset(const Magnum::Vector2& sc
     _animateScrollByTr(_translationFactor);
 
     // prc eq
-    return _translationFactor / maxTranslate;
+    auto scrollPrc = _translationFactor / maxTranslate;
+    return scrollPrc;
 }
 
 void UnderStory::Widget::Scissorable::_undoScissor() {

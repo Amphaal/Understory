@@ -49,6 +49,7 @@ class Scissorable : public Scrollable {
    
     // returns progression as percent relative to min-max poles
     float _scrollByOffset(const Magnum::Vector2& scrollOffset);
+    float _scrollByContentSize(Magnum::Float contentSizeTick);
 
     void _scrollContentChanged(const Magnum::Range2D& content);
     void _scrollCanvasChanged(const Magnum::Range2D &canvas);

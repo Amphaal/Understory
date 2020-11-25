@@ -33,11 +33,11 @@
 #include "src/app/widgets/animation/PlayerMatrixAnimator.hpp"
 
 #include "src/app/widgets/base/Constraints.hpp"
-#include "src/app/widgets/base/Container.hpp"
+#include "src/app/widgets/base/Hoverable.hpp"
+#include "src/app/widgets/base/Toggleable.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
-
-#include "ScrollerHandle.h"
+#include "Scrollable.hpp"
 
 namespace UnderStory {
 
@@ -47,46 +47,57 @@ using namespace Magnum::Math::Literals;
 
 class ScrollablePanel;
 
-class Scroller : public Container {
+class ScrollerHandle : 
+    public Hoverable, 
+    public Scrollable, 
+    public Button, 
+    public MouseMove_EH {
  public:
-    explicit Scroller(ScrollablePanel* panel);
+    explicit ScrollerHandle(ScrollablePanel* panel, StickTo scrollerStickyness);
 
-    void mayDraw();
+    void draw();
 
-    ScrollerHandle& handle();
+    void scrollByPercentage(Magnum::Float percentTranslate);
 
-    // callback when content ratio to canvas changed
-    void onContentRatioChanged(const Magnum::Float& contentRatio);
+    // updates handle size
+    void updateSize(const Magnum::Float& handleSize, const Magnum::Float& trGap);
 
  private:
-    static constexpr float THICKNESS_PX = 20.f;
-    static constexpr float PADDING_PX = 10.f;
-    static inline Magnum::Color4 PH_COLOR = 0xFFFFFF44_rgbaf;
+    static inline Magnum::Color4 SCRLL_COLOR_IDLE = 0xCCCCCCFF_rgbaf;
+    static inline Magnum::Color4 SCRLL_COLOR_ACTIVE = 0xFFFFFFFF_rgbaf;
+
+    ScrollablePanel* _panel;
 
     Magnum::Matrix3 _matrix;
-
-    ScrollablePanel* _associatedPanel;
-    ScrollerHandle _handle;
-    StickTo _stickness;
-
-    bool _contentBigEnough = false;
+    const Magnum::Matrix3* _parentMatrix = nullptr;
+    Magnum::Float _translationGap = .0f;
 
     struct Vertex {
         Magnum::Vector2 position;
     };
 
-    Magnum::GL::Buffer _bufferPh;
-    Corrade::Containers::StaticArray<4, Vertex> _verticesPh;
-    Magnum::GL::Mesh _meshPh{Magnum::GL::MeshPrimitive::Triangles};
-    Magnum::Range2D _geomPhPx;
+    void _onToggled(bool isToggled) final;
 
-    // scroller position within panel
-    static StickTo _stickynessFromPanel(const ScrollablePanel* panel);
+    void _onAnimationProgress() final;
+
+    Magnum::GL::Buffer _bufferScroller;
+    Corrade::Containers::StaticArray<4, Vertex> _verticesScroller;
+    Magnum::GL::Mesh _meshScroller{Magnum::GL::MeshPrimitive::Triangles};
+    Magnum::Range2D _geomScrollerPx;
+
+    // if mouse is over placeholder
+    void _onHoverChanged(bool isHovered) final;
+
+    void handleLockMoveEvent(MouseMove_EH::EventType &event) final;
 
     void _availableSpaceChanged(Magnum::Range2D& availableSpace) final;
-    const Magnum::Matrix3* _matrixUpdateRequested(const Magnum::Matrix3* parentMatrix) final;
 
     void _updateGeometry();
+
+    Magnum::Color4 _scrollerColor;
+    void _updateScrollColor();
+
+    const Magnum::Matrix3* _matrixUpdateRequested(const Magnum::Matrix3* parentMatrix) final;
 
     void _setup();
 };

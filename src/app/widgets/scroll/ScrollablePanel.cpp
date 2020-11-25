@@ -70,6 +70,11 @@ void UnderStory::Widget::ScrollablePanel::handleScrollEvent(Scroll_EH::EventType
     _scroller.handle().scrollByPercentage(prc);
 }
 
+void UnderStory::Widget::ScrollablePanel::scrollFromHandle(Magnum::Float contentSizeTick) {
+    auto prc = _content->_scrollByContentSize(contentSizeTick);
+    _scroller.handle().scrollByPercentage(prc);
+}
+
 const UnderStory::Widget::StickTo UnderStory::Widget::ScrollablePanel::stickyness() const {
     return _stickness;
 }

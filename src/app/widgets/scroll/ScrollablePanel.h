@@ -36,10 +36,10 @@
 
 #include "src/app/widgets/base/EventHandlers.hpp"
 
-#include "Scroller.h"
 
 #include "src/app/shaders/Shaders.hpp"
 
+#include "Scroller.h"
 #include "Scissorable.h"
 
 namespace UnderStory {
@@ -58,6 +58,7 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
 
     const StickTo stickyness() const;
     Scroller& scroller();
+    void scrollFromHandle(Magnum::Float contentSizeTick);
 
  private:
     StickTo _stickness;

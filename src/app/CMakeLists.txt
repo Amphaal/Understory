@@ -93,6 +93,7 @@ target_sources(appExec PRIVATE
     widgets/scroll/Scissorable.cpp
     widgets/scroll/ScrollablePanel.cpp
     widgets/scroll/Scroller.cpp
+    widgets/scroll/ScrollerHandle.cpp
     USApplication.cpp
     ${appExec_RES}
 )
