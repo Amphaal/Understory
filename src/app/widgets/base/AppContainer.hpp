@@ -46,37 +46,8 @@ class AppContainer :
     }
 
  protected:
-    void _traverseForHovered(const Magnum::Vector2 &cursorPos) {
-        auto deepHovered = _checkIfMouseOver(cursorPos);
-        if(_deepestHoveredShape != deepHovered) {
-            _deepestHoveredShape = deepHovered;
-            // _traceHoverable(_deepestHoveredShape);
-        }
-    }
-
     void _propagateScrollEvent(Scroll_EH::EventType &event) {
         _propagateEvent<Scroll_EH>(_deepestHoveredShape, event);
-    }
-
-    void _propagateMouseReleaseEvent(MouseRelease_EH::EventType &event) {
-        // update mouse state
-        switch (event.button()) {
-            case Magnum::Platform::Sdl2Application::MouseEvent::Button::Left:
-                _mouseState._leftReleased();
-            break;
-
-            case Magnum::Platform::Sdl2Application::MouseEvent::Button::Right:
-                _mouseState._rightReleased();
-            break;
-            default:
-            break;
-        }
-
-        // propagate first from lock context
-        _propagateEvent<MouseRelease_EH>(_lockContext, event);
-
-        // then clears lock context
-        _lockContext = nullptr;
     }
 
     void _propagateMousePressEvent(MousePress_EH::EventType &event) {
@@ -89,26 +60,62 @@ class AppContainer :
             case Magnum::Platform::Sdl2Application::MouseEvent::Button::Right:
                 _mouseState._rightPressed();
             break;
+
             default:
             break;
         }
 
-        // update lock context and propagate from it
+        // update lock context
         _lockContext = _deepestHoveredShape;
-        _propagateEvent<MousePress_EH>(_lockContext, event);
+
+        // handle event from it only
+        _tryHandleEvent<MousePress_EH>(_lockContext, event);
     }
 
-    void _propagateMouseMoveEvent(MouseMove_EH::EventType &event) {
+    void _propagateMouseMoveEvent(MouseMove_EH::EventType &event, const Magnum::Vector2 &cursorPos) {
+        // find hovered
+        _traverseForHovered(cursorPos);
+        
         // may update mouse state as dragging
         _mouseState._mayBeDragging();
 
-        // propagate from lock context
-        _propagateEvent<MouseMove_EH>(_lockContext, event);
+        // handle lock context only event
+        _tryHandleEvent<MouseMove_EH>(_lockContext, event);
+    }
+
+    void _propagateMouseReleaseEvent(MouseRelease_EH::EventType &event) {
+        // handle event from lock context only
+        _tryHandleEvent<MouseRelease_EH>(_lockContext, event);
+
+        // update mouse state
+        switch (event.button()) {
+            case Magnum::Platform::Sdl2Application::MouseEvent::Button::Left:
+                _mouseState._leftReleased();
+            break;
+
+            case Magnum::Platform::Sdl2Application::MouseEvent::Button::Right:
+                _mouseState._rightReleased();
+            break;
+
+            default:
+            break;
+        }
+
+        // then clears lock context
+        _lockContext = nullptr;
     }
 
  private:
     // get the 'latestHovered', but searching through the deepest in the stack
     Hoverable* _deepestHoveredShape = nullptr;
+
+    void _traverseForHovered(const Magnum::Vector2 &cursorPos) {
+        auto deepHovered = _checkIfMouseOver(cursorPos);
+        if(_deepestHoveredShape != deepHovered) {
+            _deepestHoveredShape = deepHovered;
+            // _traceHoverable(_deepestHoveredShape);
+        }
+    }
 
     // locked hoverable context
     Hoverable* _lockContext = nullptr;
@@ -116,11 +123,19 @@ class AppContainer :
     template<class Hndlr, class EvT>
     void _propagateEvent(Hoverable* target, EvT &event) {
         if(!target) return;
+        if(_tryHandleEvent<Hndlr, EvT>(target, event)) return;
+        _propagateEvent<Hndlr, EvT>(target->parent(), event);
+    }
+
+    // returns true if event has been handled 
+    template<class Hndlr, class EvT>
+    bool _tryHandleEvent(Hoverable* target, EvT &event) {
         if(auto e = dynamic_cast<Hndlr*>(target)) {
             e->_handleEvent(event);
-            return;
+            return true;
         }
-        _propagateEvent<Hndlr, EvT>(target->parent(), event);
+
+        return false;
     }
 };
 

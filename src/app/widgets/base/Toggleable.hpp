@@ -47,11 +47,15 @@ class Toggleable {
     bool _toggled = false;
 };
 
-class Button : public Toggleable, public MouseRelease_EH {
+class Button : public Toggleable, public MouseRelease_EH, public MousePress_EH {
  public:
     using ToggleCallback = std::function<void(bool)>;
     void setToogleCallback(ToggleCallback cb) {
         _toggleCb = cb;
+    }
+
+    bool isPreToggled() const {
+        return _preToggling;
     }
 
  protected:
@@ -60,10 +64,16 @@ class Button : public Toggleable, public MouseRelease_EH {
     }
 
  private:
+    bool _preToggling = false;
     ToggleCallback _toggleCb;
 
     void handleLockReleaseEvent(BasicEventHandler::EventType &event) final {
+        _preToggling = false;
         toggle();
+    }
+        
+    void handlePressEvent(BasicEventHandler::EventType &event) final {
+        _preToggling = true;
     }
 };
 

@@ -21,6 +21,8 @@
 
 #include <chrono>
 
+#include <spdlog/spdlog.h>
+
 namespace UnderStory { namespace Widget { class AppContainer; }}
 
 namespace UnderStory {
@@ -46,6 +48,7 @@ class MouseState {
     void _leftPressed() {
         //
         _lPressed = true;
+        // spdlog::info("Left [Pressed]");
 
         //
         auto now = std::chrono::system_clock::now();
@@ -58,20 +61,25 @@ class MouseState {
     }
 
     void _leftReleased() {
+        // spdlog::info("Left [Released]");
         _lDblClick = false;
         _lPressed = false;
+        _lMoved = false;
     }
 
     void _rightPressed() {
+        // spdlog::info("Right [Pressed]");
         _rPressed = true;
     }
 
     void _rightReleased() {
+        // spdlog::info("Right [Released]");
         _rPressed = false;
     }
 
     void _mayBeDragging() {
-        if(_lPressed) _lMoved = true;
+        if(_lPressed && !_lMoved) 
+            _lMoved = true;
     }
 
  private:

@@ -232,12 +232,11 @@ void UnderStory::USApplication::keyPressEvent(KeyEvent& event) {
 }
 
 void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
-    // find hovered element
+    // find OpenGL cursor pos
     auto cursorPos = _cursorPosition(event);
-    this->_traverseForHovered(cursorPos);
 
     // propagate event
-    _propagateMouseMoveEvent(event);
+    _propagateMouseMoveEvent(event, cursorPos);
 }
 
 void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {

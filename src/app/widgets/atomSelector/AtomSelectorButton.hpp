@@ -98,6 +98,8 @@ class AtomSelectorButton :
     }
 
     void _onHoverChanged(bool isHovered) final {
+        if(isPreToggled()) return;
+
         // apply changes
         if(isHovered) {
             app()->setCursor(Magnum::Platform::Sdl2Application::Cursor::Hand);
