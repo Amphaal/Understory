@@ -84,10 +84,11 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
     }
 
     void _availableSpaceChanged(Magnum::Range2D& availableSpace) final {
-        // take all remaining space as canevas size
-        _updateCanevasSize(availableSpace);
+        // take all remaining space as canvas size
+        _scrollCanvasChanged(availableSpace);
 
         // extend
+        // TODO(amphaal) find another way to modulate size
         switch(_growableAxis) {
             case GrowableAxis::Width:
                 availableSpace.max().x() *= 7.5f;
@@ -111,18 +112,7 @@ class AtomSelectorGrid : public Hoverable, public Scissorable {
         _updateGeometry();
 
         //
-        Magnum::Float size;
-        switch(_growableAxis) {
-            case GrowableAxis::Width:
-                size = availableSpace.x().size();
-            break;
-            case GrowableAxis::Height:
-                size = availableSpace.y().size();
-            break;
-        }
-
-        //
-        _contentSizeChanged(size);
+        _scrollContentChanged(availableSpace);
         availableSpace = {};
     }
 

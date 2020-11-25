@@ -57,6 +57,19 @@ class Scrollable : public Animation::PlayerMatrixAnimator<float> {
     void _onAnimationProgress() override {
         _scrllMatrix = _scrollTranslate(currentAnim());
     }
+    
+    Magnum::Float _extractScrollableSize(const Magnum::Range2D &rect) const {
+        return _extractScrollableSize(rect.size());
+    }
+
+    Magnum::Float _extractScrollableSize(const Magnum::Vector2 &vect) const {
+        switch(_growableAxis) {
+            case GrowableAxis::Width:
+                return vect.x();
+            case GrowableAxis::Height:
+                return vect.y();
+        }
+    }
 
  private:
     const AxisFunction _axisFn;

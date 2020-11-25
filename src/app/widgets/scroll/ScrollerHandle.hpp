@@ -34,6 +34,7 @@
 
 #include "src/app/widgets/base/Constraints.hpp"
 #include "src/app/widgets/base/Hoverable.hpp"
+#include "src/app/widgets/base/Toggleable.hpp"
 
 #include "src/app/shaders/Shaders.hpp"
 #include "Scrollable.hpp"
@@ -46,7 +47,11 @@ using namespace Magnum::Math::Literals;
 
 class ScrollablePanel;
 
-class ScrollerHandle : public Hoverable, public Scrollable {
+class ScrollerHandle : 
+    public Hoverable, 
+    public Scrollable, 
+    public Button, 
+    public MouseMove_EH {
  public:
     explicit ScrollerHandle(ScrollablePanel* panel, StickTo scrollerStickyness) : Scrollable(scrollerStickyness), _panel(panel) {
         _setup();
@@ -111,6 +116,12 @@ class ScrollerHandle : public Hoverable, public Scrollable {
         Magnum::Vector2 position;
     };
 
+    void _onToggled(bool isToggled) final {
+        Button::_onToggled(isToggled);
+
+        _updateScrollColor();
+    }
+
     void _onAnimationProgress() final {
         Scrollable::_onAnimationProgress();
         _updateGeometry();
@@ -123,7 +134,19 @@ class ScrollerHandle : public Hoverable, public Scrollable {
 
     // if mouse is over placeholder
     void _onHoverChanged(bool isHovered) final {
+        if(isPreToggled()) return;
+
         _updateScrollColor();
+    }
+
+    void handleLockMoveEvent(MouseMove_EH::EventType &event) final {
+        auto offset = - constraints().pixelSize() * Magnum::Vector2{
+            static_cast<float>(event.relativePosition().x()),
+            static_cast<float>(event.relativePosition().y())
+        };
+        
+        stopAnim();
+        _animateScrollByTr(currentAnim() + _extractScrollableSize(offset));
     }
 
     void _availableSpaceChanged(Magnum::Range2D& availableSpace) final {

@@ -50,16 +50,16 @@ class Scissorable : public Scrollable {
     // returns progression as percent relative to min-max poles
     float _scrollByOffset(const Magnum::Vector2& scrollOffset);
 
-    void _contentSizeChanged(const Magnum::Float& newContentSize);
+    void _scrollContentChanged(const Magnum::Range2D& content);
+    void _scrollCanvasChanged(const Magnum::Range2D &canvas);
 
-    void _updateCanevasSize(const Magnum::Range2D &canevas);
     void _updateScissorTarget(const Magnum::Range2D &geometry);
 
  private:
     ScrollablePanel* _associatedPanel;
     
     Magnum::Float _translationFactor;
-    Magnum::Float _canevasSize;
+    Magnum::Float _canvasSize;
     Magnum::Float _contentSize;
 
     Magnum::Range2Di _scissorTarget;
@@ -71,8 +71,6 @@ class Scissorable : public Scrollable {
 
     static Magnum::Range2Di framebufferSize();
     static Magnum::Vector2i fromGLtoPixel(Magnum::Vector2 GLCoords);
-
-    Magnum::Float _getCanevasSize(const Magnum::Range2D &canevas) const;
 };
 
 }  // namespace Widget
