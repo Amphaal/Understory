@@ -49,7 +49,7 @@ namespace Widget {
 class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>, 
                         public Container, 
                         public Toggleable, 
-                        public ScrollEventHandler {
+                        public Scroll_EH {
  public:
     explicit ScrollablePanel(StickTo stickness = StickTo::Left, float thickness = .6f);
 
@@ -76,7 +76,7 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
 
     void _onToggled(bool isToggled) final;
 
-    void handleScrollEvent(ScrollEventHandler::EventType &event) final;
+    void handleScrollEvent(Scroll_EH::EventType &event) final;
 
     // helper
     void _updateGeometry();

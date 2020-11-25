@@ -45,12 +45,12 @@ class Container : public Hoverable {
         }
     }
 
+ protected:
     // parent - children hovered : can be 'this' (parent is hovered), 'nullptr' (parent is not hovered), or any child ptr
-    const Hoverable* latestHovered() const {
+    const Hoverable* _latestHovered() const {
         return _latestHoveredShape;
     }
 
- protected:
     void _initContaining(std::initializer_list<UnderStory::Widget::Hoverable*> prioritized) {
         for(auto &tcc : prioritized) 
             _pushContaining(tcc);

@@ -50,7 +50,6 @@
 #include "widgets/navigation/MouseMoveHelper.hpp"
 #include "widgets/navigation/MapScaleHelper.hpp"
 #include "widgets/navigation/KeyboardMoveHelper.hpp"
-#include "widgets/navigation/MouseState.hpp"
 
 #include "widgets/atomSelector/AtomSelectorButton.hpp"
 #include "widgets/scroll/ScrollablePanel.h"
@@ -76,23 +75,25 @@ class USApplication : public Magnum::Platform::Application, public Widget::AppCo
     explicit USApplication(const Arguments& arguments);
 
  private:
-    void drawEvent() override;
-    void viewportEvent(ViewportEvent& event) override;
+    void drawEvent() final;
+    void viewportEvent(ViewportEvent& event) final;
 
-    void keyPressEvent(KeyEvent& event) override;
-    void keyReleaseEvent(KeyEvent& event) override;
+    void keyPressEvent(KeyEvent& event) final;
+    void keyReleaseEvent(KeyEvent& event) final;
 
-    void mouseScrollEvent(MouseScrollEvent& event) override;
+    void mouseScrollEvent(MouseScrollEvent& event) final;
 
-    void mousePressEvent(MouseEvent& event) override;
-    void mouseReleaseEvent(MouseEvent& event) override;
-    void mouseMoveEvent(MouseMoveEvent& event) override;
-    void leftMouseDoubleClickEvent(MouseEvent& event);
+    void mousePressEvent(MouseEvent& event) final;
+    void mouseReleaseEvent(MouseEvent& event) final;
+    void mouseMoveEvent(MouseMoveEvent& event) final;
 
     void _updateDebugText();
     void _resetWorldMatrix();
 
     void handleScrollEvent(MouseScrollEvent &event) final;
+    void handlePressEvent(MouseEvent& event) final;
+    void handleLockReleaseEvent(MouseEvent& event) final;
+    void handleLockMoveEvent(MouseMoveEvent& event) final;
 
     Magnum::PluginManager::Manager<Magnum::Text::AbstractFont> _fontManager;
     Magnum::Containers::Pointer<Magnum::Text::AbstractFont> _defaultFont;
@@ -108,17 +109,10 @@ class USApplication : public Magnum::Platform::Application, public Widget::AppCo
                     _projectionWorld,
                     _transformationProjectionDebugText;
 
-    static constexpr int DOUBLE_CLICK_DELAY_MS = 200;
     static constexpr float MAP_SIZE = 1000.f;  // CAREFUL, higher need a better precision
     static constexpr Magnum::Color4 DEBUG_TEXT_COLOR {1.f, .7f, .3f};
     static constexpr int MINIMUM_HEIGHT = 600;
     static constexpr int MINIMUM_WIDTH = 800;
-
-    // mouse state
-    Navigation::MouseState _mouseState {DOUBLE_CLICK_DELAY_MS};
-
-    // locked hoverable context
-    const Widget::Hoverable* _lockContext = nullptr;
 
     Magnum::Utility::Resource _rs;
     Magnum::Timeline _timeline;

@@ -21,6 +21,8 @@
 
 #include <functional>
 
+#include "src/app/widgets/base/EventHandlers.hpp"
+
 namespace UnderStory {
 
 namespace Widget {
@@ -45,7 +47,7 @@ class Toggleable {
     bool _toggled = false;
 };
 
-class Button : public Toggleable {
+class Button : public Toggleable, public MouseRelease_EH {
  public:
     using ToggleCallback = std::function<void(bool)>;
     void setToogleCallback(ToggleCallback cb) {
@@ -59,6 +61,10 @@ class Button : public Toggleable {
 
  private:
     ToggleCallback _toggleCb;
+
+    void handleLockReleaseEvent(BasicEventHandler::EventType &event) final {
+        toggle();
+    }
 };
 
 }  // namespace Widget

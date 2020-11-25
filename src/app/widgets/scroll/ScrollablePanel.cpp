@@ -64,7 +64,7 @@ void UnderStory::Widget::ScrollablePanel::mayDraw() {
     _content->_draw();
 }
 
-void UnderStory::Widget::ScrollablePanel::handleScrollEvent(ScrollEventHandler::EventType &event) {
+void UnderStory::Widget::ScrollablePanel::handleScrollEvent(Scroll_EH::EventType &event) {
     auto scrollOffset = event.offset();
     auto prc = _content->_scrollByOffset(scrollOffset);
     _scroller.handle().scrollByPercentage(prc);

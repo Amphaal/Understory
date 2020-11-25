@@ -42,7 +42,10 @@ namespace Widget {
 
 using namespace Magnum::Math::Literals;
 
-class AtomSelectorButton : public Animation::PlayerMatrixAnimator<>, public Hoverable, public Button {
+class AtomSelectorButton : 
+    public Animation::PlayerMatrixAnimator<>,
+    public Hoverable,
+    public Button {
  public:
     AtomSelectorButton() : PlayerMatrixAnimator(&_moveAnim, .1f, &_defaultAnimationCallback) {
         _updateCurrentColor();

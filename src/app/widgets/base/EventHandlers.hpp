@@ -21,6 +21,8 @@
 
 #include <Magnum/Platform/Sdl2Application.h>
 
+#include "src/app/widgets/navigation/MouseState.hpp"
+
 using Magnum::Platform::Sdl2Application;
 
 namespace UnderStory {namespace Widget { class AppContainer; }}
@@ -28,6 +30,12 @@ namespace UnderStory {namespace Widget { class AppContainer; }}
 namespace UnderStory {
 
 namespace Widget {
+
+class MouseStateBound {
+ friend class AppContainer;
+  protected:   
+    static inline Navigation::MouseState _mouseState;
+};
 
 template<typename Ev>
 class BasicEventHandler {
@@ -38,13 +46,43 @@ class BasicEventHandler {
     virtual void _handleEvent(Ev &event) = 0;
 };
 
-class ScrollEventHandler : public BasicEventHandler<Sdl2Application::MouseScrollEvent> {
-  friend class AppContainer;
+class Scroll_EH : public BasicEventHandler<Sdl2Application::MouseScrollEvent> {
+      friend class AppContainer;
  protected:
     virtual void handleScrollEvent(BasicEventHandler::EventType &event) = 0;
  private:
     void _handleEvent(BasicEventHandler::EventType &event) final {
         return handleScrollEvent(event);
+    }
+};
+
+class MousePress_EH : public MouseStateBound, public BasicEventHandler<Sdl2Application::MouseEvent> {
+      friend class AppContainer;
+ protected:
+    virtual void handlePressEvent(BasicEventHandler::EventType &event) = 0; // pressed on element
+ private:
+    void _handleEvent(BasicEventHandler::EventType &event) final {
+        return handlePressEvent(event);
+    }
+};
+
+class MouseRelease_EH : public MouseStateBound, public BasicEventHandler<Sdl2Application::MouseEvent> {
+      friend class AppContainer;
+ protected:
+    virtual void handleLockReleaseEvent(BasicEventHandler::EventType &event) = 0;  // when element was locked then released
+ private:
+    void _handleEvent(BasicEventHandler::EventType &event) final {
+        return handleLockReleaseEvent(event);
+    }
+};
+
+class MouseMove_EH : public MouseStateBound, public BasicEventHandler<Sdl2Application::MouseMoveEvent> {
+      friend class AppContainer;
+ protected:
+    virtual void handleLockMoveEvent(BasicEventHandler::EventType &event) = 0;  // when locked element was moved
+ private:
+    void _handleEvent(BasicEventHandler::EventType &event) final {
+        return handleLockMoveEvent(event);
     }
 };
 

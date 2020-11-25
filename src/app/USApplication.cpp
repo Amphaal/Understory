@@ -214,10 +214,6 @@ void UnderStory::USApplication::mouseScrollEvent(MouseScrollEvent& event) {
     _propagateScrollEvent(event);
 }
 
-void UnderStory::USApplication::handleScrollEvent(MouseScrollEvent &event) {
-    _msh.mouseScrollEvent(event, this->framebufferSize());
-}
-
 void UnderStory::USApplication::keyReleaseEvent(KeyEvent& event) {
     _kmh.keyReleaseEvent(event);
 }
@@ -236,109 +232,89 @@ void UnderStory::USApplication::keyPressEvent(KeyEvent& event) {
 }
 
 void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
-    // check if locked context
-    if(_lockContext == this) {
-        if (_mouseState._dragging()) {
-            //
-            this->setCursor(Cursor::ResizeAll);
+    // find hovered element
+    auto cursorPos = _cursorPosition(event);
+    this->_traverseForHovered(cursorPos);
 
-            //
-            _mmh.mouseMoveEvent(event, this->framebufferSize());
-
-        } else if (_selectionRect.isSelecting()) {
-            // if selection, update rect
-            _selectionRect.update(event, this->framebufferSize());
-        }
-
-    // no specific locked context, update hover context
-    } else {
-        auto cursorPos = _cursorPosition(event);
-        this->_traverseForHovered(cursorPos);
-    }
+    // propagate event
+    _propagateMouseMoveEvent(event);
 }
 
 void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {
-    //
-    _lockContext = this->latestHovered();
-
-    //
-    switch (event.button()) {
-        case MouseEvent::Button::Left: {
-            //
-            auto isDoubleClick = _mouseState._leftPressed();
-
-            //
-            if(_lockContext == this) {
-                _mmh.mousePressEvent();
-            }
-
-            //
-            if (isDoubleClick) leftMouseDoubleClickEvent(event);
-        }
-        break;
-
-        case MouseEvent::Button::Right: {
-            //
-            _mouseState._rightPressed();
-
-            //
-            if(_lockContext == this) {
-                _selectionRect.init(event, this->framebufferSize());
-            }
-        }
-        break;
-
-        default:
-        break;
-    }
-}
-
-void UnderStory::USApplication::leftMouseDoubleClickEvent(MouseEvent& event) {
-    if(_lockContext == this) {
-        _mmh.mouseDoubleClickEvent(event, this->framebufferSize());
-    }
+    _propagateMousePressEvent(event);
 }
 
 void UnderStory::USApplication::mouseReleaseEvent(MouseEvent& event) {
-    //
+    _propagateMouseReleaseEvent(event);
+}
+
+//
+//
+//
+
+void UnderStory::USApplication::handleScrollEvent(MouseScrollEvent &event) {
+    _msh.mouseScrollEvent(event, this->framebufferSize());
+}
+
+void UnderStory::USApplication::handlePressEvent(MouseEvent& event) {
     switch (event.button()) {
         case MouseEvent::Button::Left: {
-            //
-            auto dragged = _mouseState._leftReleased();
+            _mmh.mousePressEvent();
 
-            //
-            if(_lockContext == this) {
-                if (dragged) {
-                    _mmh.mouseMoveReleaseEvent();
-                    this->setCursor(Cursor::Arrow);
-                }
+            if (_mouseState.hasLeftDoubleClick())
+                _mmh.mouseDoubleClickEvent(event, this->framebufferSize());
+        }
+        break;
 
-            } else if (_lockContext == &_asButton) {
-                _asButton.toggle();
+        case MouseEvent::Button::Right:
+            _selectionRect.init(event, this->framebufferSize());
+        break;
+
+        default:
+        break;
+    }
+}
+
+void UnderStory::USApplication::handleLockReleaseEvent(MouseEvent& event) {
+    switch (event.button()) {
+        case MouseEvent::Button::Left: {
+            if (_mouseState.isLeftClickDragging()) {
+                _mmh.mouseMoveReleaseEvent();
+                this->setCursor(Cursor::Arrow);
             }
         }
         break;
 
         case MouseEvent::Button::Right: {
-            if(_lockContext == this) {
-                if (_selectionRect.isSelecting()) {
-                    _selectionRect.end(event, this->framebufferSize());
-                    _msh.snapshotZoom(_selectionRect.asRectangle());
-                }
+            if (_selectionRect.isSelecting()) {
+                _selectionRect.end(event, this->framebufferSize());
+                _msh.snapshotZoom(_selectionRect.asRectangle());
             }
-
-            //
-            _mouseState._rightReleased();
         }
         break;
 
         default:
         break;
     }
-
-    //
-    _lockContext = nullptr;
 }
+
+void UnderStory::USApplication::handleLockMoveEvent(MouseMoveEvent& event) {
+    if (_mouseState.isLeftClickDragging()) {
+        //
+        this->setCursor(Cursor::ResizeAll);
+
+        //
+        _mmh.mouseMoveEvent(event, this->framebufferSize());
+
+    } else if (_selectionRect.isSelecting()) {
+        // if selection, update rect
+        _selectionRect.update(event, this->framebufferSize());
+    }
+}
+
+//
+//
+//
 
 void UnderStory::USApplication::_resetWorldMatrix() {
     _mmh.stopAnim();
