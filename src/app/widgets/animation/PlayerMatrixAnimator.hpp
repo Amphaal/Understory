@@ -83,6 +83,13 @@ class PlayerMatrixAnimator : public MatrixAnimator {
         _startAnim();
     }
 
+    void _setAnimationKeyframe(const T &to) {
+        stopAnim();
+        _animState.from = to;
+        _animState.to = to;
+        _animState.current = to;
+    }
+
  private:
     State<T> _animState;
 

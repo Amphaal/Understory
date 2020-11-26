@@ -32,9 +32,15 @@ void UnderStory::Widget::ScrollerHandle::draw() {
         .draw(_meshScroller);
 }
 
-void UnderStory::Widget::ScrollerHandle::scrollByPercentage(Magnum::Float percentTranslate) {
+void UnderStory::Widget::ScrollerHandle::animateByPercentage(Magnum::Float percentTranslate) {
     auto tr = - _translationGap * percentTranslate;
     _animateScrollByTr(tr);
+}
+
+void UnderStory::Widget::ScrollerHandle::inplaceByPercentage(Magnum::Float percentTranslate) {
+    auto tr = - _translationGap * percentTranslate;
+    _setAnimationKeyframe(tr);
+    _onAnimationProgress();
 }
 
 // updates handle size
@@ -63,7 +69,7 @@ void UnderStory::Widget::ScrollerHandle::updateSize(const Magnum::Float& handleS
     _updateShape(scrollerShape);
 
     // update its geometry
-    scrollByPercentage(0.f);
+    animateByPercentage(0.f);
 
     // ... then finally update buffer
     _bufferScroller.setSubData(0, _verticesScroller);
@@ -88,12 +94,17 @@ void UnderStory::Widget::ScrollerHandle::_onHoverChanged(bool isHovered) {
 }
 
 void UnderStory::Widget::ScrollerHandle::handleLockMoveEvent(MouseMove_EH::EventType &event) {
-    auto offset = - constraints().pixelSize() * Magnum::Vector2{
-        static_cast<float>(event.relativePosition().x()),
-        static_cast<float>(event.relativePosition().y())
-    };
-    auto contentSizeTick = _extractScrollableSize(offset) / _translationGap;
-    _panel->scrollFromHandle(contentSizeTick);
+    // skip if scroll movement is zero
+    auto pixelSizeMove = _extractScrollableSize(event.relativePosition());
+    if(!pixelSizeMove) return;
+
+    // find tick size
+    auto scrollPixelSize = _extractScrollableSize(constraints().pixelSize());
+    auto tickSize = pixelSizeMove * scrollPixelSize * 2.f;
+
+    // pass tick as content size
+    auto prcHandleTick = tickSize / _translationGap;
+    _panel->scrollFromHandle(prcHandleTick);
 }
 
 void UnderStory::Widget::ScrollerHandle::_availableSpaceChanged(Magnum::Range2D& availableSpace) {

@@ -58,7 +58,7 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
 
     const StickTo stickyness() const;
     Scroller& scroller();
-    void scrollFromHandle(Magnum::Float contentSizeTick);
+    void scrollFromHandle(Magnum::Float prcHandleTick);
 
  private:
     StickTo _stickness;

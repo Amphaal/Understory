@@ -60,11 +60,16 @@ float UnderStory::Widget::Scissorable::_scrollTick() const {
 float UnderStory::Widget::Scissorable::_scrollByOffset(const Magnum::Vector2& scrollOffset) {   
     // apply factor
     auto step = scrollOffset.y() * _scrollTick();
-    return _scrollByContentSize(step);
+    return _scrollByContentSize(-step, true);
 }
 
-float UnderStory::Widget::Scissorable::_scrollByContentSize(Magnum::Float contentSizeTick) {
-    _translationFactor += -contentSizeTick;
+float UnderStory::Widget::Scissorable::_scrollByPercentTick(Magnum::Float prc) {
+    auto step = (_contentSize - _canvasSize) * prc;
+    return _scrollByContentSize(step, false);
+}
+
+float UnderStory::Widget::Scissorable::_scrollByContentSize(Magnum::Float contentSizeTick, bool animate) {
+    _translationFactor += contentSizeTick;
     auto maxTranslate = _contentSize - _canvasSize;
 
     // stop at min/max
@@ -76,8 +81,13 @@ float UnderStory::Widget::Scissorable::_scrollByContentSize(Magnum::Float conten
     }
     
     // update scroll matrix
-    _animateScrollByTr(_translationFactor);
-
+    if(animate) {
+        _animateScrollByTr(_translationFactor);
+    } else {
+        _setAnimationKeyframe(_translationFactor);
+        _onAnimationProgress();
+    }
+    
     // prc eq
     auto scrollPrc = _translationFactor / maxTranslate;
     return scrollPrc;

@@ -57,7 +57,8 @@ class ScrollerHandle :
 
     void draw();
 
-    void scrollByPercentage(Magnum::Float percentTranslate);
+    void animateByPercentage(Magnum::Float percentTranslate);
+    void inplaceByPercentage(Magnum::Float percentTranslate);
 
     // updates handle size
     void updateSize(const Magnum::Float& handleSize, const Magnum::Float& trGap);

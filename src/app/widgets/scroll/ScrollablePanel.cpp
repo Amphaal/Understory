@@ -67,12 +67,12 @@ void UnderStory::Widget::ScrollablePanel::mayDraw() {
 void UnderStory::Widget::ScrollablePanel::handleScrollEvent(Scroll_EH::EventType &event) {
     auto scrollOffset = event.offset();
     auto prc = _content->_scrollByOffset(scrollOffset);
-    _scroller.handle().scrollByPercentage(prc);
+    _scroller.handle().animateByPercentage(prc);
 }
 
-void UnderStory::Widget::ScrollablePanel::scrollFromHandle(Magnum::Float contentSizeTick) {
-    auto prc = _content->_scrollByContentSize(contentSizeTick);
-    _scroller.handle().scrollByPercentage(prc);
+void UnderStory::Widget::ScrollablePanel::scrollFromHandle(Magnum::Float prcHandleTick) {
+    auto prc = _content->_scrollByPercentTick(prcHandleTick);
+    _scroller.handle().inplaceByPercentage(prc);
 }
 
 const UnderStory::Widget::StickTo UnderStory::Widget::ScrollablePanel::stickyness() const {
