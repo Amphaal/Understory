@@ -28,25 +28,31 @@ include(IconGenerator)
 generateIcon("resources/logo.png" "package" "app")
 generateIcon("resources/install.png" "package" "install")
 
+target_sources(appExec PRIVATE 
+"package/app.ico"
+"package/install.ico"
+"package/resources.rc"
+)
+
 # resource packaging
-if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    #add Windows ressources (icons)    
-    target_sources(appExec PRIVATE 
-        "package/app.ico"
-        "package/install.ico"
-        "package/resources.rc"
-    )
-elseif(APPLE)   
-    target_sources(appExec PRIVATE "package/app.icns") #add MacOS icons in output package
-    set_source_files_properties("package/app.icns"
-        PROPERTIES 
-        MACOSX_PACKAGE_LOCATION "Resources"
-    )
-    set_target_properties(appExec PROPERTIES 
-        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/package/_Info.plist"
-        MACOSX_BUNDLE_ICON_FILE "app.icns"
-    ) 
-endif()
+# if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+#     #add Windows ressources (icons)    
+#     target_sources(appExec PRIVATE 
+#         "package/app.ico"
+#         "package/install.ico"
+#         "package/resources.rc"
+#     )
+# elseif(APPLE)   
+#     target_sources(appExec PRIVATE "package/app.icns") #add MacOS icons in output package
+#     set_source_files_properties("package/app.icns"
+#         PROPERTIES 
+#         MACOSX_PACKAGE_LOCATION "Resources"
+#     )
+#     set_target_properties(appExec PROPERTIES 
+#         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/package/_Info.plist"
+#         MACOSX_BUNDLE_ICON_FILE "app.icns"
+#     ) 
+# endif()
 
 #############
 ## Install ##
