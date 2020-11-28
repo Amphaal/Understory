@@ -1,4 +1,4 @@
-if(WIN32)
+if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     find_program(convert NAMES convert)
     SET(IconGenerator_SUFFIX ".ico")
 elseif(APPLE)
@@ -15,7 +15,7 @@ function(generateIcon fromPNG toFolder iconName)
         SET(toFolder ${CMAKE_CURRENT_SOURCE_DIR}/${toFolder}/${iconName}.iconset)
     endif()
     
-    if(WIN32)
+    if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
         add_custom_command(OUTPUT ${IconGenerator_OUTPUT_ICON}
             COMMAND ${convert} -background transparent ${fromPNG} 
                                -define icon:auto-resize=16,32,48,64,96,128,256 
