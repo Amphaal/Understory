@@ -11,7 +11,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # pre-startup
 cmake_minimum_required(VERSION 3.10.2 FATAL_ERROR)
-message(STATUS "Using toolchain file: [${CMAKE_TOOLCHAIN_FILE}].")
+message(STATUS "Using toolchain file: [${CMAKE_TOOLCHAIN_FILE}]")
 
 # project setup
 project(UnderStory

@@ -35,7 +35,7 @@ generateIcon("resources/install.png" "package" "install")
 # resource packaging
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     #add Windows ressources (icons)    
-    set(ICON_RESOURCES
+    list(APPEND ICON_RESOURCES
         "package/app.ico"
         "package/install.ico"
         "package/resources.rc"
@@ -55,6 +55,7 @@ else()
 endif()
 
 # link resources
+message(STATUS "Using icon resources files: [${ICON_RESOURCES}]")
 target_sources(appExec PRIVATE ${ICON_RESOURCES})
 
 #############
