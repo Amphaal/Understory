@@ -23,6 +23,10 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebI
     # set_target_properties(appExec PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE) #enable LTO
 endif()
 
+###########
+## ICONS ##
+###########
+
 # generate icons from png
 include(IconGenerator)
 generateIcon("resources/logo.png" "package" "app")
@@ -31,13 +35,13 @@ generateIcon("resources/install.png" "package" "install")
 # resource packaging
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     #add Windows ressources (icons)    
-    target_sources(appExec PRIVATE 
+    set(ICON_RESOURCES
         "package/app.ico"
         "package/install.ico"
         "package/resources.rc"
     )
 elseif(APPLE)   
-    target_sources(appExec PRIVATE "package/app.icns") #add MacOS icons in output package
+    set(ICON_RESOURCES "package/app.icns") #add MacOS icons in output package
     set_source_files_properties("package/app.icns"
         PROPERTIES 
         MACOSX_PACKAGE_LOCATION "Resources"
@@ -49,6 +53,9 @@ elseif(APPLE)
 else()
     message(FATAL_ERROR "Could not determine icons ressources set !")
 endif()
+
+# link resources
+target_sources(appExec PRIVATE ${ICON_RESOURCES})
 
 #############
 ## Install ##
