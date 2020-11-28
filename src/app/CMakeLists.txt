@@ -45,7 +45,9 @@ elseif(APPLE)
     set_target_properties(appExec PROPERTIES 
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/package/_Info.plist"
         MACOSX_BUNDLE_ICON_FILE "app.icns"
-    ) 
+    )
+else()
+    message(FATAL_ERROR "Could not determine icons ressources set !")
 endif()
 
 #############
