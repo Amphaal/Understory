@@ -56,11 +56,7 @@ endif()
 
 # link resources
 message(STATUS "Using icon resources files: [${ICON_RESOURCES}]")
-target_sources(appExec PRIVATE
-    "package/resources.rc" 
-    "package/app.ico"
-    "package/install.ico"
-    )
+target_sources(appExec PRIVATE ${ICON_RESOURCES})
 
 #############
 ## Install ##
