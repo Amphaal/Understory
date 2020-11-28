@@ -22,7 +22,7 @@ find_file(ASIO_HEADER asio.hpp)
 add_library(asio INTERFACE IMPORTED)
 target_sources(asio INTERFACE ${ASIO_HEADER})
 
-IF(WIN32)
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_compile_definitions(asio INTERFACE WIN32_LEAN_AND_MEAN) # prevents <winsock2.h> warnings
 endif()
 
