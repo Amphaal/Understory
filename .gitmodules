@@ -16,3 +16,6 @@
 [submodule "src/app/magnum-plugins"]
 	path = src/app/magnum-plugins
 	url = https://github.com/mosra/magnum-plugins
+[submodule "src/network/libtorrent"]
+	path = src/network/libtorrent
+	url = https://github.com/arvidn/libtorrent
