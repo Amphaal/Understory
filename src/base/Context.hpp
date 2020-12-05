@@ -43,8 +43,6 @@ class Context {
         CUSTOM = 3
     };
 
-    Context() {}
-
     ~Context() {
         if(_env == RANDOM) fs::remove_all(this->_pathToContext);
     }
@@ -114,7 +112,7 @@ class Context {
         #if defined(__APPLE__)  // OSX
             path = std::string("/Library/Application Support/") + APP_NAME;
         #elif defined(WIN32)  // Windows
-            path = std::string("C:/Users/") + std::getenv("USERNAME") + std::string("/AppData/Local/") + APP_NAME;
+            path = std::string(std::getenv("LOCALAPPDATA")) + "/" + APP_NAME;
         #else  // Linux
             path = std::string("/usr/share/") + APP_NAME;
         #endif

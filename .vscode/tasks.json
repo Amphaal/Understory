@@ -19,7 +19,7 @@
                 "kind": "test"
             },
             "type": "shell",
-            "command": "cmake -GNinja -Bbuild -H. -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/msys2.cmake"
+            "command": "cmake -GNinja -Bbuild -H. -DBUILD_TESTING=ON -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/msys2.cmake"
         },
         {
             "label": "2. Build",

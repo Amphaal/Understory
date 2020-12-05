@@ -14,6 +14,14 @@ target_sources(appNetwork INTERFACE
     HTTPDownloader.hpp
 )
 
+#######################
+## Deps : libtorrent ##
+#######################
+
+find_package(LibtorrentRasterbar REQUIRED)
+
+target_link_libraries(appNetwork INTERFACE LibtorrentRasterbar::torrent-rasterbar) 
+
 #################
 ## Deps : asio ##
 #################

@@ -14,7 +14,7 @@
             "program": "${workspaceFolder}/build/bin/tests",
             "MIMode": "lldb",
             "windows": {
-                "program": "${workspaceFolder}/build/bin/tests.exe",
+                "program": "${workspaceFolder}/build/Debug/bin/tests.exe",
                 "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe",
                 "MIMode": "gdb"
             }
@@ -29,7 +29,7 @@
             "program": "${workspaceFolder}/build/bin/localTests",
             "MIMode": "lldb",
             "windows": {
-                "program": "${workspaceFolder}/build/bin/localTests.exe",
+                "program": "${workspaceFolder}/build/Debug/bin/localTests.exe",
                 "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe",
                 "MIMode": "gdb"
             }

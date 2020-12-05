@@ -16,7 +16,6 @@
 // use a different license and copyright : please refer to their metadata
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
-#include "src/core/UpdateChecker.hpp"
 
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include <catch2/catch.hpp>
@@ -54,21 +53,51 @@
 //     REQUIRE(assetFromContext.file().content_length() == 25579);
 // }
 
-using UnderStory::UpdateChecker_Private;
+// #include "src/core/UpdateChecker.hpp"
+// using UnderStory::UpdateChecker_Private;
 
-TEST_CASE("Version comparaison", "[update checker]") {
-    spdlog::set_level(spdlog::level::debug);
+// TEST_CASE("Version comparaison", "[update checker]") {
+//     spdlog::set_level(spdlog::level::debug);
 
-    std::string test_localVersion("0.5.0");
-    auto testUpdateChecker = [test_localVersion](const std::string &remoteVersion) {
-        return UpdateChecker_Private::_isVersionNewerThanLocal(remoteVersion, test_localVersion);
-    };
+//     std::string test_localVersion("0.5.0");
+//     auto testUpdateChecker = [test_localVersion](const std::string &remoteVersion) {
+//         return UpdateChecker_Private::_isVersionNewerThanLocal(remoteVersion, test_localVersion);
+//     };
 
-    REQUIRE(testUpdateChecker("0.5.1"));
-    REQUIRE(testUpdateChecker("0.5.10"));
-    REQUIRE(testUpdateChecker("1.0"));
+//     REQUIRE(testUpdateChecker("0.5.1"));
+//     REQUIRE(testUpdateChecker("0.5.10"));
+//     REQUIRE(testUpdateChecker("1.0"));
 
-    REQUIRE_FALSE(testUpdateChecker(APP_CURRENT_VERSION));
-    REQUIRE_FALSE(testUpdateChecker("0.5.0"));
-    REQUIRE_FALSE(testUpdateChecker("0.4.10"));
+//     REQUIRE_FALSE(testUpdateChecker(APP_CURRENT_VERSION));
+//     REQUIRE_FALSE(testUpdateChecker("0.5.0"));
+//     REQUIRE_FALSE(testUpdateChecker("0.4.10"));
+// }
+
+#include <src/base/Context.hpp>
+
+#include <libtorrent/bencode.hpp>
+#include <libtorrent/file_storage.hpp>
+#include <libtorrent/create_torrent.hpp>
+#include <libtorrent/session.hpp>
+
+#include <spdlog/spdlog.h>
+
+TEST_CASE("Torrent test", "[file share]") {
+    auto context = UnderStory::Context::random();
+    auto testFilePath = fs::absolute("./tests/resources/test.png").string();
+
+    auto flags = lt::create_torrent::v2_only;
+    lt::file_storage fs;
+    lt::add_files(fs, testFilePath, flags);
+
+    lt::create_torrent t(fs, 0, flags);
+    t.add_node({"127.0.0.1", 8700});
+
+    //
+    lt::add_torrent_params atp;
+    atp.ti = std::make_shared<lt::torrent_info>(t.generate());
+    
+    //
+    lt::session s;
+    s.add_torrent(atp);
 }
