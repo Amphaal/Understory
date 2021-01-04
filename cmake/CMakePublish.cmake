@@ -33,7 +33,8 @@ SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME}")
 
 # force version if crosscompiling (detection not working)
 if(MINGW AND CMAKE_CROSSCOMPILING)
-    SET(CPACK_IFW_FRAMEWORK_VERSION_FORCED "4.0.1")
+    SET(CPACK_IFW_FRAMEWORK_VERSION_FORCED  "4.0.1")
+    SET(CPACK_IFW_FRAMEWORK_VERSION         "4.0.1")
 endif()
 
 # out ext (must be defined for XCompilation)

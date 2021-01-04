@@ -30,7 +30,6 @@ SET (CMAKE_AR                               "llvm-ar")
 SET (CMAKE_RANLIB                           "llvm-ranlib")
 SET (CMAKE_NM                               "llvm-nm")
 # SET (CMAKE_RC_COMPILER                    "llvm-rc")    DOES NOT INCLUDE *.rc file (Cmake bug ?)
-SET(CMAKE_RC_COMPILER                       "/opt/bin/x86_64-w64-mingw32-windres.exe")
 
 SET (CMAKE_C_FLAGS                          "-Wno-ignored-attributes -fuse-ld=lld -femulated-tls")
 SET (CMAKE_CXX_FLAGS                        ${CMAKE_C_FLAGS})
