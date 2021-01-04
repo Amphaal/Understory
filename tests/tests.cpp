@@ -92,7 +92,8 @@ TEST_CASE("Torrent test", "[file share]") {
 
     lt::create_torrent t(fs, 0, flags);
     t.add_node({"127.0.0.1", 8700});
-
+    auto entry = t.generate();
+    
     //
     lt::add_torrent_params atp;
     atp.ti = std::make_shared<lt::torrent_info>(t.generate());

@@ -9,10 +9,10 @@
 	url = https://github.com/ReactiveX/RxCpp
 [submodule "src/app/corrade"]
 	path = src/app/corrade
-	url = https://github.com/Amphaal/corrade
+	url = https://github.com/mosra/corrade
 [submodule "src/app/magnum"]
 	path = src/app/magnum
-	url = https://github.com/Amphaal/magnum
+	url = https://github.com/mosra/magnum
 [submodule "src/app/magnum-plugins"]
 	path = src/app/magnum-plugins
 	url = https://github.com/mosra/magnum-plugins
