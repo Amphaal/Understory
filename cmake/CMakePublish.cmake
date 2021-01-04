@@ -31,6 +31,11 @@ SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME}")
 # IFW specifics #
 #################
 
+# force version if crosscompiling (detection not working)
+if(MINGW AND CMAKE_CROSSCOMPILING)
+    SET(CPACK_IFW_FRAMEWORK_VERSION_FORCED "4.0.1")
+endif()
+
 # out ext (must be defined for XCompilation)
 IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     SET(CPACK_IFW_PACKAGE_FILE_EXTENSION ".exe")
