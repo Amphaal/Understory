@@ -117,6 +117,7 @@ IF(MINGW AND CMAKE_CROSSCOMPILING)
     ExternalProject_Add(peldd
         GIT_REPOSITORY  "https://github.com/Amphaal/pe-util.git"
         INSTALL_COMMAND ""
+        UPDATE_DISCONNECTED 1 # prevents from it always being built in search for tag change
     )
 
     #define exec
