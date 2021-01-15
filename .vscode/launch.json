@@ -40,7 +40,7 @@
             "name" : "Launch",
             "request": "launch",
             "cwd": "${workspaceFolder}/build/out",
-            "program": "C:/Program Files (x86)/UnderStory/bin/UnderStory.exe",
+            "program": "${workspaceFolder}/build/out/UnderStory.exe",
             "miDebuggerPath": "${env:MINGW64_ROOT}/bin/gdb.exe",
             "MIMode": "gdb",
             "environment": [],
