@@ -10,26 +10,23 @@ set (CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set (CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set (CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
-if(NOT DEFINED ENV{MINGW64_ROOT})
-    SET(MINGW64_ROOT "/mingw64")
-else()
-    SET(MINGW64_ROOT $ENV{MINGW64_ROOT})
-endif()
+SET(MINGW64_ROOT "/mingw64")
 
-list(APPEND CMAKE_PREFIX_PATH 
-    ${MINGW64_ROOT}
-)
+SET(CMAKE_PREFIX_PATH    ${MINGW64_ROOT})
+SET(CMAKE_FIND_ROOT_PATH ${MINGW64_ROOT})
+SET(ENV{PKG_CONFIG_PATH} ${MINGW64_ROOT}/lib/pkgconfig)
 
 #We want Release with debug infos
-SET(CMAKE_BUILD_TYPE Release)
+SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 
 SET (CMAKE_C_COMPILER                       "clang")
 SET (CMAKE_CXX_COMPILER                     "clang++")
+SET (CMAKE_ASM_MASM_COMPILER                "uasm")
 
 SET (CMAKE_AR                               "llvm-ar")
 SET (CMAKE_RANLIB                           "llvm-ranlib")
 SET (CMAKE_NM                               "llvm-nm")
-# SET (CMAKE_RC_COMPILER                    "llvm-rc")    DOES NOT INCLUDE *.rc file (Cmake bug ?)
+SET (CMAKE_RC_COMPILER                      "llvm-rc")
 
 SET (CMAKE_C_FLAGS                          "-Wno-ignored-attributes -fuse-ld=lld -femulated-tls")
 SET (CMAKE_CXX_FLAGS                        ${CMAKE_C_FLAGS})
@@ -41,8 +38,6 @@ SET (GCC_VERSION                            "10.2.0")
 
 SET (CMAKE_EXE_LINKER_FLAGS_INIT            "-Wl,/force:multiple --sysroot=${MINGW64_ROOT}/${CMAKE_C_COMPILER_TARGET} -L ${MINGW64_ROOT}/lib -L ${MINGW64_ROOT}/lib/gcc/${CMAKE_C_COMPILER_TARGET}/${GCC_VERSION}")
 SET (CMAKE_SHARED_LINKER_FLAGS_INIT         ${CMAKE_EXE_LINKER_FLAGS_INIT})
-
-SET (CMAKE_EXE_LINKER_FLAGS                 ${CMAKE_EXE_LINKER_FLAGS_INIT})
 
 SET (CMAKE_C_STANDARD_INCLUDE_DIRECTORIES  
     ${MINGW64_ROOT}/include

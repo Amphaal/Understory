@@ -2,19 +2,20 @@
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     #add Windows ressources (icons)    
     list(APPEND ICON_RESOURCES
-        "app.ico"
-        "install.ico"
+        "resources/generated/app.ico"
+        "resources/generated/install.ico"
         "resources.rc"
     )
 elseif(APPLE)   
-    set(ICON_RESOURCES "app.icns") #add MacOS icons in output package
-    set_source_files_properties("app.icns"
+    set(ICON_RESOURCES_NAME "app.icns")
+    set(ICON_RESOURCES "resources/generated/${ICON_RESOURCES_NAME}") #add MacOS icons in output package
+    set_source_files_properties(${ICON_RESOURCES}
         PROPERTIES 
         MACOSX_PACKAGE_LOCATION "Resources"
     )
     set_target_properties(appExec PROPERTIES 
         MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/_Info.plist"
-        MACOSX_BUNDLE_ICON_FILE "app.icns"
+        MACOSX_BUNDLE_ICON_FILE "${ICON_RESOURCES_NAME}"
     )
 else()
     message(FATAL_ERROR "Could not determine icons ressources set !")

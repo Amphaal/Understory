@@ -3,7 +3,7 @@ add_library(UnderStory::base ALIAS appBase)
 
 # configure header with basic app informations
 configure_file(
-    _understory.h 
+    understory.in.h 
     understory.h
 )
 

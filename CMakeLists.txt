@@ -43,6 +43,9 @@ set(CMAKE_C_STANDARD 11)
 ## define bundle configuration ##
 #################################
 
+SET(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "App")
+SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
+
 #for generated config header
 include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
@@ -51,6 +54,15 @@ include_directories(
 
 # define _DEBUG markup if in DEBUG config
 add_compile_definitions($<$<CONFIG:Debug>:_DEBUG>) 
+
+###########
+## ICONS ##
+###########
+
+# generate icons from png
+include(IconGenerator)
+generateIcon("package/resources/logo.png" "package/resources/generated" "app")
+generateIcon("package/resources/install.png" "package/resources/generated" "install")
 
 ################
 ## Submodules ##
@@ -61,6 +73,7 @@ add_subdirectory(src/network)
 add_subdirectory(src/models)
 add_subdirectory(src/core)
 add_subdirectory(src/app)
+add_subdirectory(src/package)
 
 ###########
 ## Tests ##

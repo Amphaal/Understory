@@ -23,17 +23,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebI
     # set_target_properties(appExec PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE) #enable LTO
 endif()
 
-###########
-## ICONS ##
-###########
-
-# generate icons from png
-include(IconGenerator)
-generateIcon("resources/logo.png" "package" "app")
-generateIcon("resources/install.png" "package" "install")
-
-add_subdirectory(package)
-
 #############
 ## Install ##
 #############
@@ -65,9 +54,9 @@ SET(WITH_SCENEGRAPH         OFF CACHE INTERNAL "")
 SET(WITH_PRIMITIVES         OFF CACHE INTERNAL "")
 
 #fetch
-add_subdirectory(corrade)
-add_subdirectory(magnum)
-add_subdirectory(magnum-plugins)
+add_subdirectory(corrade EXCLUDE_FROM_ALL)
+add_subdirectory(magnum EXCLUDE_FROM_ALL)
+add_subdirectory(magnum-plugins EXCLUDE_FROM_ALL)
 
 corrade_add_resource(appExec_RES
     resources.conf
@@ -107,52 +96,16 @@ target_link_libraries(appExec PRIVATE UnderStory::core)
 #link
 target_include_directories(appExec PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/RxCpp/Rx/v2/src")
 
-###########
-# pe-util #
-###########
+########################
+# Runtime dependencies #
+########################
 
-#pe-util is required to find all .dll dependencies
-IF(MINGW AND CMAKE_CROSSCOMPILING)
-    include(ExternalProject)
-    ExternalProject_Add(peldd
-        GIT_REPOSITORY  "https://github.com/Amphaal/pe-util.git"
-        INSTALL_COMMAND ""
-        UPDATE_DISCONNECTED 1 # prevents from it always being built in search for tag change
-    )
+include(CMakeDependencies)
 
-    #define exec
-    ExternalProject_Get_Property(peldd BINARY_DIR)
-    set(PELDD_EXEC "${BINARY_DIR}/peldd")
-    
-    #make sure env var is set
-    if(NOT MINGW64_ROOT)
-        message(FATAL_ERROR "MINGW64_ROOT must be set ! Please use a toolchain file !")
-    endif()
-
-    #generate requirements
-    add_dependencies(appExec peldd)
-    add_custom_command(TARGET appExec POST_BUILD
-        COMMAND 
-            ${PELDD_EXEC} -a
-            -p ${MINGW64_ROOT}/bin
-            -p $<TARGET_FILE_DIR:appExec>
-            $<TARGET_FILE:appExec>
-            $<TARGET_FILE:MagnumPlugins::FreeTypeFont>
-            $<TARGET_FILE:MagnumPlugins::PngImporter>
-            | sed -f ${CMAKE_SOURCE_DIR}/cmake/antislash-to-slash.sed
-            | tr -d '\\015' 
-            > lib_requirements.txt
-        DEPENDS 
-            ${CMAKE_CURRENT_SOURCE_DIR}/cmake/antislash-to-slash.sed
-        BYPRODUCTS
-            lib_requirements.txt
-    )
-
-    #copy required libs
-    add_custom_command(TARGET appExec POST_BUILD
-        COMMAND 
-            cat lib_requirements.txt | xargs cp -n -t ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-        DEPENDS 
-            lib_requirements.txt
-    )
-endif()
+# ALL
+DeployPEDependencies(appExec "GStreamer"
+    $<TARGET_FILE_DIR:appExec>
+    $<TARGET_FILE:appExec>
+    $<TARGET_FILE:MagnumPlugins::FreeTypeFont>
+    $<TARGET_FILE:MagnumPlugins::PngImporter>
+)

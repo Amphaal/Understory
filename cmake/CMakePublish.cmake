@@ -31,12 +31,6 @@ SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${PROJECT_NAME}")
 # IFW specifics #
 #################
 
-# force version if crosscompiling (detection not working)
-if(CMAKE_CROSSCOMPILING AND CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    SET(CPACK_IFW_FRAMEWORK_VERSION_FORCED  "4.0.1")
-    SET(CPACK_IFW_FRAMEWORK_VERSION         "4.0.1")
-endif()
-
 # out ext (must be defined for XCompilation)
 IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     SET(CPACK_IFW_PACKAGE_FILE_EXTENSION ".exe")
@@ -46,7 +40,7 @@ endif()
 
 set(SETUP_NAME_WITH_EXT "${SETUP_NAME}${CPACK_IFW_PACKAGE_FILE_EXTENSION}")
 
-SET(APP_PACKAGE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/app/package)
+SET(APP_PACKAGE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src/package)
 
 # icons
 SET(CPACK_IFW_PACKAGE_LOGO "${APP_PACKAGE_SOURCES}/logo_64.png")
@@ -71,9 +65,8 @@ INCLUDE(CPackIFW)
 # installer configuration
 cpack_ifw_configure_component(app
     DESCRIPTION      ${APP_DESCRIPTION}
-    SCRIPT          "${APP_PACKAGE_SOURCES}/ifw/install.js"
-    USER_INTERFACES "${APP_PACKAGE_SOURCES}/ifw/install.ui"
-    TRANSLATIONS    "${APP_PACKAGE_SOURCES}/ifw/_i18n/fr.qm"
+    SCRIPT          "${APP_PACKAGE_SOURCES}/ifw/EndInstallerForm.js"
+    USER_INTERFACES "${APP_PACKAGE_SOURCES}/ifw/EndInstallerForm.ui"
 )
 
 # repository for updates
