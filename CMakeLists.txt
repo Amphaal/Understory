@@ -61,8 +61,16 @@ add_compile_definitions($<$<CONFIG:Debug>:_DEBUG>)
 
 # generate icons from png
 include(IconGenerator)
-generateIcon("package/resources/logo.png" "package/resources/generated" "app")
-generateIcon("package/resources/install.png" "package/resources/generated" "install")
+generateIcon(
+    "src/package/resources/logo.png"
+    "src/package/resources/generated"
+    "app"
+)
+generateIcon(
+    "src/package/resources/install.png"
+    "src/package/resources/generated"
+    "install"
+)
 
 ################
 ## Submodules ##
