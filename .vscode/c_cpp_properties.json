@@ -21,7 +21,8 @@
                 "${workspaceFolder}/src/core/tiny-process-library",
                 "${workspaceFolder}/build",
                 "${workspaceFolder}/build/src/app/magnum/src",
-                "${workspaceFolder}/src/core/stb"
+                "${workspaceFolder}/src/core/stb",
+                "${workspaceFolder}/src"
             ],
             "defines": [
                 "_DEBUG",

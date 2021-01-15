@@ -10,17 +10,15 @@ endif()
 # define app executable
 add_executable(appExec ${APP_BUNDLE_TYPE})
 add_executable(UnderStory::executable ALIAS appExec)
-set_target_properties(appExec PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/$<CONFIG>/bin
-)
 
-string(TOLOWER ${PROJECT_NAME} PROJECT_NAME_LC)
-set_target_properties(appExec PROPERTIES OUTPUT_NAME "${PROJECT_NAME_LC}")  # define executable name
+# define executable name
+set_target_properties(appExec PROPERTIES 
+    OUTPUT_NAME ${CMAKE_PROJECT_NAME}
+)
 
 #optimise for release
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    # disable for now (LLD bug)
-    # set_target_properties(appExec PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE) #enable LTO
+    set_target_properties(appExec PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE) #enable LTO
 endif()
 
 #############
@@ -28,10 +26,8 @@ endif()
 #############
 
 #install whole output directory
-install(
-    DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/"
-    TYPE BIN    
-    COMPONENT app
+install(TARGETS appExec
+    COMPONENT "App"
 )
 
 #############
@@ -96,16 +92,95 @@ target_link_libraries(appExec PRIVATE UnderStory::core)
 #link
 target_include_directories(appExec PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/RxCpp/Rx/v2/src")
 
-########################
-# Runtime dependencies #
-########################
+#############
+## INSTALL ##
+#############
 
-include(CMakeDependencies)
+# spdlog
+if(MINGW)
+    find_file(MINGW_SPDLOG libspdlog.dll REQUIRED)
+    install(FILES ${MINGW_SPDLOG}
+        TYPE BIN
+        COMPONENT "Runtime"
+    )
+endif()
 
-# ALL
-DeployPEDependencies(appExec "GStreamer"
-    $<TARGET_FILE_DIR:appExec>
-    $<TARGET_FILE:appExec>
-    $<TARGET_FILE:MagnumPlugins::FreeTypeFont>
-    $<TARGET_FILE:MagnumPlugins::PngImporter>
+# runtime
+if(MINGW)
+    find_file(MINGW_STDLIB libstdc++-6.dll REQUIRED)
+    find_file(MINGW_GCC_SEH libgcc_s_seh-1.dll REQUIRED)
+    find_file(MINGW_WINPTHREAD libwinpthread-1.dll REQUIRED)
+    install(
+        FILES 
+            ${MINGW_STDLIB}
+            ${MINGW_GCC_SEH}
+            ${MINGW_WINPTHREAD}
+        TYPE BIN
+        COMPONENT "Runtime"
+    )
+    list(APPEND PEUTIL_WHITELIST_EXTENSIONS 
+        "libstdc++-6.dll"
+        "libgcc_s_seh-1.dll"
+        "libwinpthread-1.dll"
+    )
+endif()
+
+# Corrade
+install(
+    FILES 
+        $<TARGET_FILE:CorradePluginManager>
+        $<TARGET_FILE:CorradeUtility>
+    TYPE BIN
+    COMPONENT "Magnum"
 )
+
+# Magnum
+install(
+    FILES 
+        ${SDL2_DLL_RELEASE}
+        $<TARGET_FILE:MagnumGL>
+        $<TARGET_FILE:Magnum>
+        $<TARGET_FILE:MagnumShaders>
+        $<TARGET_FILE:MagnumText>
+        $<TARGET_FILE:MagnumTrade>
+        $<TARGET_FILE:MagnumTextureTools>
+    TYPE BIN
+    COMPONENT "Magnum"
+)
+
+# Magnum Plugins
+include(GNUInstallDirs)
+install(
+    FILES 
+        $<TARGET_FILE:FreeTypeFont>
+        $<TARGET_FILE_DIR:FreeTypeFont>/FreeTypeFont.conf
+    DESTINATION ${CMAKE_INSTALL_BINDIR}/magnum$<$<CONFIG:Debug>:-d>/fonts
+    COMPONENT "Magnum"
+)
+install(
+    FILES 
+        $<TARGET_FILE:PngImporter>
+        $<TARGET_FILE_DIR:PngImporter>/PngImporter.conf
+    DESTINATION ${CMAKE_INSTALL_BINDIR}/magnum$<$<CONFIG:Debug>:-d>/importers
+    COMPONENT "Magnum"
+)
+
+if(MINGW)
+    # Magnum Plugins direct Deps
+    find_file(MINGW_FREETYPE_DLL libfreetype-6.dll REQUIRED)
+    find_file(MINGW_PNG_DLL libpng16-16.dll REQUIRED)
+    install(
+        FILES
+            ${MINGW_FREETYPE_DLL}
+            ${MINGW_PNG_DLL}
+        TYPE BIN
+        COMPONENT "Magnum"
+    )
+
+    # Magnum Plugins further Deps
+    include(CMakeDependencies)
+    DeployPEDependencies(appExec "Magnum"
+        ${MINGW_FREETYPE_DLL}
+        ${MINGW_PNG_DLL}
+    )
+endif()

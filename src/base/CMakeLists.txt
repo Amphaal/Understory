@@ -4,7 +4,7 @@ add_library(UnderStory::base ALIAS appBase)
 # configure header with basic app informations
 configure_file(
     understory.in.h 
-    understory.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/understory.h
 )
 
 target_sources(appBase INTERFACE 

@@ -43,12 +43,16 @@ set(CMAKE_C_STANDARD 11)
 ## define bundle configuration ##
 #################################
 
+# name for default component binding when installing
 SET(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "App")
+
+# must set all 3 for Magnum
 SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out)
+SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out_lib)
+SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/out_arch)
 
 #for generated config header
 include_directories(
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 )
 
