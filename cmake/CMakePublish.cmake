@@ -101,7 +101,7 @@ cpack_ifw_add_repository(coreRepo
 ###########
 
 # create target to be invoked with bash
-add_custom_target(zipForDeploy)
+add_custom_target(zipForDeploy DEPENDS package)
 
 # variables
 SET(CPACK_PACKAGES_DIR ${CMAKE_BINARY_DIR}/_CPack_Packages)
