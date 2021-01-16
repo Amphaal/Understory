@@ -18,7 +18,8 @@ set_target_properties(appExec PROPERTIES
 
 #optimise for release
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    set_target_properties(appExec PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE) #enable LTO
+    # disabled, buged because of rxcpp ? (https://github.com/msys2/MINGW-packages/issues/5786)
+    #set_target_properties(appExec PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE) #enable LTO
 endif()
 
 #############
