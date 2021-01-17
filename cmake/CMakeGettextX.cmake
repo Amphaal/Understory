@@ -137,16 +137,16 @@ function(configure_gettext)
             COMMENT "Updating the ${lang} .po file from the .pot file")
 
         add_custom_command(
-            OUTPUT "${GETTEXT_GMOFILE_DESTINATION}/${lang}/${GETTEXT_DOMAIN}.gmo"
+            OUTPUT "${GETTEXT_GMOFILE_DESTINATION}/${lang}/LC_MESSAGES/${GETTEXT_DOMAIN}.mo"
             COMMAND "${GETTEXT_MSGFMT_COMMAND}" ${GETTEXT_MSGFMT_ARGS}
                 "${GETTEXT_POFILE_DESTINATION}/${lang}/${GETTEXT_DOMAIN}.po"
-                "--output-file=${GETTEXT_GMOFILE_DESTINATION}/${lang}/${GETTEXT_DOMAIN}.gmo"
+                "--output-file=${GETTEXT_GMOFILE_DESTINATION}/${lang}/LC_MESSAGES/${GETTEXT_DOMAIN}.mo"
             DEPENDS "${GETTEXT_POFILE_DESTINATION}/${lang}/${GETTEXT_DOMAIN}.po"
             WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-            COMMENT "Creating the ${lang} .gmo file from the .po file")
+            COMMENT "Creating the ${lang} .mo file from the .po file")
 
         add_custom_target("${GETTEXT_TARGET_NAME}-${lang}"
-            DEPENDS "${GETTEXT_GMOFILE_DESTINATION}/${lang}/${GETTEXT_DOMAIN}.gmo")
+            DEPENDS "${GETTEXT_GMOFILE_DESTINATION}/${lang}/LC_MESSAGES/${GETTEXT_DOMAIN}.mo")
         add_dependencies("${GETTEXT_TARGET_NAME}" "${GETTEXT_TARGET_NAME}-${lang}")
 
         if(GETTEXT_INSTALL_DESTINATION)
@@ -155,10 +155,9 @@ function(configure_gettext)
             else()
                 set(comp_line)
             endif()
-            install(FILES "${GETTEXT_GMOFILE_DESTINATION}/${lang}/${GETTEXT_DOMAIN}.gmo"
+            install(FILES "${GETTEXT_GMOFILE_DESTINATION}/${lang}/LC_MESSAGES/${GETTEXT_DOMAIN}.mo"
                 DESTINATION "${GETTEXT_INSTALL_DESTINATION}/${lang}/LC_MESSAGES/"
-                ${comp_line}
-                RENAME "${GETTEXT_DOMAIN}.mo")
+                ${comp_line})
         endif()
 
     endforeach() # lang IN LISTS GETTEXT_LANGUAGES

@@ -110,13 +110,13 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     {        
         // text
         std::string paddedText;
-        paddedText += _("[LeftClick  (DoubleClick)] Center screen on cursor\n");
-        paddedText += _("[LeftClick  (Maintain)]                       Move camera\n");
-        paddedText += _("[RightClick (Maintain / Release)]             Snapshot zoom-in\n");
-        paddedText += _("[D-Pad]                       Move camera\n");
-        paddedText += _("[Esc]                       Reset camera\n");
-        paddedText += _("[MouseScroll]                                       Zoom\n");
-        paddedText += _("[NumPad +/-]                                       Zoom");
+        paddedText += _("[LeftClick (DoubleClick)] Center screen on cursor\n");
+        paddedText += _("[LeftClick (Maintain)] Move camera\n");
+        paddedText += _("[RightClick (Maintain / Release)] Snapshot zoom-in\n");
+        paddedText += _("[D-Pad] Move camera\n");
+        paddedText += _("[Esc] Reset camera\n");
+        paddedText += _("[MouseScroll] Zoom\n");
+        paddedText += _("[NumPad +/-] Zoom");
 
         // widget
         Widget::StaticTextFactory textFactory(*_defaultFont, _worldCache, 14.f);

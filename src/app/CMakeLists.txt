@@ -115,7 +115,7 @@ configure_gettext(
         ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/translations
     POFILE_DESTINATION i18n
     INSTALL_DESTINATION "translations"
-    INSTALL_COMPONENT "appExecTR"
+    INSTALL_COMPONENT "App"
     LANGUAGES
         "fr"
     XGETTEXT_ARGS 
