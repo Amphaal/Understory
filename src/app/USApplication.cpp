@@ -41,6 +41,15 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     // set minimum size
     SDL_SetWindowMinimumSize(this->window(), MINIMUM_WIDTH, MINIMUM_HEIGHT);
 
+    #ifdef _DEBUG
+        // IMGUI initial setup
+        _imgui = Magnum::ImGuiIntegration::Context(
+            Magnum::Vector2{windowSize()} / dpiScaling(),
+            windowSize(),
+            framebufferSize()
+            );
+    #endif
+
     //
     Shaders::distanceField = &_distanceField;
     Shaders::flat = &_flat;
@@ -100,10 +109,8 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
         _stWidget.reset(new Widget::ShortcutsText(std::move(text)));
     }
 
-    // enable stencil for scrolling
-    // Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::ScissorTest);
-
-    /* Set up premultiplied alpha blending to avoid overlapping text characters to cut into each other */
+    // default renderer behavior
+    Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::ScissorTest);
     Magnum::GL::Renderer::enable(Magnum::GL::Renderer::Feature::Blending);
     Magnum::GL::Renderer::setBlendFunction(Magnum::GL::Renderer::BlendFunction::SourceAlpha, Magnum::GL::Renderer::BlendFunction::OneMinusSourceAlpha);
     Magnum::GL::Renderer::setBlendEquation(Magnum::GL::Renderer::BlendEquation::Add, Magnum::GL::Renderer::BlendEquation::Add);
@@ -132,6 +139,15 @@ void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
     // set viewport
     Magnum::GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
 
+    #ifdef _DEBUG
+        // IMGUI
+        _imgui.relayout(
+            Magnum::Vector2{event.windowSize()}/event.dpiScaling(),
+            event.windowSize(),
+            event.framebufferSize()
+        );
+    #endif
+
     // update constraints
     Shape::setConstraints(windowSize());
 
@@ -158,7 +174,24 @@ void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
     AppContainer::onViewportChange(shape);
 }
 
+#ifdef _DEBUG
+void UnderStory::USApplication::_drawImGui() {
+    /* Enable text input, if needed */
+    if(ImGui::GetIO().WantTextInput && !isTextInputActive())
+        startTextInput();
+    else if(!ImGui::GetIO().WantTextInput && isTextInputActive())
+        stopTextInput();
+
+    //
+    _imgui.newFrame();
+        ImGui::Text("Application average %.3f ms/frame (%.1f FPS)",
+            1000.0/Magnum::Double(ImGui::GetIO().Framerate), Magnum::Double(ImGui::GetIO().Framerate));
+    _imgui.drawFrame();
+}
+#endif
+
 void UnderStory::USApplication::drawEvent() {
+    // clear
     Magnum::GL::defaultFramebuffer.clear(Magnum::GL::FramebufferClear::Color);
 
     // advance animations
@@ -204,6 +237,11 @@ void UnderStory::USApplication::drawEvent() {
     // shortcuts text
     _stWidget->draw();
 
+    #ifdef _DEBUG
+        // IMGUI
+        _drawImGui();
+    #endif
+
     // buffers swap, automatic redrawing and timeline frame check
     swapBuffers();
     redraw();
@@ -211,14 +249,36 @@ void UnderStory::USApplication::drawEvent() {
 }
 
 void UnderStory::USApplication::mouseScrollEvent(MouseScrollEvent& event) {
+    //
+    #ifdef _DEBUG
+        if(_imgui.handleMouseScrollEvent(event)) {
+            /* Prevent scrolling the page */
+            event.setAccepted();
+            return;
+        }
+    #endif
+
+    //
     _propagateScrollEvent(event);
 }
 
 void UnderStory::USApplication::keyReleaseEvent(KeyEvent& event) {
+    //
+    #ifdef _DEBUG
+        if(_imgui.handleKeyReleaseEvent(event)) return;
+    #endif
+
+    //
     _kmh.keyReleaseEvent(event);
 }
 
 void UnderStory::USApplication::keyPressEvent(KeyEvent& event) {
+    //
+    #ifdef _DEBUG
+        if(_imgui.handleKeyPressEvent(event)) return;
+    #endif
+
+    //
     _kmh.keyPressEvent(event);
     _msh.keyPressEvent(event);
 
@@ -232,6 +292,11 @@ void UnderStory::USApplication::keyPressEvent(KeyEvent& event) {
 }
 
 void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
+    //
+    #ifdef _DEBUG
+        if(_imgui.handleMouseMoveEvent(event)) return;
+    #endif
+
     // find OpenGL cursor pos
     auto cursorPos = _cursorPosition(event);
 
@@ -240,11 +305,33 @@ void UnderStory::USApplication::mouseMoveEvent(MouseMoveEvent& event) {
 }
 
 void UnderStory::USApplication::mousePressEvent(MouseEvent& event) {
+    //
+    #ifdef _DEBUG
+        if(_imgui.handleMousePressEvent(event)) return;
+    #endif
+
+    //
     _propagateMousePressEvent(event);
 }
 
 void UnderStory::USApplication::mouseReleaseEvent(MouseEvent& event) {
+    //
+    #ifdef _DEBUG
+        if(_imgui.handleMouseReleaseEvent(event)) return;
+    #endif
+
+    //
     _propagateMouseReleaseEvent(event);
+}
+
+//
+//
+//
+
+void UnderStory::USApplication::textInputEvent(TextInputEvent& event) {
+    #ifdef _DEBUG
+        if(_imgui.handleTextInputEvent(event)) return;
+    #endif
 }
 
 //

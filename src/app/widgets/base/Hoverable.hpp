@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <spdlog/spdlog.h>
+
 #include "src/base/Debug.hpp"
 
 #include "src/app/utility/AppBound.hpp"
@@ -100,7 +102,7 @@ class Hoverable : public Shape, public AppBound {
         void _traceSelf() const {
             auto self = Debug::demanglePtr(this);
             self = "[" + self + "]";
-            Magnum::Debug{} << self.c_str();
+            spdlog::debug(self);
         }
 
         void _traceHoverable(Hoverable* hoverable) const {
@@ -109,14 +111,9 @@ class Hoverable : public Shape, public AppBound {
 
             //
             if(!hoverable) {
-                Magnum::Debug{}
-                    << self.c_str()
-                    << ": Out-of-frame";
+                spdlog::debug("{} : Out-of-frame", self);
             } else {
-                Magnum::Debug{}
-                    << self.c_str()
-                    << ":"
-                    << Debug::demanglePtr(hoverable).c_str();
+                spdlog::debug("{} : {}", self, Debug::demanglePtr(hoverable));
             }
         }
     #endif

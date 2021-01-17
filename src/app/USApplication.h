@@ -40,6 +40,8 @@
 #include <Magnum/Math/Matrix3.h>
 #include <Magnum/Math/Color.h>
 
+#include <Magnum/ImGuiIntegration/Context.hpp>
+
 #include <utility>
 #include <string>
 
@@ -94,6 +96,12 @@ class USApplication : public Magnum::Platform::Application, public Widget::AppCo
     void handlePressEvent(MouseEvent& event) final;
     void handleLockReleaseEvent(MouseEvent& event) final;
     void handleLockMoveEvent(MouseMoveEvent& event) final;
+    void textInputEvent(TextInputEvent& event) final;
+    
+    #ifdef _DEBUG
+      Magnum::ImGuiIntegration::Context _imgui{Magnum::NoCreate};
+      void _drawImGui();
+    #endif
 
     Magnum::PluginManager::Manager<Magnum::Text::AbstractFont> _fontManager;
     Magnum::Containers::Pointer<Magnum::Text::AbstractFont> _defaultFont;

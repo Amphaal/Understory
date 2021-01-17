@@ -55,10 +55,22 @@ add_subdirectory(corrade EXCLUDE_FROM_ALL)
 add_subdirectory(magnum EXCLUDE_FROM_ALL)
 add_subdirectory(magnum-plugins EXCLUDE_FROM_ALL)
 
+# only for debug
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    # configure
+    SET(IMGUI_DIR ${CMAKE_CURRENT_SOURCE_DIR}/imgui)
+    SET(WITH_IMGUI ON CACHE INTERNAL "")
+    add_subdirectory(magnum-integration EXCLUDE_FROM_ALL)
+    # link magnum-integration / IMGUI
+    target_link_libraries(appExec PRIVATE MagnumIntegration::ImGui)
+endif()
+
+# resources
 corrade_add_resource(appExec_RES
     resources.conf
 )
 
+# list code source
 target_sources(appExec PRIVATE
     widgets/animation/MatrixAnimator.cpp
     widgets/animation/TimelineBound.cpp
@@ -70,7 +82,7 @@ target_sources(appExec PRIVATE
     ${appExec_RES}
 )
 
-# linking
+# linking Magnum
 target_link_libraries(appExec PRIVATE
     Corrade::Main
     Magnum::Sdl2Application
@@ -83,6 +95,7 @@ target_link_libraries(appExec PRIVATE
     MagnumPlugins::PngImporter
 )
 
+# linking inner deps
 target_link_libraries(appExec PRIVATE UnderStory::network)
 target_link_libraries(appExec PRIVATE UnderStory::core)
 

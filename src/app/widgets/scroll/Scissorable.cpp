@@ -42,7 +42,7 @@ void UnderStory::Widget::Scissorable::_scrollCanvasChanged(const Magnum::Range2D
 
 void UnderStory::Widget::Scissorable::_scrollContentChanged(const Magnum::Range2D& content) {
     // reset scroll matrix
-    _translationFactor = 0.f;
+    _translationFactor = .0f;
     _animateScrollByTr(_translationFactor);
     
     // update cached content size

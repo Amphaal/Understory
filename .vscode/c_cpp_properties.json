@@ -22,7 +22,10 @@
                 "${workspaceFolder}/build",
                 "${workspaceFolder}/build/src/app/magnum/src",
                 "${workspaceFolder}/src/core/stb",
-                "${workspaceFolder}/src"
+                "${workspaceFolder}/src",
+                "${workspaceFolder}/src/app/magnum-integration/src",
+                "${workspaceFolder}/build/src/app/magnum-integration/src",
+                "${workspaceFolder}/src/app/imgui"
             ],
             "defines": [
                 "_DEBUG",
