@@ -1,3 +1,5 @@
+if(NOT CMakeDependencies_INCLUDED)
+
 ###########
 # pe-util #
 ###########
@@ -63,3 +65,6 @@ endfunction()
 ##
 ##
 
+endif()
+
+SET(CMakeDependencies_INCLUDED ON)

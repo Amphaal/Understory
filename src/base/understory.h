@@ -25,3 +25,4 @@
 #define APP_FULL_DENOM "UnderStory 0.0.7"
 #define APP_REPOSITORY_HOST "dl.bintray.com"
 #define APP_REPOSITORY_COMMAND "/amphaal/understory/repository/Updates.xml"
+#define APP_TRANSLATION_FOLDER "translations"

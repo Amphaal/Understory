@@ -99,6 +99,31 @@ target_link_libraries(appExec PRIVATE
 target_link_libraries(appExec PRIVATE UnderStory::network)
 target_link_libraries(appExec PRIVATE UnderStory::core)
 
+#################
+## Translation ##
+#################
+
+include(CMakeGettextX)
+configure_gettext(
+    DOMAIN ${PROJECT_NAME}
+    TARGET_NAME appExec-translate
+    SOURCES
+        USApplication.cpp
+    POTFILE_DESTINATION 
+        ${CMAKE_CURRENT_BINARY_DIR}/i18n
+    GMOFILE_DESTINATION 
+        ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/translations
+    POFILE_DESTINATION i18n
+    INSTALL_DESTINATION "translations"
+    INSTALL_COMPONENT "appExecTR"
+    LANGUAGES
+        "fr"
+    XGETTEXT_ARGS 
+        "-k_"
+)
+
+add_dependencies(appExec appExec-translate)
+
 ##################
 ## Deps : RxCpp ##
 ##################

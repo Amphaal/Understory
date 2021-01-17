@@ -52,6 +52,12 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
             );
     #endif
 
+    // i18n
+    bindtextdomain(APP_NAME, APP_TRANSLATION_FOLDER);
+    /* Only write the following 2 lines if creating an executable */
+    setlocale(LC_ALL, ""); /* Set locale based on ENV */
+    textdomain(APP_NAME);
+
     //
     Shaders::distanceField = &_distanceField;
     Shaders::flat = &_flat;
@@ -88,7 +94,8 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     // define world text as static
     {
         // text
-        auto welcomeText = _("Welcome to the Understory developper early demo !\n"
+        auto welcomeText = _(
+            "Welcome to the Understory developper early demo !\n"
             "This is a placeholder meant to showcase the text displaying capabilities.\n"
             "Thank you for trying this early stage build and supporting our efforts !\n"
             "More infos available on our Discord server and Github page (https://github.com/Amphaal/Understory)"
