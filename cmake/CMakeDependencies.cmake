@@ -40,7 +40,7 @@ function(DeployPEDependencies target component)
     string(REPLACE ";" " " pattern_ "${ARGN}")
 
     configure_file(
-        ${CMAKE_SOURCE_DIR}/cmake/deps.sh
+        ${CMAKE_SOURCE_DIR}/cmake/CMakeDependencies.in.sh
         PEDeps_${component}.sh
         NEWLINE_STYLE LF
     )

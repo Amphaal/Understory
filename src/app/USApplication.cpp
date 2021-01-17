@@ -19,6 +19,8 @@
 
 #include "USApplication.h"
 
+#include "src/base/translate.h"
+
 using namespace Magnum::Math::Literals;
 
 UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Platform::Application{
@@ -85,27 +87,33 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
 
     // define world text as static
     {
-        Widget::StaticTextFactory textFactory(*_defaultFont, _worldCache, .2f);
-        _worldText = textFactory.generate("Welcome to the Understory developper early demo !\n"
+        // text
+        auto welcomeText = _("Welcome to the Understory developper early demo !\n"
             "This is a placeholder meant to showcase the text displaying capabilities.\n"
             "Thank you for trying this early stage build and supporting our efforts !\n"
             "More infos available on our Discord server and Github page (https://github.com/Amphaal/Understory)"
         );
+
+        // widget
+        Widget::StaticTextFactory textFactory(*_defaultFont, _worldCache, .2f);
+        _worldText = textFactory.generate(welcomeText);
     }
 
     // define shortcut text as static
-    {
+    {        
+        // text
+        std::string paddedText;
+        paddedText += _("[LeftClick  (DoubleClick)] Center screen on cursor\n");
+        paddedText += _("[LeftClick  (Maintain)]                       Move camera\n");
+        paddedText += _("[RightClick (Maintain / Release)]             Snapshot zoom-in\n");
+        paddedText += _("[D-Pad]                       Move camera\n");
+        paddedText += _("[Esc]                       Reset camera\n");
+        paddedText += _("[MouseScroll]                                       Zoom\n");
+        paddedText += _("[NumPad +/-]                                       Zoom");
+
+        // widget
         Widget::StaticTextFactory textFactory(*_defaultFont, _worldCache, 14.f);
-        auto text = textFactory.generate(
-                "[LeftClick  (DoubleClick)] Center screen on cursor\n"
-                "[LeftClick  (Maintain)]                       Move camera\n"
-                "[RightClick (Maintain / Release)]             Snapshot zoom-in\n"
-                "[D-Pad]                       Move camera\n"
-                "[Esc]                       Reset camera\n"
-                "[MouseScroll]                                       Zoom\n"
-                "[NumPad +/-]                                       Zoom",
-            Magnum::Text::Alignment::TopRight
-        );
+        auto text = textFactory.generate(paddedText, Magnum::Text::Alignment::TopRight);
         _stWidget.reset(new Widget::ShortcutsText(std::move(text)));
     }
 
