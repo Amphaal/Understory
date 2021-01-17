@@ -16,3 +16,9 @@
 [submodule "src/app/magnum-plugins"]
 	path = src/app/magnum-plugins
 	url = https://github.com/mosra/magnum-plugins
+[submodule "src/app/magnum-integration"]
+	path = src/app/magnum-integration
+	url = https://github.com/mosra/magnum-integration
+[submodule "src/app/imgui"]
+	path = src/app/imgui
+	url = https://github.com/ocornut/imgui
