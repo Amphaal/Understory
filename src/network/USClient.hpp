@@ -45,7 +45,7 @@ class USClient : public SocketHelper {
         asio::async_connect(this->socket(), endpoints, [&](std::error_code ec, tcp::endpoint endpoint){
             if(ec) return this->_onError(ec);
 
-            spdlog::debug("UnderStory client connected to {}", endpoint.address().to_string());
+            spdlog::info("UnderStory client connected to {}", endpoint.address().to_string());
             this->start();
         });
     }

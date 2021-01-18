@@ -69,7 +69,7 @@ class Context {
 
     Context(const PredefinedEnvironement& env, const fs::path &pathToContext) : _env(env), _pathToContext(pathToContext) {
         if(!_directoryExists(pathToContext)) throw std::exception();
-        spdlog::debug("Using app context [{}]", pathToContext.string());
+        spdlog::info("Using app context [{}]", pathToContext.string());
     }
 
     static bool _directoryExists(const fs::path &path) {

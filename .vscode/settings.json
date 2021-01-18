@@ -124,6 +124,10 @@
         "forward_list": "cpp",
         "span": "cpp",
         "valarray": "cpp",
-        "semaphore": "cpp"
+        "semaphore": "cpp",
+        "strstream": "cpp",
+        "netfwd": "cpp",
+        "cfenv": "cpp",
+        "typeindex": "cpp"
     }
 }

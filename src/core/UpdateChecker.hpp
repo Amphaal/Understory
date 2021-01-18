@@ -28,6 +28,7 @@
 #include <iostream>
 #include <vector>
 #include <future>
+#include <map>
 
 #include "src/base/understory.h"
 
@@ -40,38 +41,74 @@ namespace UnderStory {
 class UpdateChecker_Private {
  public:
     static std::string _getManifest() {
+        spdlog::info("UpdateChecker : Downloading remote manifest [{}, {}]", APP_REPOSITORY_HOST, APP_REPOSITORY_COMMAND);
         return Network::DownloadHTTPFile(APP_REPOSITORY_HOST, APP_REPOSITORY_COMMAND);
     }
 
-    static std::string _extractRemoteVersionFromManifest(const std::string &manifestContent) {
-        std::regex findVersionExp(R"|(<Version>(.*?)<\/Version>)|");
+    static auto _extractRemoteVersionsFromManifest(std::string manifestContent) {
+        // remove newline
+        manifestContent.erase(
+            std::remove(
+                manifestContent.begin(), 
+                manifestContent.end(), 
+                '\n'
+            ), 
+            manifestContent.end()
+        );
+        
+        //
+        std::regex findVersionExp(R"|(<Name>(.*?)<\/Name>.*?<Version>(.*?)<\/Version>)|");
         std::smatch match;
+        std::map<std::string, std::string> out;
 
-        while (std::regex_search(manifestContent, match, findVersionExp)) {
-            // remove whole match
-            if(match.length() < 2) continue;
-            auto first = true;
+        //
+        std::string::const_iterator searchStart( manifestContent.cbegin() );
+        while(std::regex_search(searchStart, manifestContent.cend(), match, findVersionExp)) {
+            //
+            bool first = true;
+            std::string key;
+            auto count = match.size();
 
-            // return first occurence
+            // iterate
             for (auto &group : match) {
+                
+                // skip first (whole pattern)
                 if (first) {
-                    first = false;
+                    first ^= true;
                     continue;
                 }
 
-                spdlog::debug("UpdateChecker : Found remote version from manifest [{}]", group.str());
-                return group;
+                // store key
+                if (key.empty()) {
+                    key = group.str();
+                    continue;
+                }
+
+                // store version
+                auto version = group.str();
+                spdlog::info("UpdateChecker : Found remote version from manifest for \"{}\" [{}]", key, version);
+                out.insert_or_assign(key, version);
+                break;
+
             }
+
+            //
+            searchStart = match.suffix().first;
+
         }
 
-        spdlog::warn("UpdateChecker : Cannot find remote version from manifest");
-        return std::string();
+        // warn if empty
+        if(out.empty())
+            spdlog::warn("UpdateChecker : Cannot find remote versions from manifest");
+
+        //
+        return out;
     }
 
     static bool _isVersionNewerThanLocal(const std::string &remoteVersion, const std::string &localVersion = APP_CURRENT_VERSION) {
-        spdlog::debug("UpdateChecker : Local version is [{}]", localVersion);
+        spdlog::info("UpdateChecker : Local version is [{}]", localVersion);
         auto isNewer =  localVersion < remoteVersion;
-        spdlog::debug("UpdateChecker : Must update from remote ? [{}]", isNewer);
+        spdlog::info("UpdateChecker : Must update from remote ? [{}]", isNewer);
         return isNewer;
     }
 
@@ -100,25 +137,32 @@ class UpdateChecker : private UpdateChecker_Private {
 
     static void tryToLaunchUpdater(const std::filesystem::path &updaterPath = _exectedMaintenanceToolPath()) {
         if(!std::filesystem::exists(updaterPath)) {
-            spdlog::warn("UpdateChecker : Cannot find updater at [{}]", updaterPath.string());
+            spdlog::warn("UpdateChecker : Cannot find updater at [{}], aborting.", updaterPath.string());
             return;
         }
 
         // run
         std::vector<std::string> args {updaterPath.string(), "--updater"};
-        spdlog::debug("UpdateChecker : Launching updater [{}]...", updaterPath.string());
+        spdlog::info("UpdateChecker : Launching updater [{}]...", updaterPath.string());
         TinyProcessLib::Process run(args);
 
-        spdlog::debug("UpdateChecker : Quitting {}...", APP_NAME);
+        spdlog::info("UpdateChecker : Quitting {}...", APP_NAME);
         exit(0);
     }
 
  private:
     static bool _isNewerVersionAvailable() {
-        spdlog::debug("UpdateChecker : Checking updates...");
+        spdlog::info("UpdateChecker : Checking updates...");
         auto manifest = UpdateChecker_Private::_getManifest();
-        auto version = UpdateChecker_Private::_extractRemoteVersionFromManifest(manifest);
-        return UpdateChecker_Private::_isVersionNewerThanLocal(version);
+        
+        // read versions
+        auto versions = UpdateChecker_Private::_extractRemoteVersionsFromManifest(manifest);
+        auto hasVersions = versions.size();
+        if(!hasVersions) return false;
+
+        // compare
+        auto firstVersion = versions.begin()->second;
+        return UpdateChecker_Private::_isVersionNewerThanLocal(firstVersion);
     }
 };
 

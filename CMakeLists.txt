@@ -21,10 +21,16 @@ project(UnderStory
     LANGUAGES C CXX
 )
 
+#
 SET(APP_REPOSITORY_HOST         "dl.bintray.com")
 SET(APP_REPOSITORY_COMMAND_LITE "/amphaal/understory/repository")
 SET(APP_REPOSITORY_COMMAND      "${APP_REPOSITORY_COMMAND_LITE}/Updates.xml")
 SET(APP_REPOSITORY_URL          "https://${APP_REPOSITORY_HOST}/${APP_REPOSITORY_COMMAND_LITE}")
+
+#
+SET(SENTRY_ENDPOINT "https://b9618c02d38d4633b02c3dd2b736674e@o333337.ingest.sentry.io/5518788")
+
+#
 SET(APP_TRANSLATION_FOLDER      "translations")
 
 #policies

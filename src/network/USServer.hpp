@@ -62,7 +62,7 @@ class USServer {
 
     explicit USServer(Context &appContext, asio::io_context &context, unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT)
         : _appContext(appContext), _acceptor(context, tcp::endpoint(tcp::v4(), port)) {
-        spdlog::debug("UnderStory server listening on port {}", port);
+        spdlog::info("UnderStory server listening on port {}", port);
         this->_acceptConnections();
     }
 
