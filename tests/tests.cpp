@@ -72,33 +72,3 @@
 //     REQUIRE_FALSE(testUpdateChecker("0.5.0"));
 //     REQUIRE_FALSE(testUpdateChecker("0.4.10"));
 // }
-
-#include <src/base/Context.hpp>
-
-#include <libtorrent/bencode.hpp>
-#include <libtorrent/file_storage.hpp>
-#include <libtorrent/create_torrent.hpp>
-#include <libtorrent/session.hpp>
-
-#include <spdlog/spdlog.h>
-
-TEST_CASE("Torrent test", "[file share]") {
-    auto context = UnderStory::Context::random();
-    auto testFilePath = fs::absolute("./tests/resources/test.png").string();
-
-    auto flags = lt::create_torrent::v2_only;
-    lt::file_storage fs;
-    lt::add_files(fs, testFilePath, flags);
-
-    lt::create_torrent t(fs, 0, flags);
-    t.add_node({"127.0.0.1", 8700});
-    auto entry = t.generate();
-    
-    //
-    lt::add_torrent_params atp;
-    atp.ti = std::make_shared<lt::torrent_info>(t.generate());
-    
-    //
-    lt::session s;
-    s.add_torrent(atp);
-}
