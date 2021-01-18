@@ -88,7 +88,8 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
         _worldCache,
         "abcdefghijklmnopqrstuvwxyz"
         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "0123456789:-+,.!°()/[] "
+        "0123456789:-+,.!°'()/[] "
+        "éèàêâ" // french characters
     );
 
     // define world text as static

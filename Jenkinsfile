@@ -8,7 +8,7 @@ pipeline {
                         docker { image 'amphaal/understory-ci-windows' }
                     }
                     environment {
-                        SENTRY_URL = 'http://zonme.to2x.ovh:9000'
+                        SENTRY_URL = 'https://sentry.io/'
                         SENTRY_ORG = 'lvwl'
                         SENTRY_PROJECT = 'understory'
                     }
