@@ -26,3 +26,5 @@
 #define APP_REPOSITORY_HOST "dl.bintray.com"
 #define APP_REPOSITORY_COMMAND "/amphaal/understory/repository/Updates.xml"
 #define APP_TRANSLATION_FOLDER "translations"
+#define SENTRY_ENDPOINT "https://b9618c02d38d4633b02c3dd2b736674e@o333337.ingest.sentry.io/5518788"
+#define GITHUB_VERSION_NAME "understory@0.0.7"

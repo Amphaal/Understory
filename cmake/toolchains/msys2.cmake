@@ -23,6 +23,7 @@ SET(CMAKE_BUILD_TYPE Debug)
 
 SET (CMAKE_C_COMPILER           "clang")
 SET (CMAKE_CXX_COMPILER         "clang++")
+SET (CMAKE_ASM_MASM_COMPILER    "uasm")
 
 SET (CMAKE_AR                   "llvm-ar")
 SET (CMAKE_RANLIB               "llvm-ranlib")

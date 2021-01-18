@@ -21,6 +21,9 @@
 
 #include "src/base/translate.h"
 
+#include "src/base/Context.hpp"
+#include <sentry.h>
+
 using namespace Magnum::Math::Literals;
 
 UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Platform::Application{
@@ -442,6 +445,32 @@ void UnderStory::USApplication::_updateDebugText() {
 Magnum::Vector2 UnderStory::USApplication::_cursorPosition(const Sdl2Application::MouseMoveEvent& event) const {
     Magnum::Vector2 fs{this->framebufferSize()};
     return (Magnum::Vector2{event.position()} - fs / 2.f) / fs * Magnum::Vector2{2.f, -2.f};
+}
+
+//
+//
+//
+
+void UnderStory::USApplication::_initSentry() {
+    auto options = sentry_options_new();
+    sentry_options_set_dsn(options, SENTRY_ENDPOINT);
+
+    #ifdef _DEBUG
+        auto environement = "Debug";
+    #else
+        auto environement = "Production";
+    #endif
+    sentry_options_set_environment(options, environement);
+
+    sentry_options_set_release(options, GITHUB_VERSION_NAME);
+    sentry_options_set_debug(options, 1);
+
+    // integration
+    auto context = Context::normal();
+    auto dbStr = context.path().string() + "/sentry_db";
+    sentry_options_set_database_path(options, dbStr.c_str());
+
+    sentry_init(options);
 }
 
 MAGNUM_APPLICATION_MAIN(UnderStory::USApplication)

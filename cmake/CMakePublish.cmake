@@ -87,6 +87,18 @@ cpack_ifw_configure_component("Magnum"
     FORCED_INSTALLATION
 )
 
+# sentry-native
+cpack_add_component("SentryNative" DOWNLOADED)
+cpack_ifw_configure_component("SentryNative"
+    DISPLAY_NAME "Sentry-Native ${SENTRY_NATIVE_PROJECT_VERSION}"
+    DESCRIPTION
+        "Utility that allows automatic bugs reports"
+        fr "Utilitaire qui permet la génération de rapports de bugs automatiques"
+    SORTING_PRIORITY 95
+    VERSION ${SENTRY_NATIVE_PROJECT_VERSION}
+    FORCED_INSTALLATION
+)
+
 ######################################
 # CPACK IFW COMPONENTS CONFIGURATION #
 ######################################

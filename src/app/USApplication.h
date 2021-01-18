@@ -144,6 +144,8 @@ class USApplication : public Magnum::Platform::Application, public Widget::AppCo
     Widget::AtomSelectorGrid _asGrid;
 
     Utility::UpdateChecker _updateChecker;
+    
+    void _initSentry();
 };
 
 }  // namespace UnderStory

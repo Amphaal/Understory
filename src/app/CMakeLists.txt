@@ -124,6 +124,58 @@ configure_gettext(
 
 add_dependencies(appExec appExec-translate)
 
+#################
+# Sentry-native #
+#################
+
+SET(SENTRY_BUILD_SHARED_LIBS ON CACHE INTERNAL "")
+add_subdirectory(sentry-native EXCLUDE_FROM_ALL)
+
+# get version
+get_directory_property(SENTRY_NATIVE_PROJECT_VERSION
+    DIRECTORY sentry-native 
+    DEFINITION PROJECT_VERSION
+)
+
+# link
+target_link_libraries(appExec PRIVATE sentry)
+
+# track version into file
+execute_process(
+    COMMAND printf "${CMAKE_PROJECT_VERSION}"
+    OUTPUT_FILE ${CMAKE_BINARY_DIR}/version
+)
+
+# install
+install(FILES 
+    $<TARGET_FILE:sentry>
+    TYPE BIN
+    COMPONENT "SentryNative"
+)
+
+# add crashpad_handler next to app, and to install process
+set_target_properties(crashpad_handler PROPERTIES 
+    RUNTIME_OUTPUT_DIRECTORY $<TARGET_FILE_DIR:appExec>
+)
+install(TARGETS crashpad_handler 
+    COMPONENT "SentryNative"
+)
+
+# generate pdb
+IF(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")  
+    
+    target_link_options(appExec PRIVATE -Wl,-pdb=) # generate pdb files
+    target_compile_options(appExec PRIVATE -gcodeview) #use codeview for pdbs
+    
+    # add .pdb to install
+    install(
+        FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<TARGET_FILE_BASE_NAME:appExec>.pdb
+        TYPE BIN
+        COMPONENT "App"
+    )
+
+endif()
+
 ##################
 ## Deps : RxCpp ##
 ##################
