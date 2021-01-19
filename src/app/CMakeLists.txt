@@ -18,8 +18,7 @@ set_target_properties(appExec PROPERTIES
 
 #optimise for release
 if(CMAKE_BUILD_TYPE STREQUAL "Release" OR CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo")
-    # disabled, buged because of rxcpp ? (https://github.com/msys2/MINGW-packages/issues/5786)
-    #set_target_properties(appExec PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE) #enable LTO
+    set_target_properties(appExec PROPERTIES INTERPROCEDURAL_OPTIMIZATION TRUE) #enable LTO
 endif()
 
 #############
@@ -162,7 +161,7 @@ install(TARGETS crashpad_handler
 )
 
 # generate pdb
-IF(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")  
+IF(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND NOT CMAKE_BUILD_TYPE STREQUAL "Debug")  
     
     target_link_options(appExec PRIVATE -Wl,-pdb=) # generate pdb files
     target_compile_options(appExec PRIVATE -gcodeview) #use codeview for pdbs
@@ -175,13 +174,6 @@ IF(MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     )
 
 endif()
-
-##################
-## Deps : RxCpp ##
-##################
-
-#link
-target_include_directories(appExec PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/RxCpp/Rx/v2/src")
 
 #############
 ## INSTALL ##

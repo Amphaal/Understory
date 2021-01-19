@@ -24,8 +24,6 @@
 
 #include "src/core/UpdateChecker.hpp"
 
-#include <rxcpp/rx.hpp>
-
 namespace UnderStory {
 
 namespace Utility {
@@ -35,20 +33,11 @@ class UpdateChecker {
     UpdateChecker() {}
 
     void start() {
-        // timer to check for completness
-        _tmr = rxcpp::observable<>::interval(std::chrono::seconds(2))
-            .subscribe_on(rxcpp::observe_on_new_thread())
-            .subscribe([&](int) {
-                this->_onUpdateCheckDone();
-            });
-
         // invoke update check
         _updateCheckResult = UnderStory::UpdateChecker::isNewerVersionAvailable();
     }
 
  private:
-    rxcpp::composite_subscription _tmr;
-
     std::future<bool> _updateCheckResult;
     void _onUpdateCheckDone() {
         if(!_updateCheckResult.valid()) return;
@@ -56,7 +45,6 @@ class UpdateChecker {
 
         // get result and unsubscribe
         auto isNewerVersionAvailable = _updateCheckResult.get();
-        _tmr.unsubscribe();
 
         // do nothing if not newer
         if(!isNewerVersionAvailable) return;

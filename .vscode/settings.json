@@ -17,7 +17,6 @@
         "src/app/magnum": true,
         "src/app/magnum-plugins": true,
         "src/app/magnum-integration": true,
-        "src/app/RxCpp": true,
         "src/base/spdlog": true,
         "src/core/stb": true,
         "src/core/tiny-process-library": true,

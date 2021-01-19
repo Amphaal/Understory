@@ -17,7 +17,6 @@
                 "${workspaceFolder}/src/app/magnum/src",
                 "${workspaceFolder}/src/app/magnum-plugins/src",
                 "${workspaceFolder}/src/app/corrade/src",
-                "${workspaceFolder}/src/app/RxCpp/Rx/v2/src",
                 "${workspaceFolder}/src/core/tiny-process-library",
                 "${workspaceFolder}/build",
                 "${workspaceFolder}/build/src/app/magnum/src",

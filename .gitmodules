@@ -4,9 +4,6 @@
 [submodule "src/core/stb"]
 	path = src/core/stb
 	url = https://github.com/nothings/stb
-[submodule "src/app/RxCpp"]
-	path = src/app/RxCpp
-	url = https://github.com/ReactiveX/RxCpp
 [submodule "src/app/corrade"]
 	path = src/app/corrade
 	url = https://github.com/mosra/corrade
