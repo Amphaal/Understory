@@ -72,7 +72,12 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     Animation::TimelineBound::setupTimeline(&_timeline);
 
     //
+    _initSentry();
+
+    //
     _updateChecker.start();
+    // TODO(amphaal) loop every 3-5 sec until 1min for updates
+    
 
     // define animation mutual exclusions
     _kmh.setExcludedWhenPlaying({&_mmh});

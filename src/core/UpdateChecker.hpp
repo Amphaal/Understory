@@ -135,10 +135,11 @@ class UpdateChecker : private UpdateChecker_Private {
         );
     }
 
-    static void tryToLaunchUpdater(const std::filesystem::path &updaterPath = _exectedMaintenanceToolPath()) {
+    // returns if successfully requested updater to run
+    static bool tryToLaunchUpdater(const std::filesystem::path &updaterPath = _exectedMaintenanceToolPath()) {
         if(!std::filesystem::exists(updaterPath)) {
             spdlog::warn("UpdateChecker : Cannot find updater at [{}], aborting.", updaterPath.string());
-            return;
+            return false;
         }
 
         // run
@@ -147,7 +148,7 @@ class UpdateChecker : private UpdateChecker_Private {
         TinyProcessLib::Process run(args);
 
         spdlog::info("UpdateChecker : Quitting {}...", APP_NAME);
-        exit(0);
+        return true;
     }
 
  private:

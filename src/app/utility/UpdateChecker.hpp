@@ -37,21 +37,23 @@ class UpdateChecker {
         _updateCheckResult = UnderStory::UpdateChecker::isNewerVersionAvailable();
     }
 
- private:
-    std::future<bool> _updateCheckResult;
-    void _onUpdateCheckDone() {
-        if(!_updateCheckResult.valid()) return;
-        if(_updateCheckResult.wait_for(std::chrono::seconds(0)) != std::future_status::ready) return;
+    // returns if results are received
+    bool checkResults() {
+       if(!_updateCheckResult.valid()) return false;
+        if(_updateCheckResult.wait_for(std::chrono::seconds(0)) != std::future_status::ready) return false;
 
         // get result and unsubscribe
-        auto isNewerVersionAvailable = _updateCheckResult.get();
-
-        // do nothing if not newer
-        if(!isNewerVersionAvailable) return;
-
-        // launch updater
-        UnderStory::UpdateChecker::tryToLaunchUpdater();
+        _isNewerVersionAvailable = _updateCheckResult.get();
+        return true;
     }
+
+    bool isNewerVersionAvailable() const {
+        return _isNewerVersionAvailable;
+    }
+
+ private:
+    std::future<bool> _updateCheckResult;
+    bool _isNewerVersionAvailable = false;
 };
 
 }  // namespace Utility
