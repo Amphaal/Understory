@@ -7,7 +7,7 @@ Follow-up to https://github.com/Amphaal/rpgrpz.
 ## License
     UnderStory
     An intuitive Pen & Paper experience
-    Copyright (C) 2020 Guillaume Vara
+    Copyright (C) 2020-2021 Guillaume Vara <guillaume.vara@gmail.com>
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
