@@ -26,6 +26,7 @@
 #include <regex>
 #include <filesystem>
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <future>
 #include <map>
@@ -40,12 +41,30 @@ namespace UnderStory {
 
 class UpdateChecker_Private {
  public:
-    static std::string _getManifest() {
+    static std::string _getRemoteManifestContent() {
         spdlog::info("UpdateChecker : Downloading remote manifest [{}, {}]", APP_REPOSITORY_HOST, APP_REPOSITORY_COMMAND);
         return Network::DownloadHTTPFile(APP_REPOSITORY_HOST, APP_REPOSITORY_COMMAND);
     }
 
-    static auto _extractRemoteVersionsFromManifest(std::string manifestContent) {
+    static std::string _getLocalManifestContent() {
+        // check existence
+        auto absolute = std::filesystem::absolute("../components.xml");
+        if(!std::filesystem::exists(absolute)) {
+            spdlog::warn("UpdateChecker : No local manifest found at [{}]", absolute.string());
+            return std::string();
+        }
+
+        // dump content
+        std::ifstream t(absolute);
+        std::stringstream buffer;
+        buffer << t.rdbuf();
+        spdlog::info("UpdateChecker : Local manifest found at [{}]", absolute.string());
+
+        //
+        return buffer.str();
+    }
+
+    static auto _extractVersionsFromManifest(std::string manifestContent) {
         // remove newline
         manifestContent.erase(
             std::remove(
@@ -86,7 +105,6 @@ class UpdateChecker_Private {
 
                 // store version
                 auto version = group.str();
-                spdlog::info("UpdateChecker : Found remote version from manifest for \"{}\" [{}]", key, version);
                 out.insert_or_assign(key, version);
                 break;
 
@@ -97,19 +115,12 @@ class UpdateChecker_Private {
 
         }
 
-        // warn if empty
-        if(out.empty())
-            spdlog::warn("UpdateChecker : Cannot find remote versions from manifest");
-
         //
         return out;
     }
 
-    static bool _isVersionNewerThanLocal(const std::string &remoteVersion, const std::string &localVersion = APP_CURRENT_VERSION) {
-        spdlog::info("UpdateChecker : Local version is [{}]", localVersion);
-        auto isNewer =  localVersion < remoteVersion;
-        spdlog::info("UpdateChecker : Must update from remote ? [{}]", isNewer);
-        return isNewer;
+    static bool _isRemoteVersionNewerThanLocal(const std::string &localVersion, const std::string &remoteVersion) {
+        return localVersion < remoteVersion;
     }
 
     static std::filesystem::path _exectedMaintenanceToolPath() {
@@ -138,32 +149,75 @@ class UpdateChecker : private UpdateChecker_Private {
     // returns if successfully requested updater to run
     static bool tryToLaunchUpdater(const std::filesystem::path &updaterPath = _exectedMaintenanceToolPath()) {
         if(!std::filesystem::exists(updaterPath)) {
-            spdlog::warn("UpdateChecker : Cannot find updater at [{}], aborting.", updaterPath.string());
+            spdlog::warn("UpdateChecker : Cannot find updater at [{}], aborting", updaterPath.string());
             return false;
         }
 
         // run
         std::vector<std::string> args {updaterPath.string(), "--updater"};
-        spdlog::info("UpdateChecker : Launching updater [{}]...", updaterPath.string());
+        spdlog::info("UpdateChecker : Launching updater [{}] ...", updaterPath.string());
         TinyProcessLib::Process run(args);
 
-        spdlog::info("UpdateChecker : Quitting {}...", APP_NAME);
+        spdlog::info("UpdateChecker : Quitting {} ...", APP_NAME);
         return true;
     }
 
  private:
-    static bool _isNewerVersionAvailable() {
-        spdlog::info("UpdateChecker : Checking updates...");
-        auto manifest = UpdateChecker_Private::_getManifest();
-        
-        // read versions
-        auto versions = UpdateChecker_Private::_extractRemoteVersionsFromManifest(manifest);
-        auto hasVersions = versions.size();
-        if(!hasVersions) return false;
+    static bool _warn(const char* str) {
+        spdlog::warn("UpdateChecker : Error while fetching {} manifest !", str);
+        return false;
+    }
 
-        // compare
-        auto firstVersion = versions.begin()->second;
-        return UpdateChecker_Private::_isVersionNewerThanLocal(firstVersion);
+    static bool _isNewerVersionAvailable() {
+        //
+        spdlog::info("UpdateChecker : Checking updates...");
+
+        // fetch local
+        std::map<std::string, std::string> localComponents;
+        auto localRaw = _getLocalManifestContent();
+        if(localRaw.empty()) return _warn("local");
+        localComponents = _extractVersionsFromManifest(localRaw);
+        if(!localComponents.size()) return _warn("local");;
+
+        // fetch remote
+        std::map<std::string, std::string> remoteVersions;
+        auto remoteRaw = _getRemoteManifestContent();
+        if(remoteRaw.empty()) return _warn("remote");;
+        remoteVersions = _extractVersionsFromManifest(remoteRaw);
+        if(!remoteVersions.size()) return _warn("remote");;
+
+        // iterate through local components
+        for(auto &[component, localVersion] : localComponents) {
+            // if local component not found on remote, needs update
+            auto foundOnRemote = remoteVersions.find(component);
+            if (foundOnRemote == remoteVersions.end()) {
+                spdlog::info("UpdateChecker : Local component [{}] not found on remote", component);
+                return true;
+            }
+
+            // compare versions
+            auto &remoteVersion = foundOnRemote->second;
+            auto isNewer = _isRemoteVersionNewerThanLocal(localVersion, remoteVersion);
+            if(isNewer) {
+                spdlog::info("UpdateChecker : Local component [{} : {}] older than remote [{}]", component, localVersion, remoteVersion);
+                return true;
+            }
+
+            // if not older, remove from remote
+            spdlog::info("UpdateChecker : Local component [{}] up-to-date", component);
+            remoteVersions.erase(component);
+        }
+
+        // if any components remaining in remote, has updates
+        if(remoteVersions.size()) {
+            auto &firstComponent = remoteVersions.begin()->first;
+            spdlog::info("UpdateChecker : Remote component [{}] not found in local", firstComponent);
+            return true;
+        }
+
+        //
+        spdlog::info("UpdateChecker : No components to be updated");
+        return false;
     }
 };
 
