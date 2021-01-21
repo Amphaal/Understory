@@ -13,6 +13,8 @@
         "MSVSCODE": "1"
     },
     "search.exclude": {
+        "src/app/imgui" : true,
+        "src/app/sentry-native" : true,
         "src/app/corrade": true,
         "src/app/magnum": true,
         "src/app/magnum-plugins": true,

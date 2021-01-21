@@ -34,26 +34,28 @@ class UpdateChecker {
 
     void start() {
         // invoke update check
-        _updateCheckResult = UnderStory::UpdateChecker::isNewerVersionAvailable();
+        _future = UnderStory::UpdateChecker::isNewerVersionAvailable();
     }
 
-    // returns if results are received
-    bool checkResults() {
-       if(!_updateCheckResult.valid()) return false;
-        if(_updateCheckResult.wait_for(std::chrono::seconds(0)) != std::future_status::ready) return false;
+    void poll() {
+        //
+        if(_resolved) return;
 
-        // get result and unsubscribe
-        _isNewerVersionAvailable = _updateCheckResult.get();
-        return true;
-    }
+        //
+        if(!_future.valid() || _future.wait_for(std::chrono::seconds(0)) != std::future_status::ready) return;
 
-    bool isNewerVersionAvailable() const {
-        return _isNewerVersionAvailable;
+        //
+        auto isNewerVersionAvailable = _future.get();
+        if(isNewerVersionAvailable)
+            UnderStory::UpdateChecker::tryToLaunchUpdater();
+        
+        //
+        _resolved = true;
     }
 
  private:
-    std::future<bool> _updateCheckResult;
-    bool _isNewerVersionAvailable = false;
+    std::future<bool> _future;
+    bool _resolved = false;
 };
 
 }  // namespace Utility

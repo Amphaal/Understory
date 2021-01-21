@@ -215,6 +215,9 @@ void UnderStory::USApplication::_drawImGui() {
 #endif
 
 void UnderStory::USApplication::drawEvent() {
+    //
+    _updateChecker.poll();
+
     // clear
     Magnum::GL::defaultFramebuffer.clear(Magnum::GL::FramebufferClear::Color);
 
