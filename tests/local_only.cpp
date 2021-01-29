@@ -89,10 +89,10 @@ TEST_CASE("client / server - Handshake", "[network]") {
 TEST_CASE("Download update manifest", "[update checker]") {
     spdlog::set_level(spdlog::level::debug);
 
-    auto manifest = UpdateChecker_Private::_getManifest();
+    auto manifest = UpdateChecker_Private::_getRemoteManifestContent();
     REQUIRE(!manifest.empty());
 
-    auto version = UpdateChecker_Private::_extractRemoteVersionFromManifest(manifest);
-    spdlog::debug("Compared Versions : Local [{}] <> Remote [{}]", version, APP_CURRENT_VERSION);
+    auto versions = UpdateChecker_Private::_extractVersionsFromManifest(manifest);
+    spdlog::debug("Compared Versions : Local [{}] <> Remote [{}]", versions["App"], APP_CURRENT_VERSION);
     REQUIRE(!version.empty());
 }
