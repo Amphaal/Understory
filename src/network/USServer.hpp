@@ -60,8 +60,11 @@ class USServer {
  public:
     SocketCallbacks callbacks;
 
-    explicit USServer(Context &appContext, asio::io_context &context, unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT)
-        : _appContext(appContext), _acceptor(context, tcp::endpoint(tcp::v4(), port)) {
+    explicit USServer(
+        Context &appContext,
+        asio::io_context &context,
+        unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT
+    ) : _appContext(appContext), _acceptor(context, tcp::endpoint(tcp::v4(), port)) {
         spdlog::info("UnderStory server listening on port {}", port);
         this->_acceptConnections();
     }
@@ -74,10 +77,20 @@ class USServer {
     void _acceptConnections() {
         this->_acceptor.async_accept(
             [&](std::error_code ec, tcp::socket socket) {
+                // if no error code
                 if(!ec) {
-                    auto client = new ClientSocket(std::move(socket), this->_clientSockets, this->callbacks);
+                    // create client
+                    auto client = new ClientSocket(
+                        std::move(socket),
+                        this->_clientSockets, 
+                        this->callbacks
+                    );
+
+                    // listen to client
                     client->start();
                 }
+
+                // accept connexions again
                 this->_acceptConnections();
         });
     }
