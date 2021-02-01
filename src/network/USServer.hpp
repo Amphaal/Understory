@@ -58,7 +58,7 @@ class ClientSocket : public SocketHelper {
 
 class USServer {
  public:
-    SocketCallbacks callbacks;
+    SocketCallbacks clientCallbacks;
 
     explicit USServer(
         Context &appContext,
@@ -83,7 +83,7 @@ class USServer {
                     auto client = new ClientSocket(
                         std::move(socket),
                         this->_clientSockets, 
-                        this->callbacks
+                        this->clientCallbacks
                     );
 
                     // listen to client

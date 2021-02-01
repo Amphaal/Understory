@@ -31,39 +31,11 @@
 using asio::ip::tcp;
 
 #include "src/base/Defaults.hpp"
-
-#include "src/models/User.pb.h"
+#include "src/network/Marshaller.hpp"
 
 namespace UnderStory {
 
 namespace Network {
-
-enum class PayloadType {
-    UNKNOWN = 0,
-    HANDSHAKE = 1
-};
-
-struct RawPayload {
-    PayloadType type;
-    size_t bytesSize;
-    std::string bytes;
-};
-
-class Marshaller {
- public:
-    static RawPayload serialize(const Handshake &handshake) {
-        return _serialize(handshake, PayloadType::HANDSHAKE);
-    }
-
- private:
-    static RawPayload _serialize(const google::protobuf::Message &protobufMsg, const PayloadType &type) {
-        RawPayload payload;
-        payload.type = type;
-        protobufMsg.SerializePartialToString(&payload.bytes);
-        payload.bytesSize = payload.bytes.length();
-        return payload;
-    }
-};
 
 using OnPayloadReceivedCallback = std::function<void(const RawPayload&)>;
 using OnBytesUploadedCallback = std::function<void(size_t)>;
@@ -74,7 +46,7 @@ struct SocketCallbacks {
     OnBytesDownloadedCallback onBytesDownloaded;
 };
 
-class SocketHelper : public Marshaller {
+class SocketHelper {
  public:
     explicit SocketHelper(tcp::socket socket, SocketCallbacks &cb) : _callbacks(cb), _socket(std::move(socket)) {}
     explicit SocketHelper(asio::io_context& context, SocketCallbacks &cb) : _callbacks(cb), _socket(context) {}

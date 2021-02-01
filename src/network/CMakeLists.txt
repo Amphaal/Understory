@@ -12,6 +12,7 @@ target_sources(appNetwork INTERFACE
     USServer.hpp
     SocketHelper.hpp
     HTTPDownloader.hpp
+    Marshaller.hpp
 )
 
 #################

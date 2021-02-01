@@ -50,7 +50,7 @@ class USClient : public SocketHelper {
         });
     }
 
-    void connectAs(const std::string &userName) {
+    void initiateHandshake(const std::string &userName) {
         // define handshake
         Handshake hsIn;
             auto currentVersion = new std::string(APP_CURRENT_VERSION);
@@ -61,7 +61,7 @@ class USClient : public SocketHelper {
 
         // send
         asio::post(this->_io_context, [this, hsIn]() {
-            auto payload = serialize(hsIn);
+            auto payload = Marshaller::serialize(hsIn);
             this->sendPayload(payload);
         });
     }

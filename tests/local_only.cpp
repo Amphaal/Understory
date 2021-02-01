@@ -79,7 +79,7 @@ TEST_CASE("client / server - Handshake", "[network]") {
     };
 
     // send handshake to server
-    client1.connectAs(username);
+    client1.initiateHandshake(username);
 
     // wait for threads to finish
     serverThread.join();
