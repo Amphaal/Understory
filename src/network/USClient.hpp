@@ -42,26 +42,29 @@ class USClient : public SocketHelper {
         auto endpoints = resolver.resolve(host, std::to_string(port));
 
         // on connection
-        asio::async_connect(this->socket(), endpoints, [&](std::error_code ec, tcp::endpoint endpoint){
-            if(ec) return this->_onError(ec);
+        asio::async_connect(
+            this->socket(), 
+            endpoints, 
+            [&](std::error_code ec, tcp::endpoint endpoint){
+                if(ec) return this->_onError(ec);
 
-            spdlog::info("UnderStory client connected to {}", endpoint.address().to_string());
-            this->start();
-        });
+                spdlog::info("UnderStory client connected to {}", endpoint.address().to_string());
+                this->start();
+            }
+        );
     }
 
     void initiateHandshake(const std::string &userName) {
         // define handshake
         Handshake hsIn;
-            auto currentVersion = new std::string(APP_CURRENT_VERSION);
-            hsIn.set_allocated_client_version(currentVersion);
+            hsIn.set_client_version(APP_CURRENT_VERSION);
+            hsIn.set_username(userName);
 
-            auto username = new std::string(userName);
-            hsIn.set_allocated_username(username);
+        //
+        auto payload = Marshaller::serialize(hsIn);
 
         // send
-        asio::post(this->_io_context, [this, hsIn]() {
-            auto payload = Marshaller::serialize(hsIn);
+        asio::post(this->_io_context, [this, &payload]() {
             this->sendPayload(payload);
         });
     }
