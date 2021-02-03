@@ -28,14 +28,14 @@ using UnderStory::UpdateChecker_Private;
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include <catch2/catch.hpp>
 
-// #include "src/network/USServer.hpp"
-// #include "src/network/USClient.hpp"
+#include "src/network/USServer.hpp"
+#include "src/network/USClient.hpp"
 
 //
 // Test cases
 //
 
-/* using UnderStory::Network::Server::USServer;
+using UnderStory::Network::Server::USServer;
 using UnderStory::Network::USClient;
 using UnderStory::Network::RawPayload;
 using UnderStory::Network::PayloadType;
@@ -61,7 +61,7 @@ TEST_CASE("client / server - Handshake", "[network]") {
     auto username = "TestUser";
 
     // define test
-    server.callbacks.onPayloadReceived = [username, &serverContext, &clientContext](const RawPayload & payload) {
+    server.clientCallbacks.onPayloadReceived = [username, &serverContext, &clientContext](const RawPayload & payload) {
         // check type
         REQUIRE(payload.type == PayloadType::HANDSHAKE);
 
@@ -84,15 +84,15 @@ TEST_CASE("client / server - Handshake", "[network]") {
     // wait for threads to finish
     serverThread.join();
     clientThread.join();
-} */
-
-TEST_CASE("Download update manifest", "[update checker]") {
-    spdlog::set_level(spdlog::level::debug);
-
-    auto manifest = UpdateChecker_Private::_getRemoteManifestContent();
-    REQUIRE(!manifest.empty());
-
-    auto versions = UpdateChecker_Private::_extractVersionsFromManifest(manifest);
-    spdlog::debug("Compared Versions : Local [{}] <> Remote [{}]", versions["App"], APP_CURRENT_VERSION);
-    REQUIRE(!version.empty());
 }
+
+// TEST_CASE("Download update manifest", "[update checker]") {
+//     spdlog::set_level(spdlog::level::debug);
+
+//     auto manifest = UpdateChecker_Private::_getRemoteManifestContent();
+//     REQUIRE(!manifest.empty());
+
+//     auto versions = UpdateChecker_Private::_extractVersionsFromManifest(manifest);
+//     spdlog::debug("Compared Versions : Local [{}] <> Remote [{}]", versions["App"], APP_CURRENT_VERSION);
+//     REQUIRE(!version.empty());
+// }

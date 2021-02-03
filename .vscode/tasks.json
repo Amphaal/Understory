@@ -19,7 +19,15 @@
                 "kind": "test"
             },
             "type": "shell",
-            "command": "cmake -GNinja -Bbuild -H. -DBUILD_TESTING=OFF -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/msys2.cmake"
+            "command": "cmake",
+            "args": [
+                "-GNinja", 
+                "-Bbuild", 
+                "-H.", 
+                "-DBUILD_TESTING=ON",
+                "-DLOCAL_TESTING=ON", 
+                "-DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/msys2.cmake"
+            ]
         },
         {
             "label": "2. Build",

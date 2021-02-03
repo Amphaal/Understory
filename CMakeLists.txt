@@ -47,6 +47,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_C_STANDARD 11)
 
+# OPTIONS
+option(LOCAL_TESTING "If tests are enabled, builds local-only tests" OFF)
+
 #################################
 ## define bundle configuration ##
 #################################
