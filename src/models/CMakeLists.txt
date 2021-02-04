@@ -1,5 +1,5 @@
 
-add_library(appModels STATIC)
+add_library(appModels INTERFACE)
 add_library(UnderStory::models ALIAS appModels)
 
 #####################
@@ -25,7 +25,7 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
         Map.proto
 )
 
-target_include_directories(appModels PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(appModels INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
 
 #############
 ## Sources ##

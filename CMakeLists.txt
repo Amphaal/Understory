@@ -92,8 +92,8 @@ generateIcon(
 ################
 
 add_subdirectory(src/base)
-add_subdirectory(src/network)
 add_subdirectory(src/models)
+add_subdirectory(src/network)
 add_subdirectory(src/core)
 add_subdirectory(src/app)
 add_subdirectory(src/package)

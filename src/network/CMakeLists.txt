@@ -2,6 +2,7 @@ add_library(appNetwork INTERFACE)
 add_library(UnderStory::network ALIAS appNetwork)
 
 target_link_libraries(appNetwork INTERFACE UnderStory::base)
+target_link_libraries(appNetwork INTERFACE UnderStory::models)
 
 #############
 ## Sources ##

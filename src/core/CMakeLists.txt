@@ -28,9 +28,3 @@ target_link_libraries(appCore INTERFACE stb)
 #link
 add_subdirectory(tiny-process-library EXCLUDE_FROM_ALL)
 target_link_libraries(appCore INTERFACE tiny-process-library)
-
-##
-## MODELS
-##
-
-target_link_libraries(appCore INTERFACE UnderStory::models)
