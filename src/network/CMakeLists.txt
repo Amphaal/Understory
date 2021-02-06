@@ -1,3 +1,21 @@
+
+#################
+## Deps : asio ##
+#################
+
+find_file(ASIO_HEADER asio.hpp)
+add_library(asio INTERFACE IMPORTED)
+target_include_directories(asio INTERFACE ${ASIO_HEADER})
+target_compile_definitions(asio INTERFACE ASIO_STANDALONE)
+
+IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+    target_compile_definitions(asio INTERFACE WIN32_LEAN_AND_MEAN) # prevents <winsock2.h> warnings
+endif()
+
+#########
+## Lib ##
+#########
+
 add_library(appNetwork INTERFACE)
 add_library(UnderStory::network ALIAS appNetwork)
 
@@ -16,20 +34,9 @@ target_sources(appNetwork INTERFACE
     Marshaller.hpp
 )
 
-#################
-## Deps : asio ##
-#################
-
-find_file(ASIO_HEADER asio.hpp)
-add_library(asio INTERFACE IMPORTED)
-target_sources(asio INTERFACE ${ASIO_HEADER})
-
-IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_compile_definitions(asio INTERFACE WIN32_LEAN_AND_MEAN) # prevents <winsock2.h> warnings
-endif()
-
+# link
 target_link_libraries(appNetwork INTERFACE asio)
-#WSA functions !
 if(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-    target_link_libraries(appNetwork INTERFACE ws2_32) 
+    target_compile_definitions(appNetwork INTERFACE ASIO_DISABLE_IOCP) # prevent usage of wsock32
+    target_link_libraries(appNetwork INTERFACE ws2_32) #WSA functions !
 endif()

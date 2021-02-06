@@ -25,10 +25,12 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
         Map.proto
 )
 
-target_include_directories(appModels INTERFACE ${CMAKE_CURRENT_BINARY_DIR})
-
 #############
 ## Sources ##
 #############
 
-target_sources(appModels PRIVATE ${PROTO_SRCS} ${PROTO_HDRS})
+target_include_directories(appModels INTERFACE ${CMAKE_BINARY_DIR})
+
+target_sources(appModels 
+    INTERFACE ${PROTO_SRCS} ${PROTO_HDRS}
+)

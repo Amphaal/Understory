@@ -8,15 +8,15 @@ namespace UnderStory {
 
 namespace Network {
 
+enum class PayloadType {
+    UNKNOWN = 0,
+    HANDSHAKE = 1
+};
+
 struct RawPayload {
     PayloadType type;
     size_t bytesSize;
     std::string bytes;
-};
-
-enum class PayloadType {
-    UNKNOWN = 0,
-    HANDSHAKE = 1
 };
 
 class Marshaller {
