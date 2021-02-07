@@ -14,8 +14,8 @@ enum class PayloadType {
 };
 
 struct RawPayload {
-    PayloadType type;
-    size_t bytesSize;
+    PayloadType type = PayloadType::UNKNOWN;
+    size_t bytesSize = 0;
     std::string bytes;
 };
 

@@ -64,7 +64,7 @@ class USClient : public SocketHelper {
         auto payload = Marshaller::serialize(hsIn);
 
         // send
-        asio::post(this->_io_context, [this, &payload]() {
+        asio::post(this->_io_context, [this, payload]() {
             this->sendPayload(payload);
         });
     }
