@@ -19,34 +19,34 @@
 
 #pragma once
 
-#include "ClientBase.hpp"
+#include <memory>
+#include <atomic>
+
+#include <asio.hpp>
+using asio::ip::tcp;
+
+#include "src/base/Defaults.hpp"
+#include "Marshaller.hpp"
+#include "AtomicQueue.hpp"
 
 namespace UnderStory {
 
 namespace Network {
 
-class USClient : private ClientBase {
+template<class T>
+class IPayloadHandler {
  public:
-    USClient(
-        asio::io_context &context,
-        const char * name,
-        const std::string &host,
-        unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT
-    ) : ClientBase(context, name, host, port) {}
+    IPayloadHandler(const char* socketName, tcp::socket* socket, AtomicQueue<T>* payloadQueue) : 
+        _socketName(socketName), _socket(socket), _payloadQueue(payloadQueue) {}
 
-    // async init handshake command
-    void initiateHandshake(const std::string &userName) {
-        // define handshake
-        Handshake hsIn;
-            hsIn.set_client_version(APP_CURRENT_VERSION);
-            hsIn.set_username(userName);
+ protected:
+    tcp::socket* _socket;
+    const char* _socketName;
+    AtomicQueue<T>* _payloadQueue;
 
-        // serialize
-        auto payload = Marshaller::serialize(hsIn);
-
-        // send
-        this->_asyncSendPayload(payload);
-    }
+    T _buf;
+    size_t _bufContentOffset = 0;
+    std::atomic<bool> _isProcessing = false;
 };
 
 }   // namespace Network

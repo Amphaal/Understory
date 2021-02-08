@@ -19,34 +19,39 @@
 
 #pragma once
 
-#include "ClientBase.hpp"
+#include "IPayloadReceiver.hpp"
+#include "IPayloadSender.hpp"
 
 namespace UnderStory {
 
 namespace Network {
 
-class USClient : private ClientBase {
+struct NetworkQueues {
+    AtomicQueue<RawPayload> incomingQueue;
+    AtomicQueue<RawPayload> outgoingQueue;
+};
+
+class PayloadableSocket : public IPayloadReceiver<>, public IPayloadSender<> {
  public:
-    USClient(
-        asio::io_context &context,
-        const char * name,
-        const std::string &host,
-        unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT
-    ) : ClientBase(context, name, host, port) {}
+    // from socket itself
+    explicit PayloadableSocket(tcp::socket socket, NetworkQueues* queues, const char* name) : 
+        IPayloadReceiver<>(name, &_socket, &queues->incomingQueue), 
+        IPayloadSender<>(name, &_socket, &queues->outgoingQueue),
+        _socket(std::move(socket)) {}
 
-    // async init handshake command
-    void initiateHandshake(const std::string &userName) {
-        // define handshake
-        Handshake hsIn;
-            hsIn.set_client_version(APP_CURRENT_VERSION);
-            hsIn.set_username(userName);
+    // from context
+    explicit PayloadableSocket(asio::io_context* context, NetworkQueues* queues, const char* name) : 
+        IPayloadReceiver(name, &_socket, &queues->incomingQueue), 
+        IPayloadSender(name, &_socket, &queues->outgoingQueue),
+        _socket(*context) {}
 
-        // serialize
-        auto payload = Marshaller::serialize(hsIn);
-
-        // send
-        this->_asyncSendPayload(payload);
+ protected:
+    tcp::socket& socket() {
+        return this->_socket;
     }
+
+ private:
+    tcp::socket _socket;
 };
 
 }   // namespace Network

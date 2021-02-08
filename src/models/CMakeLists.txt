@@ -1,16 +1,10 @@
 
-add_library(appModels INTERFACE)
-add_library(UnderStory::models ALIAS appModels)
-
 #####################
 ## Deps : protobuf ##
 #####################
 
 #fetch
 find_package(Protobuf REQUIRED)
-
-#link (for using libs)
-target_link_libraries(appModels INTERFACE protobuf::libprotobuf)
 
 #generate
 protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
@@ -29,8 +23,18 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
 ## Sources ##
 #############
 
-target_include_directories(appModels INTERFACE ${CMAKE_BINARY_DIR})
-
-target_sources(appModels 
-    INTERFACE ${PROTO_SRCS} ${PROTO_HDRS}
+# define
+add_library(appModels STATIC 
+    ${PROTO_SRCS} 
+    ${PROTO_HDRS}
 )
+add_library(UnderStory::models ALIAS appModels)
+
+# include
+target_include_directories(appModels 
+    INTERFACE 
+        ${CMAKE_BINARY_DIR}
+)
+
+# link
+target_link_libraries(appModels INTERFACE protobuf::libprotobuf)

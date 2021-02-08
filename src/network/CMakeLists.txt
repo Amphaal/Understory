@@ -26,12 +26,17 @@ target_link_libraries(appNetwork INTERFACE UnderStory::models)
 ## Sources ##
 #############
 
-target_sources(appNetwork INTERFACE 
-    USClient.hpp
-    USServer.hpp
-    SocketHelper.hpp
-    HTTPDownloader.hpp
+target_sources(appNetwork INTERFACE  
+    AtomicQueue.hpp
     Marshaller.hpp
+    IPayloadHandler.hpp
+    IPayloadReceiver.hpp
+    IPayloadSender.hpp
+    PayloadableSocket.hpp
+    ClientBase.hpp
+    USClient.hpp
+    USServer.hpp    
+    HTTPDownloader.hpp
 )
 
 # link

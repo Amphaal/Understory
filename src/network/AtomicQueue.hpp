@@ -19,34 +19,38 @@
 
 #pragma once
 
-#include "ClientBase.hpp"
+#include <queue>
+#include <mutex>
 
 namespace UnderStory {
 
 namespace Network {
 
-class USClient : private ClientBase {
+template<class T>
+class AtomicQueue : private std::queue<T> {
  public:
-    USClient(
-        asio::io_context &context,
-        const char * name,
-        const std::string &host,
-        unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT
-    ) : ClientBase(context, name, host, port) {}
-
-    // async init handshake command
-    void initiateHandshake(const std::string &userName) {
-        // define handshake
-        Handshake hsIn;
-            hsIn.set_client_version(APP_CURRENT_VERSION);
-            hsIn.set_username(userName);
-
-        // serialize
-        auto payload = Marshaller::serialize(hsIn);
-
-        // send
-        this->_asyncSendPayload(payload);
+    // Mutexed push
+    void push(const T& val) {
+        std::unique_lock<std::mutex> lock(this->_m);
+        std::queue<T>::push(val);
     }
+
+    const T& front() {
+        std::unique_lock<std::mutex> lock(this->_m);
+        assert(!std::queue<T>::empty());
+        return std::queue<T>::front();
+    }
+
+    // returns if queue is empty after pop
+    bool pop() {
+        std::unique_lock<std::mutex> lock(this->_m);
+        assert(!std::queue<T>::empty());
+        std::queue<T>::pop();
+        return std::queue<T>::empty();
+    }
+
+ private:
+    std::mutex _m;
 };
 
 }   // namespace Network

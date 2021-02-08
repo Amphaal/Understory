@@ -20,14 +20,14 @@
 #pragma once
 
 #include <string>
-#include <set>
+#include <list>
 #include <memory>
 #include <utility>
 
 #include <asio.hpp>
 using asio::ip::tcp;
 
-#include "src/network/SocketHelper.hpp"
+#include "src/network/PayloadableSocket.hpp"
 
 #include "src/base/Context.hpp"
 
@@ -37,60 +37,75 @@ namespace Network {
 
 namespace Server {
 
-class ClientSocket : public SocketHelper {
+class SpawnedSocket : protected PayloadableSocket {
  public:
-    ClientSocket(tcp::socket socket, std::set<ClientSocket*> &clientSockets, SocketCallbacks &cb)
-        : SocketHelper(std::move(socket), cb), _clientSockets(clientSockets) { }
+    SpawnedSocket(tcp::socket socket, const std::string &name) : 
+        PayloadableSocket(std::move(socket), &_queues, name.c_str()), _name(name) {}
 
-    void start() override {
-        this->_clientSockets.insert(this);
-        SocketHelper::start();
+    void start() {
+        this->_startReceiving();
     }
 
  private:
-    std::set<ClientSocket*> &_clientSockets;
-
-    void _onError(const std::error_code &ec) override {
-        SocketHelper::_onError(ec);
-        this->_clientSockets.erase(this);
-    }
+    NetworkQueues _queues;
+    const std::string _name;
 };
 
 class USServer {
  public:
-    SocketCallbacks clientCallbacks;
-
     explicit USServer(
         Context &appContext,
         asio::io_context &context,
+        const char* name,
         unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT
-    ) : _appContext(appContext), _acceptor(context, tcp::endpoint(tcp::v4(), port)) {
-        spdlog::info("UnderStory server listening on port {}", port);
-        this->_acceptConnections();
-    }
+    ) : _prefix(name),
+        _port(port), 
+        _appContext(appContext), 
+        _acceptor(context, tcp::endpoint(tcp::v4(), port)) {}
+
+    void start() {
+        // begin
+        _acceptConnections();
+
+        // log
+        spdlog::info("Server listening on port {}", _port);
+    } 
 
  private:
     tcp::acceptor _acceptor;
-    std::set<ClientSocket*> _clientSockets;
+    std::list<std::shared_ptr<SpawnedSocket>> _spawnedSockets;
     Context _appContext;
+    unsigned short _port;
+    int _cliCount = 0;
+    const std::string _prefix;
 
     void _acceptConnections() {
         this->_acceptor.async_accept(
             [&](std::error_code ec, tcp::socket socket) {
-                // if no error code
-                if(!ec) {
-                    // create client
-                    auto client = new ClientSocket(
+                // define sock name
+                _cliCount++;
+                std::string sockName = _prefix;
+                sockName += "_Sock";
+                sockName += std::to_string(_cliCount);
+            
+                // if error code
+                if(ec) {
+                    spdlog::error("[{}] issue while accepting connection {} !", _prefix, sockName.c_str());
+                } else {
+                   // if OK
+                    auto sock_ptr = std::make_shared<SpawnedSocket>(
                         std::move(socket),
-                        this->_clientSockets, 
-                        this->clientCallbacks
+                        sockName
                     );
 
-                    // listen to client
-                    client->start();
+                    // add to list
+                    _spawnedSockets.push_back(sock_ptr);
+
+                    // listen to client 
+                    sock_ptr->start();
                 }
 
-                // accept connexions again
+                // then accept connexions again
                 this->_acceptConnections();
         });
     }
