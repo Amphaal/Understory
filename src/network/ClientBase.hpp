@@ -32,30 +32,43 @@ class ClientBase : public PayloadableSocket {
         const char * name,
         const std::string &host,
         unsigned short port
-    ) : PayloadableSocket(&context, &_queues, name), _io_context(context) {
+    ) : PayloadableSocket(&context, &_queues, name), _io_context(context), _name(name) {
         // resolve host
         tcp::resolver resolver(context);
         auto endpoints = resolver.resolve(host, std::to_string(port));
+
+        // log
+        spdlog::info("[{}] Attempting connection to {}:{}...", 
+            this->_name, 
+            host,
+            port
+        );
 
         // on connection
         asio::async_connect(
             this->socket(), 
             endpoints, 
-            [&](std::error_code ec, tcp::endpoint endpoint){
+            [this](std::error_code ec, tcp::endpoint endpoint){
                 // on error...
                 if(ec) 
                     return this->_onError(ec);
 
                 // start receiving
-                spdlog::info("Client [{}] connected to {}", name, endpoint.address().to_string());
                 this->_startReceiving();
+
+                // log
+                spdlog::info("[{}] Successfully connected to {}:{} !", 
+                    this->_name, 
+                    endpoint.address().to_string(),
+                    endpoint.port()
+                );
             }
         );
     }
 
  protected:
     void _asyncSendPayload(const RawPayload &payload) {
-        asio::post(this->_io_context, [this, &payload]() {
+        asio::post(this->_io_context, [this, payload]() {
             this->_sendPayload(payload);
         });
     }
@@ -63,10 +76,10 @@ class ClientBase : public PayloadableSocket {
  private:
     asio::io_context& _io_context;
     NetworkQueues _queues;
-    const char* name;
+    const char* _name;
 
     void _onError(const std::error_code &ec) {
-        spdlog::error("Client [{}] error >> {}", name, ec.message());
+        spdlog::error("[{}] error >> {}", this->_name, ec.message());
     }
 };
 

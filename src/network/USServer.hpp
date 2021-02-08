@@ -37,18 +37,22 @@ namespace Network {
 
 namespace Server {
 
-class SpawnedSocket : protected PayloadableSocket {
+class SpawnedSocket {
  public:
     SpawnedSocket(tcp::socket socket, const std::string &name) : 
-        PayloadableSocket(std::move(socket), &_queues, name.c_str()), _name(name) {}
+        _name(name), 
+        _queues(), 
+        _ps(std::move(socket), &_queues, _name.c_str()) {}
 
     void start() {
-        this->_startReceiving();
+        this->_ps._startReceiving();
+        spdlog::info("[{}] Client logged to server !", _name.c_str());
     }
 
  private:
-    NetworkQueues _queues;
     const std::string _name;
+    NetworkQueues _queues;
+    PayloadableSocket _ps;
 };
 
 class USServer {
@@ -61,15 +65,13 @@ class USServer {
     ) : _prefix(name),
         _port(port), 
         _appContext(appContext), 
-        _acceptor(context, tcp::endpoint(tcp::v4(), port)) {}
-
-    void start() {
-        // begin
-        _acceptConnections();
-
-        // log
-        spdlog::info("Server listening on port {}", _port);
-    } 
+        _acceptor(context, tcp::endpoint(tcp::v4(), port)) {
+            // log
+            spdlog::info("[{}] Listening on port {}", _prefix, _port);
+            
+            // begin
+            _acceptConnections();
+        }
 
  private:
     tcp::acceptor _acceptor;
@@ -90,7 +92,7 @@ class USServer {
             
                 // if error code
                 if(ec) {
-                    spdlog::error("[{}] issue while accepting connection {} !", _prefix, sockName.c_str());
+                    spdlog::error("[{}] Issue while accepting connection {} !", _prefix, sockName.c_str());
                 } else {
                    // if OK
                     auto sock_ptr = std::make_shared<SpawnedSocket>(

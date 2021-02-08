@@ -34,14 +34,14 @@ class IPayloadReceiver : protected IPayloadHandler<T> {
         IPayloadHandler<T>(socketName, socket, receiverQueue) {}
 
     virtual void _onPayloadReceiveError(const std::error_code &ec, const char* partStr) {
-        spdlog::warn("[Receive - {}] Error while reading \"{}\" section", 
+        spdlog::warn("[{}] Error while reading \"{}\" section", 
             this->_socketName, 
             partStr
         );
     }
 
     virtual void _onPayloadBytesDownloaded(PayloadType type, size_t downloaded, size_t total) {
-        spdlog::info("[Receive - {}] Downloading n°{} payload [{}/{}]...", 
+        spdlog::info("[{}] Downloading n°{} payload [{}/{}]...", 
             this->_socketName,
             static_cast<int>(type),
             downloaded,

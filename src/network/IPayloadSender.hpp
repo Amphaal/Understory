@@ -45,14 +45,14 @@ class IPayloadSender : protected IPayloadHandler<T> {
     }
 
     virtual void _onPayloadSendError(const std::error_code &ec, const char* partStr) {
-        spdlog::warn("[Send - {}] Error while writing \"{}\" section", 
+        spdlog::warn("[{}] Error while writing \"{}\" section", 
             this->_socketName, 
             partStr
         );
     }
 
     virtual void _onPayloadBytesUploaded(PayloadType type, size_t uploaded, size_t total) {
-        spdlog::info("[Send - {}] Uploading n°{} payload [{}/{}]...", 
+        spdlog::info("[{}] Uploading n°{} payload [{}/{}]...", 
             this->_socketName,
             static_cast<int>(type),
             uploaded,
@@ -65,12 +65,9 @@ class IPayloadSender : protected IPayloadHandler<T> {
         // copy shared ptr from queue
         this->_buf = this->_payloadQueue->front();
 
-        // cast to int to prevent random behavior on tests
-        auto type = static_cast<int>(this->_buf.type);
-
         // async write payload type
         asio::async_write(*this->_socket,
-            asio::buffer(&type, sizeof(type)),
+            asio::buffer(&this->_buf.type, sizeof(this->_buf.type)),
             [this](std::error_code ec, std::size_t length) {
                 // if error...
                 if(ec) 

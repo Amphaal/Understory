@@ -131,6 +131,7 @@
         "cfenv": "cpp",
         "typeindex": "cpp",
         "hash_map": "cpp",
-        "hash_set": "cpp"
+        "hash_set": "cpp",
+        "__functional_base_03": "cpp"
     }
 }
