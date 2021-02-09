@@ -49,12 +49,12 @@ TEST_CASE("client / server - Handshake", "[network]") {
 
     // start server
     asio::io_context serverContext;
-    USServer server(appContext, serverContext, "ServTest");
+    USServer server(appContext, serverContext, "Server");
     std::thread serverThread([&serverContext](){ serverContext.run(); });
 
     // start client
     asio::io_context clientContext;
-    USClient client1(clientContext, "CliTest", "127.0.0.1");
+    USClient client1(clientContext, "Client1", "127.0.0.1");
     std::thread clientThread([&clientContext](){ clientContext.run(); });
 
     // define env

@@ -21,6 +21,7 @@
 
 #include <queue>
 #include <mutex>
+#include <condition_variable>
 
 namespace UnderStory {
 
@@ -31,8 +32,12 @@ class AtomicQueue : private std::queue<T> {
  public:
     // Mutexed push
     void push(const T& val) {
-        std::unique_lock<std::mutex> lock(this->_m);
-        std::queue<T>::push(val);
+        {
+            std::unique_lock<std::mutex> lock(this->_m);
+            std::queue<T>::push(val);
+        }
+        _isQueueEmpty = false;
+        _cv.notify_all();
     }
 
     const T& front() {
@@ -43,14 +48,29 @@ class AtomicQueue : private std::queue<T> {
 
     // returns if queue is empty after pop
     bool pop() {
-        std::unique_lock<std::mutex> lock(this->_m);
-        assert(!std::queue<T>::empty());
-        std::queue<T>::pop();
-        return std::queue<T>::empty();
+        bool isEmpty;
+        {
+            std::unique_lock<std::mutex> lock(this->_m);
+            assert(!std::queue<T>::empty());
+            std::queue<T>::pop();
+            isEmpty = std::queue<T>::empty();
+        }
+        _isQueueEmpty = isEmpty;
+        return isEmpty;
+    }
+
+    bool empty() const {
+        return _isQueueEmpty;
+    }
+
+    void waitToBeFilled(std::unique_lock<std::mutex>& lock) {
+        _cv.wait(lock);
     }
 
  private:
     std::mutex _m;
+    std::atomic<bool> _isQueueEmpty = true;
+    std::condition_variable _cv;
 };
 
 }   // namespace Network
