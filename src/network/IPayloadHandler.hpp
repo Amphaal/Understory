@@ -21,6 +21,7 @@
 
 #include <memory>
 #include <atomic>
+#include <chrono>
 
 #include <asio.hpp>
 using asio::ip::tcp;
@@ -32,6 +33,26 @@ using asio::ip::tcp;
 namespace UnderStory {
 
 namespace Network {
+
+class PayloadLog {
+ public:
+    void increment() {
+        _payloadIdCount++;
+        _latestPayloadTP = std::chrono::system_clock::now();
+    }
+
+    int id() const {
+        return _payloadIdCount;
+    }
+
+    std::chrono::system_clock::time_point started() const {
+        return _latestPayloadTP;
+    }
+
+ private:
+    int _payloadIdCount = 0;
+    std::chrono::system_clock::time_point _latestPayloadTP;
+};
 
 template<class T>
 class IPayloadHandler {
@@ -47,6 +68,8 @@ class IPayloadHandler {
     T _buf;
     size_t _bufContentOffset = 0;
     std::atomic<bool> _isProcessing = false;
+
+    PayloadLog _log;
 };
 
 }   // namespace Network

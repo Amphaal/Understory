@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include <magic_enum.hpp>
+
 #include "src/models/User.pb.h"
 
 namespace UnderStory {

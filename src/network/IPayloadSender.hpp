@@ -52,9 +52,9 @@ class IPayloadSender : protected IPayloadHandler<T> {
     }
 
     virtual void _onPayloadBytesUploaded(PayloadType type, size_t uploaded, size_t total) {
-        spdlog::info("[{}] Uploading n°{} payload [{}/{}]...", 
+        spdlog::info("[{}] Uploading \"{}\" payload [{}/{}]...", 
             this->_socketName,
-            static_cast<int>(type),
+            magic_enum::enum_name(type),
             uploaded,
             total
         );
@@ -64,6 +64,9 @@ class IPayloadSender : protected IPayloadHandler<T> {
     void _sendPayloadType() {
         // copy shared ptr from queue
         this->_buf = this->_payloadQueue->front();
+
+        // log
+        this->_log.increment();
 
         // async write payload type
         asio::async_write(*this->_socket,

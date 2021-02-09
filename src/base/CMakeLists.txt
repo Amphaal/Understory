@@ -36,3 +36,12 @@ endif()
 
 #link
 target_link_libraries(appBase INTERFACE spdlog::spdlog)
+
+#######################
+## Deps : magic_enum ##
+#######################
+
+add_subdirectory(magic_enum)
+
+#link
+target_link_libraries(appBase INTERFACE magic_enum::magic_enum)

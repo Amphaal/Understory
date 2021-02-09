@@ -41,9 +41,9 @@ class IPayloadReceiver : protected IPayloadHandler<T> {
     }
 
     virtual void _onPayloadBytesDownloaded(PayloadType type, size_t downloaded, size_t total) {
-        spdlog::info("[{}] Downloading n°{} payload [{}/{}]...", 
+        spdlog::info("[{}] Downloading \"{}\" payload [{}/{}]...", 
             this->_socketName,
-            static_cast<int>(type),
+            magic_enum::enum_name(type),
             downloaded,
             total
         );
@@ -64,6 +64,9 @@ class IPayloadReceiver : protected IPayloadHandler<T> {
         asio::async_read(*this->_socket,
             asio::buffer(&this->_buf.type, sizeof(this->_buf.type)),
             [this](std::error_code ec, std::size_t length) {
+                // log
+                this->_log.increment();
+
                 // if error...
                 if(ec) 
                     return this->_onPayloadReceiveError(ec, "PAYLOAD_TYPE");
