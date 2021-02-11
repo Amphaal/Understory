@@ -65,3 +65,25 @@ void UnderStory::Network::Server::_acceptConnections() {
             this->_acceptConnections();
     });
 }
+
+void UnderStory::Network::Server::processPayloads(const std::function<bool(const RawPayload&)> &processingCallback) {
+    std::mutex m;
+    std::unique_lock<std::mutex> lock(m);
+
+    //
+    while(true) {
+        //
+        _incomingQueue.waitToBeFilled(lock);
+        auto payloads = _incomingQueue.popIntoQueue();
+
+        //
+        while(!payloads.empty()) {
+            // 
+            auto shouldBreak = processingCallback(payloads.front());
+            if(shouldBreak) return;
+
+            //
+            payloads.pop();
+        }
+    }
+}

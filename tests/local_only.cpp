@@ -76,26 +76,32 @@ TEST_CASE("client / server - Handshake", "[network]") {
     // define env
     auto username = "TestUser";
 
-    // define test
-    // server.clientCallbacks.onPayloadReceived = [username, &serverContext, &clientContext](const RawPayload & payload) {
-    //     // check type
-    //     REQUIRE(payload.type == PayloadType::HANDSHAKE);
-
-    //     // parse
-    //     Handshake hsOut;
-    //     hsOut.ParseFromString(payload.bytes);
-
-    //     // check payload content
-    //     REQUIRE(hsOut.client_version() == APP_CURRENT_VERSION);
-    //     REQUIRE(hsOut.username() == username);
-
-    //     // stop contexts
-    //     serverContext.stop();
-    //     clientContext.stop();
-    // };
-
     // send handshake to server
     client1.initiateHandshake(username);
+
+    // test callback on main thread
+    auto onPayloadReceived = [username, &serverContext, &clientContext](const RawPayload & payload) -> bool {
+        // check type
+        REQUIRE(payload.type == PayloadType::HANDSHAKE);
+
+        // parse
+        Handshake hsOut;
+        hsOut.ParseFromString(payload.bytes);
+
+        // check payload content
+        REQUIRE(hsOut.client_version() == APP_CURRENT_VERSION);
+        REQUIRE(hsOut.username() == username);
+
+        // stop contexts
+        serverContext.stop();
+        clientContext.stop();
+
+        // break
+        return true;
+    };
+
+    // bind callback
+    server.processPayloads(onPayloadReceived);
 
     // wait for threads to finish
     serverThread.join();

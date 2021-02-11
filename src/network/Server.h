@@ -31,6 +31,8 @@ class Server {
  public:
     Server(Context &appContext, asio::io_context &context, const char* name, unsigned short port);
 
+    void processPayloads(const std::function<bool(const RawPayload&)> &processingCallback);
+
  private:
     Context _appContext;
     unsigned short _port;
