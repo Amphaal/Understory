@@ -96,12 +96,12 @@ TEST_CASE("client / server - Handshake", "[network]") {
         serverContext.stop();
         clientContext.stop();
 
-        // break
+        // break processing
         return true;
     };
 
     // bind callback
-    server.processPayloads(onPayloadReceived);
+    server.processPayloadQueue(onPayloadReceived);
 
     // wait for threads to finish
     serverThread.join();

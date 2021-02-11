@@ -37,6 +37,7 @@ target_sources(appNetwork INTERFACE
     SpawnedSocket.cpp
     ClientSocket.cpp
     Server.cpp
+    IPayloadProcessor.cpp
 )
 
 # link

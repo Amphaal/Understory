@@ -22,17 +22,18 @@
 #include "IPayloadSender.h"
 #include "IPayloadReceiver.h"
 #include "IClientImpl.h"
+#include "IPayloadProcessor.h"
 
 namespace UnderStory {
 
 namespace Network {
 
-class ClientSocket : public tcp::socket, public IPayloadReceiver<>, public IPayloadSender<>, public IClientImpl {
+class ClientSocket : public tcp::socket, public IPayloadReceiver<>, public IPayloadSender<>, public IClientImpl, public IPayloadProcessor<> {
  public:
     ClientSocket(asio::io_context &context, const char * name, const std::string &host, unsigned short port);
 
  private:
-    SQueue   _outgoingQueue;
+    SQueue _outgoingQueue;
     RQueue _incomingQueue;
 
     asio::io_context& _io_context;

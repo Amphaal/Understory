@@ -25,6 +25,7 @@ UnderStory::Network::ClientSocket::ClientSocket(asio::io_context &context, const
     tcp::socket(context), 
     IPayloadReceiver<>(name, this, &this->_incomingQueue),
     IPayloadSender<>(name, this, &this->_outgoingQueue),
+    IPayloadProcessor<RawPayload>(&this->_incomingQueue),
     _io_context(context), 
     _name(name) {
     // resolve host

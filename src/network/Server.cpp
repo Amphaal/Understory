@@ -20,6 +20,7 @@
 #include "Server.h"
 
 UnderStory::Network::Server::Server(Context &appContext, asio::io_context &context, const char* name, unsigned short port) : 
+    IPayloadProcessor<SpawnedSocket::Payload>(&_incomingQueue),
     _prefix(name),
     _port(port), 
     _appContext(appContext), 
@@ -64,26 +65,4 @@ void UnderStory::Network::Server::_acceptConnections() {
             // then accept connexions again
             this->_acceptConnections();
     });
-}
-
-void UnderStory::Network::Server::processPayloads(const std::function<bool(const RawPayload&)> &processingCallback) {
-    std::mutex m;
-    std::unique_lock<std::mutex> lock(m);
-
-    //
-    while(true) {
-        //
-        _incomingQueue.waitToBeFilled(lock);
-        auto payloads = _incomingQueue.popIntoQueue();
-
-        //
-        while(!payloads.empty()) {
-            // 
-            auto shouldBreak = processingCallback(payloads.front());
-            if(shouldBreak) return;
-
-            //
-            payloads.pop();
-        }
-    }
 }

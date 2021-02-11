@@ -17,34 +17,35 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
-#pragma once
-
-#include "SpawnedSocket.h"
 #include "IPayloadProcessor.h"
 
-#include "src/base/Context.hpp"
+#include "SpawnedSocket.h"
 
-namespace UnderStory {
+template<class T>
+UnderStory::Network::IPayloadProcessor<T>::IPayloadProcessor(AtomicQueue<T>* queue) : _queue(queue) {}
 
-namespace Network {
+template<class T>
+void UnderStory::Network::IPayloadProcessor<T>::processPayloadQueue(const Processor &processor) {
+    std::mutex m;
+    std::unique_lock<std::mutex> lock(m);
 
-class Server : public IPayloadProcessor<SpawnedSocket::Payload> {
- public:
-    Server(Context &appContext, asio::io_context &context, const char* name, unsigned short port);
+    //
+    while(true) {
+        //
+        _queue->waitToBeFilled(lock);
+        auto payloads = _queue->popIntoQueue();
 
- private:
-    Context _appContext;
-    unsigned short _port;
-    int _spawnCount = 0;
-    const std::string _prefix;
+        //
+        while(!payloads.empty()) {
+            // 
+            auto shouldBreak = processor(payloads.front());
+            if(shouldBreak) return;
 
-    tcp::acceptor _acceptor;
-    std::list<std::shared_ptr<SpawnedSocket>> _spawnedSockets;
-    SpawnedSocket::RQueue _incomingQueue;
+            //
+            payloads.pop();
+        }
+    }
+}
 
-    void _acceptConnections();
-};
-
-}   // namespace Network
-
-}   // namespace UnderStory
+template class UnderStory::Network::IPayloadProcessor<UnderStory::Network::SpawnedSocket::Payload>;
+template class UnderStory::Network::IPayloadProcessor<UnderStory::Network::RawPayload>;

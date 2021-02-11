@@ -19,30 +19,24 @@
 
 #pragma once
 
-#include "SpawnedSocket.h"
-#include "IPayloadProcessor.h"
-
-#include "src/base/Context.hpp"
+#include "Marshaller.h"
+#include "AtomicQueue.h"
 
 namespace UnderStory {
 
 namespace Network {
 
-class Server : public IPayloadProcessor<SpawnedSocket::Payload> {
+template<class T = RawPayload>
+class IPayloadProcessor {
  public:
-    Server(Context &appContext, asio::io_context &context, const char* name, unsigned short port);
+    using Processor = std::function<bool(const T&)>;
+    IPayloadProcessor(AtomicQueue<T>* queue);
+
+    void processPayloadQueue(const Processor &processor);
 
  private:
-    Context _appContext;
-    unsigned short _port;
-    int _spawnCount = 0;
-    const std::string _prefix;
-
-    tcp::acceptor _acceptor;
-    std::list<std::shared_ptr<SpawnedSocket>> _spawnedSockets;
-    SpawnedSocket::RQueue _incomingQueue;
-
-    void _acceptConnections();
+    const Processor _processor;
+    AtomicQueue<T>* _queue;
 };
 
 }   // namespace Network
