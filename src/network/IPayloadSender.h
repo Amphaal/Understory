@@ -19,32 +19,28 @@
 
 #pragma once
 
-#include "Marshaller.hpp"
-
-#include "src/base/Defaults.hpp"
+#include "IPayloadHandler.h"
+#include "Marshaller.h"
 
 namespace UnderStory {
 
 namespace Network {
 
-class IClientImpl {
+template<class T = RawPayload>
+class IPayloadSender : protected IPayloadHandler<T> {
  public:
-    // async init handshake command
-    void initiateHandshake(const std::string &userName) {
-        // define handshake
-        Handshake hsIn;
-            hsIn.set_client_version(APP_CURRENT_VERSION);
-            hsIn.set_username(userName);
+    using SQueue = AtomicQueue<T>;
+    IPayloadSender(const char* socketName, tcp::socket* socket, SQueue* senderQueue);
 
-        // serialize
-        auto payload = Marshaller::serialize(hsIn);
+    void _sendPayload(const T& payload);
 
-        // send
-        this->_asyncSendPayload(payload);
-    }
- 
- protected:
-    virtual void _asyncSendPayload(const RawPayload &payload) = 0;
+    virtual void _onPayloadSendError(const std::error_code &ec, const char* partStr);
+    virtual void _onPayloadBytesUploaded(PayloadType type, size_t uploaded, size_t total);
+
+ private:
+    void _sendPayloadType();
+    void _sendPayloadBytesSize();
+    void _sendPayloadBytes();
 };
 
 }   // namespace Network

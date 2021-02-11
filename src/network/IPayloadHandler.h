@@ -19,18 +19,12 @@
 
 #pragma once
 
-#include <memory>
-#include <atomic>
 #include <chrono>
 
 #include <asio.hpp>
 using asio::ip::tcp;
 
-#include "Marshaller.hpp"
-#include "AtomicQueue.hpp"
-
-#include "src/base/Defaults.hpp"
-using UnderStory::Defaults;
+#include "AtomicQueue.h"
 
 namespace UnderStory {
 
@@ -38,18 +32,9 @@ namespace Network {
 
 class PayloadLog {
  public:
-    void increment() {
-        _payloadIdCount++;
-        _latestPayloadTP = std::chrono::system_clock::now();
-    }
-
-    int id() const {
-        return _payloadIdCount;
-    }
-
-    std::chrono::system_clock::time_point started() const {
-        return _latestPayloadTP;
-    }
+    void increment();
+    int id() const;
+    std::chrono::system_clock::time_point started() const;
 
  private:
     int _payloadIdCount = 0;
@@ -59,8 +44,7 @@ class PayloadLog {
 template<class T>
 class IPayloadHandler {
  public:
-    IPayloadHandler(const char* socketName, tcp::socket* socket, AtomicQueue<T>* payloadQueue) : 
-        _socketName(socketName), _socketRef(socket), _payloadQueue(payloadQueue) {}
+    IPayloadHandler(const char* socketName, tcp::socket* socket, AtomicQueue<T>* payloadQueue);
 
  protected:
     tcp::socket* _socketRef;

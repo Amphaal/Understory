@@ -27,16 +27,16 @@ target_link_libraries(appNetwork INTERFACE UnderStory::models)
 #############
 
 target_sources(appNetwork INTERFACE  
-    AtomicQueue.hpp
-    Marshaller.hpp
-    IPayloadHandler.hpp
-    IPayloadReceiver.hpp
-    IPayloadSender.hpp
-    PayloadableSocket.hpp
-    ClientBase.hpp
-    USClient.hpp
-    USServer.hpp    
-    HTTPDownloader.hpp
+    HTTPDownloader.cpp
+    AtomicQueue.cpp
+    Marshaller.cpp
+    IClientImpl.cpp
+    IPayloadHandler.cpp
+    IPayloadReceiver.cpp
+    IPayloadSender.cpp
+    SpawnedSocket.cpp
+    ClientSocket.cpp
+    Server.cpp
 )
 
 # link

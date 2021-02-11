@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include "IPayloadSender.hpp"
-#include "IPayloadReceiver.hpp"
+#include "IPayloadSender.h"
+#include "IPayloadReceiver.h"
 
 namespace UnderStory {
 
@@ -28,31 +28,21 @@ namespace Network {
 
 class ISpawnedPayloadReceiver : public IPayloadReceiver<SpawnedRawPayload> {
  public:
-    ISpawnedPayloadReceiver(const char* socketName, tcp::socket* socket, RQueue* receiverQueue, int spawnId) : 
-        IPayloadReceiver<SpawnedRawPayload>(socketName, socket, receiverQueue) {
-            this->_buf.spawnId = spawnId;
-        }
+    ISpawnedPayloadReceiver(const char* socketName, tcp::socket* socket, RQueue* receiverQueue, int spawnId);
 };
 
 class NamedSpawnedSocket {
  public:
-    NamedSpawnedSocket(const std::string &name) : _sName(name) {}
+    NamedSpawnedSocket(const std::string &name);
  protected:
     const std::string _sName;
 };
 
 class SpawnedSocket : public tcp::socket, public NamedSpawnedSocket, public ISpawnedPayloadReceiver, public IPayloadSender<> {
  public:
-    SpawnedSocket(tcp::socket &&socket, const std::string &name, int spawnId, RQueue* incomingQueue) : 
-        tcp::socket(std::move(socket)),
-        NamedSpawnedSocket(name),
-        ISpawnedPayloadReceiver(this->_sName.c_str(), this, incomingQueue, spawnId),
-        IPayloadSender<>       (this->_sName.c_str(), this, &this->_outgoingQueue) {}
+    SpawnedSocket(tcp::socket &&socket, const std::string &name, int spawnId, RQueue* incomingQueue);
 
-    void start() {
-        this->_startReceiving();
-        spdlog::info("[{}] Client logged to server !", _sName.c_str());
-    }
+    void start();
 
  private:
     SQueue _outgoingQueue;

@@ -17,23 +17,17 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
-#pragma once
+#include "HTTPDownloader.h"
 
 #include <spdlog/spdlog.h>
 
 #include <sstream>
-#include <string>
 #include <vector>
 
 #include <asio.hpp>
-
 using asio::ip::tcp;
 
-namespace UnderStory {
-
-namespace Network {
-
-std::string DownloadHTTPFile(const std::string& serverName, const std::string& getCommand) {
+std::string UnderStory::Network::DownloadHTTPFile(const std::string& serverName, const std::string& getCommand) {
     std::ostringstream stream;
 
     asio::io_service io_service;
@@ -114,7 +108,3 @@ std::string DownloadHTTPFile(const std::string& serverName, const std::string& g
 
     return stream.str();
 }
-
-}   // namespace Network
-
-}   // namespace UnderStory
