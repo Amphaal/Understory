@@ -26,9 +26,11 @@
 #include <asio.hpp>
 using asio::ip::tcp;
 
-#include "src/base/Defaults.hpp"
 #include "Marshaller.hpp"
 #include "AtomicQueue.hpp"
+
+#include "src/base/Defaults.hpp"
+using UnderStory::Defaults;
 
 namespace UnderStory {
 
@@ -58,10 +60,10 @@ template<class T>
 class IPayloadHandler {
  public:
     IPayloadHandler(const char* socketName, tcp::socket* socket, AtomicQueue<T>* payloadQueue) : 
-        _socketName(socketName), _socket(socket), _payloadQueue(payloadQueue) {}
+        _socketName(socketName), _socketRef(socket), _payloadQueue(payloadQueue) {}
 
  protected:
-    tcp::socket* _socket;
+    tcp::socket* _socketRef;
     const char* _socketName;
     AtomicQueue<T>* _payloadQueue;
 

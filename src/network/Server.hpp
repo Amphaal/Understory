@@ -19,15 +19,7 @@
 
 #pragma once
 
-#include <string>
-#include <list>
-#include <memory>
-#include <utility>
-
-#include <asio.hpp>
-using asio::ip::tcp;
-
-#include "src/network/PayloadableSocket.hpp"
+#include "SpawnedSocket.hpp"
 
 #include "src/base/Context.hpp"
 
@@ -35,34 +27,10 @@ namespace UnderStory {
 
 namespace Network {
 
-namespace Server {
-
-class SpawnedSocket {
+class Server {
  public:
-    SpawnedSocket(tcp::socket socket, const std::string &name) : 
-        _name(name), 
-        _queues(), 
-        _ps(std::move(socket), &_queues, _name.c_str()) {}
-
-    void start() {
-        this->_ps._startReceiving();
-        spdlog::info("[{}] Client logged to server !", _name.c_str());
-    }
-
- private:
-    const std::string _name;
-    NetworkQueues _queues;
-    PayloadableSocket _ps;
-};
-
-class USServer {
- public:
-    explicit USServer(
-        Context &appContext,
-        asio::io_context &context,
-        const char* name,
-        unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT
-    ) : _prefix(name),
+    explicit Server(Context &appContext, asio::io_context &context, const char* name, unsigned short port) : 
+        _prefix(name),
         _port(port), 
         _appContext(appContext), 
         _acceptor(context, tcp::endpoint(tcp::v4(), port)) {
@@ -74,21 +42,25 @@ class USServer {
         }
 
  private:
-    tcp::acceptor _acceptor;
-    std::list<std::shared_ptr<SpawnedSocket>> _spawnedSockets;
     Context _appContext;
     unsigned short _port;
-    int _cliCount = 0;
+    int _spawnCount = 0;
     const std::string _prefix;
+
+    tcp::acceptor _acceptor;
+    std::list<std::shared_ptr<SpawnedSocket>> _spawnedSockets;
+    SpawnedSocket::RQueue _incomingQueue;
 
     void _acceptConnections() {
         this->_acceptor.async_accept(
             [&](std::error_code ec, tcp::socket socket) {
-                // define sock name
-                _cliCount++;
+                // define sock id
+                _spawnCount++;
+
+                // define name
                 std::string sockName = _prefix;
                 sockName += "_Sock";
-                sockName += std::to_string(_cliCount);
+                sockName += std::to_string(_spawnCount);
             
                 // if error code
                 if(ec) {
@@ -97,7 +69,9 @@ class USServer {
                    // if OK
                     auto sock_ptr = std::make_shared<SpawnedSocket>(
                         std::move(socket),
-                        sockName
+                        sockName,
+                        this->_spawnCount,
+                        &this->_incomingQueue
                     );
 
                     // add to list
@@ -112,8 +86,6 @@ class USServer {
         });
     }
 };
-
-}   // namespace Server
 
 }   // namespace Network
 

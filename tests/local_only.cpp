@@ -28,15 +28,15 @@ using UnderStory::UpdateChecker_Private;
 #define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
 #include <catch2/catch.hpp>
 
-#include "src/network/USServer.hpp"
-#include "src/network/USClient.hpp"
+#include "src/network/Server.hpp"
+#include "src/network/ClientSocket.hpp"
 
 //
 // Test cases
 //
 
-using UnderStory::Network::Server::USServer;
-using UnderStory::Network::USClient;
+using UnderStory::Network::Server;
+using UnderStory::Network::ClientSocket;
 using UnderStory::Network::RawPayload;
 using UnderStory::Network::PayloadType;
 using UnderStory::Defaults;
@@ -49,13 +49,27 @@ TEST_CASE("client / server - Handshake", "[network]") {
 
     // start server
     asio::io_context serverContext;
-    USServer server(appContext, serverContext, "Server");
-    std::thread serverThread([&serverContext](){ serverContext.run(); });
+    Server server(
+        appContext, 
+        serverContext, 
+        "Server", 
+        Defaults::UPNP_DEFAULT_TARGET_PORT
+    );
+    std::thread serverThread([&serverContext](){ 
+        serverContext.run(); 
+    });
 
     // start client
     asio::io_context clientContext;
-    USClient client1(clientContext, "Client1", "127.0.0.1");
-    std::thread clientThread([&clientContext](){ clientContext.run(); });
+    ClientSocket client1(
+        clientContext, 
+        "Client1", 
+        "127.0.0.1", 
+        Defaults::UPNP_DEFAULT_TARGET_PORT
+    );
+    std::thread clientThread([&clientContext](){ 
+        clientContext.run(); 
+    });
 
     // define env
     auto username = "TestUser";

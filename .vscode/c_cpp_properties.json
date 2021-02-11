@@ -24,7 +24,8 @@
                 "${workspaceFolder}/src/app/imgui",
                 "${workspaceFolder}/src/app/sentry-native/include",
                 "${workspaceFolder}/build",
-                "${workspaceFolder}/src/base/magic_enum/include"
+                "${workspaceFolder}/src/base/magic_enum/include",
+                "${workspaceFolder}/build/src/app/magnum/src"
             ],
             "defines": [
                 "_DEBUG",

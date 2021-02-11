@@ -35,8 +35,8 @@ class AtomicQueue : private std::queue<T> {
         {
             std::unique_lock<std::mutex> lock(this->_m);
             std::queue<T>::push(val);
+            _isQueueEmpty = false;
         }
-        _isQueueEmpty = false;
         _cv.notify_all();
     }
 
@@ -54,9 +54,29 @@ class AtomicQueue : private std::queue<T> {
             assert(!std::queue<T>::empty());
             std::queue<T>::pop();
             isEmpty = std::queue<T>::empty();
+            _isQueueEmpty = isEmpty;
         }
-        _isQueueEmpty = isEmpty;
         return isEmpty;
+    }
+
+    std::queue<T> popIntoQueue() {
+        std::queue<T> queue;
+        
+        {
+            std::unique_lock<std::mutex> lock(this->_m);
+            
+            // while not empty
+            while(!std::queue<T>::empty()) {
+                // populate new queue and clear old one
+                queue.push(std::queue<T>::front());
+                std::queue<T>::pop();
+            }
+
+            // obviously empty
+            _isQueueEmpty = true;
+        }
+
+        return queue;
     }
 
     bool empty() const {

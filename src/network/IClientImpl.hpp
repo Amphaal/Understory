@@ -19,21 +19,16 @@
 
 #pragma once
 
-#include "ClientBase.hpp"
+#include "Marshaller.hpp"
+
+#include "src/base/Defaults.hpp"
 
 namespace UnderStory {
 
 namespace Network {
 
-class USClient : private ClientBase {
+class IClientImpl {
  public:
-    USClient(
-        asio::io_context &context,
-        const char * name,
-        const std::string &host,
-        unsigned short port = UnderStory::Defaults::UPNP_DEFAULT_TARGET_PORT
-    ) : ClientBase(context, name, host, port) {}
-
     // async init handshake command
     void initiateHandshake(const std::string &userName) {
         // define handshake
@@ -47,6 +42,9 @@ class USClient : private ClientBase {
         // send
         this->_asyncSendPayload(payload);
     }
+ 
+ protected:
+    virtual void _asyncSendPayload(const RawPayload &payload) = 0;
 };
 
 }   // namespace Network

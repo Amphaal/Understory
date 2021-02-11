@@ -19,20 +19,22 @@
 
 #pragma once
 
-#include "src/network/PayloadableSocket.hpp"
+#include "IPayloadSender.hpp"
+#include "IPayloadReceiver.hpp"
+#include "IClientImpl.hpp"
 
 namespace UnderStory {
 
 namespace Network {
 
-class ClientBase : public PayloadableSocket {
+class ClientSocket : public tcp::socket, public IPayloadReceiver<>, public IPayloadSender<>, public IClientImpl {
  public:
-    ClientBase(
-        asio::io_context &context,
-        const char * name,
-        const std::string &host,
-        unsigned short port
-    ) : PayloadableSocket(&context, &_queues, name), _io_context(context), _name(name) {
+    ClientSocket(asio::io_context &context, const char * name, const std::string &host, unsigned short port) :
+        tcp::socket(context), 
+        IPayloadReceiver<>(name, this, &this->_incomingQueue),
+        IPayloadSender<>(name, this, &this->_outgoingQueue),
+        _io_context(context), 
+        _name(name) {
         // resolve host
         tcp::resolver resolver(context);
         auto endpoints = resolver.resolve(host, std::to_string(port));
@@ -46,7 +48,7 @@ class ClientBase : public PayloadableSocket {
 
         // on connection
         asio::async_connect(
-            this->socket(), 
+            *this, 
             endpoints, 
             [this](std::error_code ec, tcp::endpoint endpoint){
                 // on error...
@@ -66,20 +68,21 @@ class ClientBase : public PayloadableSocket {
         );
     }
 
- protected:
-    void _asyncSendPayload(const RawPayload &payload) {
-        asio::post(this->_io_context, [this, payload]() {
-            this->_sendPayload(payload);
-        });
-    }
-
  private:
+    SQueue   _outgoingQueue;
+    RQueue _incomingQueue;
+
     asio::io_context& _io_context;
-    NetworkQueues _queues;
     const char* _name;
 
     void _onError(const std::error_code &ec) {
         spdlog::error("[{}] error >> {}", this->_name, ec.message());
+    }
+
+    void _asyncSendPayload(const RawPayload &payload) final {
+        asio::post(this->_io_context, [this, payload]() {
+            this->_sendPayload(payload);
+        });
     }
 };
 

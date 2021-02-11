@@ -30,7 +30,8 @@ namespace Network {
 template<class T = RawPayload>
 class IPayloadReceiver : protected IPayloadHandler<T> {
  public:
-    IPayloadReceiver(const char* socketName, tcp::socket* socket, AtomicQueue<T>* receiverQueue) : 
+    using RQueue = AtomicQueue<T>;
+    IPayloadReceiver(const char* socketName, tcp::socket* socket, RQueue* receiverQueue) : 
         IPayloadHandler<T>(socketName, socket, receiverQueue) {}
 
     virtual void _onPayloadReceiveError(const std::error_code &ec, const char* partStr) {
@@ -61,7 +62,7 @@ class IPayloadReceiver : protected IPayloadHandler<T> {
  private:
     void _receivePayloadType() {
         // async read payload type into RawPayload
-        asio::async_read(*this->_socket,
+        asio::async_read(*this->_socketRef,
             asio::buffer(&this->_buf.type, sizeof(this->_buf.type)),
             [this](std::error_code ec, std::size_t length) {
                 // log
@@ -78,7 +79,7 @@ class IPayloadReceiver : protected IPayloadHandler<T> {
 
     void _receivePayloadBytesSize() {
         // async read payload content size into RawPayload
-        asio::async_read(*this->_socket,
+        asio::async_read(*this->_socketRef,
             asio::buffer(&this->_buf.bytesSize, sizeof(this->_buf.bytesSize)),
             [this](std::error_code ec, std::size_t length) {
                 // if error...
@@ -101,7 +102,7 @@ class IPayloadReceiver : protected IPayloadHandler<T> {
         );
 
         // async read payload content into RawPayload
-        asio::async_read(*this->_socket,
+        asio::async_read(*this->_socketRef,
             asio::buffer(this->_buf.bytes.begin().base() + this->_bufContentOffset, bytesToRead),
             [this](std::error_code ec, std::size_t length) {
                 // if error...

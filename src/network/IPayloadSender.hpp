@@ -30,7 +30,8 @@ namespace Network {
 template<class T = RawPayload>
 class IPayloadSender : protected IPayloadHandler<T> {
  public:
-    IPayloadSender(const char* socketName, tcp::socket* socket, AtomicQueue<T>* senderQueue) : 
+    using SQueue = AtomicQueue<T>;
+    IPayloadSender(const char* socketName, tcp::socket* socket, SQueue* senderQueue) : 
         IPayloadHandler<T>(socketName, socket, senderQueue) {}
 
     void _sendPayload(const T& payload) {
@@ -69,7 +70,7 @@ class IPayloadSender : protected IPayloadHandler<T> {
         this->_log.increment();
 
         // async write payload type
-        asio::async_write(*this->_socket,
+        asio::async_write(*this->_socketRef,
             asio::buffer(&this->_buf.type, sizeof(this->_buf.type)),
             [this](std::error_code ec, std::size_t length) {
                 // if error...
@@ -82,7 +83,7 @@ class IPayloadSender : protected IPayloadHandler<T> {
     }
 
     void _sendPayloadBytesSize() {
-        asio::async_write(*this->_socket,
+        asio::async_write(*this->_socketRef,
             asio::buffer(&this->_buf.bytesSize, sizeof(this->_buf.bytesSize)),
             [this](std::error_code ec, std::size_t length) {
                 // if error...
@@ -102,7 +103,7 @@ class IPayloadSender : protected IPayloadHandler<T> {
         );
 
         // write
-        asio::async_write(*this->_socket,
+        asio::async_write(*this->_socketRef,
             asio::buffer(this->_buf.bytes.c_str() + this->_bufContentOffset, bytesToWrite),
             [this](std::error_code ec, std::size_t length) {
                 // if error...

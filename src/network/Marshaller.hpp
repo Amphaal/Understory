@@ -21,6 +21,10 @@ struct RawPayload {
     std::string bytes;
 };
 
+struct SpawnedRawPayload : RawPayload {
+    int spawnId = 0;
+};
+
 class Marshaller {
  public:
     static RawPayload serialize(const Handshake &handshake) {
