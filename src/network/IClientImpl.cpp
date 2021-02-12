@@ -22,6 +22,8 @@
 
 #include "src/base/Defaults.hpp"
 
+#include "src/models/Heartbeat.pb.h"
+
 void UnderStory::Network::IClientImpl::initiateHandshake(const std::string &userName) {
     // define handshake
     Handshake hsIn;
@@ -30,6 +32,19 @@ void UnderStory::Network::IClientImpl::initiateHandshake(const std::string &user
 
     // serialize
     auto payload = Marshaller::serialize(hsIn);
+
+    // send
+    this->_asyncSendPayload(payload);
+}
+
+void UnderStory::Network::IClientImpl::sendHeartbeat() {
+    //
+    Heartbeat hb;
+    auto ts = std::chrono::system_clock::now().time_since_epoch().count();
+    hb.set_ts(ts);
+
+    // serialize
+    auto payload = Marshaller::serialize(hb);
 
     // send
     this->_asyncSendPayload(payload);

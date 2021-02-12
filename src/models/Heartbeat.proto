@@ -1,0 +1,5 @@
+syntax = "proto3";
+
+message Heartbeat {
+    fixed64 ts = 1;
+}

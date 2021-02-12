@@ -17,6 +17,7 @@ protobuf_generate_cpp(PROTO_SRCS PROTO_HDRS
         YoutubeVideo.proto
         Base.proto
         Map.proto
+        Heartbeat.proto
 )
 
 #############

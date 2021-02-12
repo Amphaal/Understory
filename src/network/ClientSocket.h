@@ -46,7 +46,7 @@ class ClientSocket : public tcp::socket, public IPayloadReceiver<>, public IPayl
     void _asyncSendPayload(const RawPayload &payload) final;
 
     time_t_timer _hbTimer;
-    void _sendHeartbeats();
+    void _heartbeating();
 };
 
 }   // namespace Network

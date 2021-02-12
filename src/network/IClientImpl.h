@@ -29,8 +29,8 @@ namespace Network {
 
 class IClientImpl {
  public:
-    // async init handshake command
     void initiateHandshake(const std::string &userName);
+    void sendHeartbeat();
  
  protected:
     virtual void _asyncSendPayload(const RawPayload &payload) = 0;

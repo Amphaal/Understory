@@ -55,7 +55,7 @@ UnderStory::Network::ClientSocket::ClientSocket(asio::io_context &context, const
             this->_startReceiving();
 
             //
-            this->_sendHeartbeats();
+            this->_heartbeating();
 
             // log
             spdlog::info("[{}] Successfully connected to {}:{} !", 
@@ -67,16 +67,14 @@ UnderStory::Network::ClientSocket::ClientSocket(asio::io_context &context, const
     );
 }
 
-void UnderStory::Network::ClientSocket::_sendHeartbeats() {
+void UnderStory::Network::ClientSocket::_heartbeating() {
     _hbTimer.expires_after(Defaults::HEARTBEAT_FREQUENCY);
     _hbTimer.async_wait([this](const std::error_code&){
-          //
-          this->_asyncSendPayload({
-              PayloadType::HEARTBEAT
-          });
+          // send
+          this->sendHeartbeat();
 
-          // resend
-          this->_sendHeartbeats();
+          // keep looping
+          this->_heartbeating();
     });
 }
 

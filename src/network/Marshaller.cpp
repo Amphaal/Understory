@@ -20,6 +20,7 @@
 #include "Marshaller.h"
 
 #include "src/models/User.pb.h"
+#include "src/models/Heartbeat.pb.h"
 
 using UnderStory::Network::RawPayload;
 using UnderStory::Network::PayloadType;
@@ -35,6 +36,11 @@ RawPayload UnderStory::Network::Marshaller::_serialize(const google::protobuf::M
 // allowed
 
 template<>
-RawPayload UnderStory::Network::Marshaller::serialize(const Handshake &handshake) {
-    return _serialize(handshake, PayloadType::HANDSHAKE);
+RawPayload UnderStory::Network::Marshaller::serialize(const Handshake &protobufMsg) {
+    return _serialize(protobufMsg, PayloadType::HANDSHAKE);
+}
+
+template<>
+RawPayload UnderStory::Network::Marshaller::serialize(const Heartbeat &protobufMsg) {
+    return _serialize(protobufMsg, PayloadType::HEARTBEAT);
 }
