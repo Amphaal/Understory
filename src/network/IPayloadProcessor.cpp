@@ -47,5 +47,5 @@ void UnderStory::Network::IPayloadProcessor<T>::processPayloadQueue(const Proces
     }
 }
 
-template class UnderStory::Network::IPayloadProcessor<UnderStory::Network::SpawnedSocket::Payload>;
+template class UnderStory::Network::IPayloadProcessor<UnderStory::Network::SpawnedSocket::RPayload>;
 template class UnderStory::Network::IPayloadProcessor<UnderStory::Network::RawPayload>;

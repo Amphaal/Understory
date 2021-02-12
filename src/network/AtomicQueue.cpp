@@ -17,9 +17,11 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
+#include <assert.h>
+
 #include "AtomicQueue.h"
 
-#include "Marshaller.h"
+#include "Payloads.hpp"
 
 template<class T>
 void UnderStory::Network::AtomicQueue<T>::push(const T& val) {

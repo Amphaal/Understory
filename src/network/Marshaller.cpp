@@ -19,11 +19,10 @@
 
 #include "Marshaller.h"
 
-using UnderStory::Network::RawPayload;
+#include "src/models/User.pb.h"
 
-RawPayload UnderStory::Network::Marshaller::serialize(const Handshake &handshake) {
-    return _serialize(handshake, PayloadType::HANDSHAKE);
-}
+using UnderStory::Network::RawPayload;
+using UnderStory::Network::PayloadType;
 
 RawPayload UnderStory::Network::Marshaller::_serialize(const google::protobuf::Message &protobufMsg, const PayloadType &type) {
     RawPayload payload;
@@ -31,4 +30,11 @@ RawPayload UnderStory::Network::Marshaller::_serialize(const google::protobuf::M
     protobufMsg.SerializePartialToString(&payload.bytes);
     payload.bytesSize = payload.bytes.length();
     return payload;
+}
+
+// allowed
+
+template<>
+RawPayload UnderStory::Network::Marshaller::serialize(const Handshake &handshake) {
+    return _serialize(handshake, PayloadType::HANDSHAKE);
 }

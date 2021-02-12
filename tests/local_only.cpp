@@ -92,16 +92,16 @@ TEST_CASE("client / server - Handshake", "[network]") {
         REQUIRE(hsOut.client_version() == APP_CURRENT_VERSION);
         REQUIRE(hsOut.username() == username);
 
-        // stop contexts
-        serverContext.stop();
-        clientContext.stop();
-
         // break processing
         return true;
     };
 
     // bind callback
     server.processPayloadQueue(onPayloadReceived);
+
+    // stop contexts
+    serverContext.stop();
+    clientContext.stop();
 
     // wait for threads to finish
     serverThread.join();

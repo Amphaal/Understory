@@ -19,32 +19,18 @@
 
 #pragma once
 
-#include <string>
+#include <google/protobuf/message.h>
 
-#include "src/models/User.pb.h"
+#include "Payloads.hpp"
 
 namespace UnderStory {
 
 namespace Network {
 
-enum class PayloadType {
-    UNKNOWN = 0,
-    HANDSHAKE = 1
-};
-
-struct RawPayload {
-    PayloadType type = PayloadType::UNKNOWN;
-    size_t bytesSize = 0;
-    std::string bytes;
-};
-
-struct SpawnedRawPayload : RawPayload {
-    int spawnId = 0;
-};
-
 class Marshaller {
  public:
-    static RawPayload serialize(const Handshake &handshake);
+    template<class Proto>
+    static RawPayload serialize(const Proto &);
 
  private:
     static RawPayload _serialize(const google::protobuf::Message &protobufMsg, const PayloadType &type);

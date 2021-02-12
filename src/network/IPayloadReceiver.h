@@ -20,7 +20,7 @@
 #pragma once
 
 #include "IPayloadHandler.h"
-#include "Marshaller.h"
+#include "Payloads.hpp"
 
 namespace UnderStory {
 
@@ -30,7 +30,7 @@ template<class T = RawPayload>
 class IPayloadReceiver : protected IPayloadHandler<T> {
  public:
     using RQueue = AtomicQueue<T>;
-    using Payload = T;
+    using RPayload = T;
     IPayloadReceiver(const char* socketName, tcp::socket* socket, RQueue* receiverQueue);
 
     virtual void _onPayloadReceiveError(const std::error_code &ec, const char* partStr);

@@ -17,20 +17,38 @@
 // for further details. Graphical resources without explicit references to a
 // different license and copyright still refer to this GPL.
 
-#include "IClientImpl.h"
-#include "Marshaller.h"
+#pragma once
 
-#include "src/base/Defaults.hpp"
+#include <string>
 
-void UnderStory::Network::IClientImpl::initiateHandshake(const std::string &userName) {
-    // define handshake
-    Handshake hsIn;
-        hsIn.set_client_version(APP_CURRENT_VERSION);
-        hsIn.set_username(userName);
+namespace UnderStory {
 
-    // serialize
-    auto payload = Marshaller::serialize(hsIn);
+namespace Network {
 
-    // send
-    this->_asyncSendPayload(payload);
-}
+enum class PayloadType {
+    UNKNOWN = 0,
+    HANDSHAKE = 1
+};
+
+class SpawnedRawPayload;
+
+class RawPayload {
+ public:
+    RawPayload() {}
+    RawPayload(const SpawnedRawPayload&) = delete;
+    RawPayload(SpawnedRawPayload&&) = delete;
+    RawPayload(SpawnedRawPayload) = delete;
+
+    PayloadType type = PayloadType::UNKNOWN;
+    size_t bytesSize = 0;
+    std::string bytes;
+};
+
+class SpawnedRawPayload : public RawPayload {
+ public:
+    int spawnId = 0;
+};
+
+}   // namespace Network
+
+}   // namespace UnderStory

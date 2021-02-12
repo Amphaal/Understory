@@ -28,7 +28,7 @@ namespace UnderStory {
 
 namespace Network {
 
-class Server : public IPayloadProcessor<SpawnedSocket::Payload> {
+class Server : public IPayloadProcessor<SpawnedSocket::RPayload> {
  public:
     Server(Context &appContext, asio::io_context &context, const char* name, unsigned short port);
 

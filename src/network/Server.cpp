@@ -20,7 +20,7 @@
 #include "Server.h"
 
 UnderStory::Network::Server::Server(Context &appContext, asio::io_context &context, const char* name, unsigned short port) : 
-    IPayloadProcessor<SpawnedSocket::Payload>(&_incomingQueue),
+    IPayloadProcessor(&_incomingQueue),
     _prefix(name),
     _port(port), 
     _appContext(appContext), 

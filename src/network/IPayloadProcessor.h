@@ -19,7 +19,9 @@
 
 #pragma once
 
-#include "Marshaller.h"
+#include <functional>
+
+#include "Payloads.hpp"
 #include "AtomicQueue.h"
 
 namespace UnderStory {
@@ -35,7 +37,6 @@ class IPayloadProcessor {
     void processPayloadQueue(const Processor &processor);
 
  private:
-    const Processor _processor;
     AtomicQueue<T>* _queue;
 };
 

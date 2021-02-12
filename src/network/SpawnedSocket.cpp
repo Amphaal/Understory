@@ -22,7 +22,7 @@
 #include <spdlog/spdlog.h>
 
 UnderStory::Network::ISpawnedPayloadReceiver::ISpawnedPayloadReceiver(const char* socketName, tcp::socket* socket, RQueue* receiverQueue, int spawnId) : 
-    IPayloadReceiver<SpawnedRawPayload>(socketName, socket, receiverQueue) {
+    IPayloadReceiver(socketName, socket, receiverQueue) {
         this->_buf.spawnId = spawnId;
     }
 
