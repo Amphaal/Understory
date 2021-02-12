@@ -19,6 +19,11 @@
 
 #pragma once
 
+// MUST declare winsock2 and windows.h to ensure appropriate behavior and prevent segfaults from asio
+#ifdef _WIN32
+#include <winsock2.h>
+#include <windows.h>
+#endif
 #include <asio.hpp>
 using asio::ip::tcp;
 

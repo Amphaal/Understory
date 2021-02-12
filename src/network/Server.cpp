@@ -21,9 +21,9 @@
 
 UnderStory::Network::Server::Server(Context &appContext, asio::io_context &context, const char* name, unsigned short port) : 
     IPayloadProcessor(&_incomingQueue),
+    _appContext(appContext),
     _prefix(name),
     _port(port), 
-    _appContext(appContext), 
     _acceptor(context, tcp::endpoint(tcp::v4(), port)) {
         // log
         spdlog::info("[{}] Listening on port {}", _prefix, _port);
@@ -33,36 +33,35 @@ UnderStory::Network::Server::Server(Context &appContext, asio::io_context &conte
     }
 
 void UnderStory::Network::Server::_acceptConnections() {
-    this->_acceptor.async_accept(
-        [&](std::error_code ec, tcp::socket socket) {
-            // define sock id
-            _spawnCount++;
+    this->_acceptor.async_accept([&](std::error_code ec, tcp::socket socket) {
+        // define sock id
+        _spawnCount++;
 
-            // define name
-            std::string sockName = _prefix;
-            sockName += "_Sock";
-            sockName += std::to_string(_spawnCount);
-        
-            // if error code
-            if(ec) {
-                spdlog::error("[{}] Issue while accepting connection {} !", _prefix, sockName.c_str());
-            } else {
-                // if OK
-                auto sock_ptr = std::make_shared<SpawnedSocket>(
-                    std::move(socket),
-                    sockName,
-                    this->_spawnCount,
-                    &this->_incomingQueue
-                );
+        // define name
+        std::string sockName = _prefix;
+        sockName += "_Sock";
+        sockName += std::to_string(_spawnCount);
+    
+        // if error code
+        if(ec) {
+            spdlog::error("[{}] Issue while accepting connection {} !", _prefix, sockName.c_str());
+        } else {
+            // if OK
+            auto sock_ptr = std::make_shared<SpawnedSocket>(
+                std::move(socket),
+                sockName,
+                this->_spawnCount,
+                &this->_incomingQueue
+            );
 
-                // add to list
-                _spawnedSockets.push_back(sock_ptr);
+            // add to list
+            _spawnedSockets.push_back(sock_ptr);
 
-                // listen to client 
-                sock_ptr->start();
-            }
+            // listen to client 
+            sock_ptr->start();
+        }
 
-            // then accept connexions again
-            this->_acceptConnections();
+        // then accept connexions again
+        this->_acceptConnections();
     });
 }

@@ -11,7 +11,6 @@ target_compile_definitions(asio INTERFACE ASIO_STANDALONE)
 IF(CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_compile_definitions(asio INTERFACE 
         WIN32_LEAN_AND_MEAN # prevents <winsock2.h> warnings
-        _WIN32_WINNT=0x0601 # define default Windows target
     ) 
 endif()
 
