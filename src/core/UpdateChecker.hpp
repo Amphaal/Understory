@@ -33,7 +33,7 @@
 
 #include "src/base/understory.h"
 
-#include "src/network/HTTPDownloader.h"
+#include "src/network/helpers/HTTPDownloader.h"
 
 #include <process.hpp>
 
