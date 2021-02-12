@@ -30,23 +30,20 @@ enum class PayloadType {
     HANDSHAKE = 1
 };
 
-class SpawnedRawPayload;
-
 class RawPayload {
  public:
-    RawPayload() {}
-    RawPayload(const SpawnedRawPayload&) = delete;
-    RawPayload(SpawnedRawPayload&&) = delete;
-    RawPayload(SpawnedRawPayload) = delete;
-
     PayloadType type = PayloadType::UNKNOWN;
     size_t bytesSize = 0;
     std::string bytes;
 };
 
-class SpawnedRawPayload : public RawPayload {
+// duplicate fields on a different class to prevent implicit conversion from RawPayload
+class SpawnedRawPayload {
  public:
     int spawnId = 0;
+    PayloadType type = PayloadType::UNKNOWN;
+    size_t bytesSize = 0;
+    std::string bytes;
 };
 
 }   // namespace Network

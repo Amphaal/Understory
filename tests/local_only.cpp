@@ -39,7 +39,7 @@ using UnderStory::UpdateChecker_Private;
 
 using UnderStory::Network::Server;
 using UnderStory::Network::ClientSocket;
-using UnderStory::Network::RawPayload;
+using UnderStory::Network::SpawnedRawPayload;
 using UnderStory::Network::PayloadType;
 using UnderStory::Defaults;
 
@@ -80,7 +80,7 @@ TEST_CASE("client / server - Handshake", "[network]") {
     client1.initiateHandshake(username);
 
     // test callback on main thread
-    auto onPayloadReceived = [username, &serverContext, &clientContext](const RawPayload & payload) -> bool {
+    auto onPayloadReceived = [username, &serverContext, &clientContext](const SpawnedRawPayload & payload) -> bool {
         // check type
         REQUIRE(payload.type == PayloadType::HANDSHAKE);
 
