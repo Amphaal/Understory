@@ -46,6 +46,9 @@ void UnderStory::Network::IPayloadSender<T>::_onPayloadSendError(const std::erro
         this->_socketName, 
         partStr
     );
+
+    // commit even on error
+    this->commitLog();
 }
 
 template<class T>
@@ -56,6 +59,9 @@ void UnderStory::Network::IPayloadSender<T>::_onPayloadBytesUploaded(PayloadType
         uploaded,
         total
     );
+
+    //
+    this->commitPayloadSpeed(uploaded);
 }
 
 template<class T>
@@ -64,7 +70,9 @@ void UnderStory::Network::IPayloadSender<T>::_sendPayloadType() {
     this->_buf = this->_payloadQueue->front();
 
     // log
-    this->_log.increment();
+    this->logNewPayload();
+    this->logPayloadType(this->_buf.type);
+    this->logPayloadSize(this->_buf.bytesSize);
 
     // async write payload type
     asio::async_write(*this->_socketRef,
@@ -125,6 +133,7 @@ void UnderStory::Network::IPayloadSender<T>::_sendPayloadBytes() {
 
             // pop from queue, unref
             auto isQueueEmpty = this->_payloadQueue->pop();
+            this->commitLog(); // commit log
 
             // if payloads are still in queue, handle them
             if(!isQueueEmpty)

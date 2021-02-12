@@ -27,7 +27,7 @@ namespace UnderStory {
 namespace Network {
 
 template<class T = RawPayload>
-class IPayloadSender : protected IPayloadHandler<T> {
+class IPayloadSender : public IPayloadHandler<T> {
  public:
     using SQueue = AtomicQueue<T>;
     IPayloadSender(const char* socketName, tcp::socket* socket, SQueue* senderQueue);

@@ -19,29 +19,48 @@
 
 #pragma once
 
-#include "IPayloadHandler.h"
+#include "AtomicQueue.h"
 #include "Payloads.h"
 
 namespace UnderStory {
 
 namespace Network {
 
-template<class T = RawPayload>
-class IPayloadReceiver : public IPayloadHandler<T> {
+struct PayloadTrace {
+   using tp = int64_t; 
+
+   int payloadId;
+   tp startedAt;
+   tp endedAt;
+   PayloadType payloadType;
+   size_t expectedSize;
+};
+
+struct NetworkLoadSpeedTrace {
+   int payloadId;
+   PayloadTrace::tp doneAt;
+   size_t bytesExchanged;
+};
+
+class PayloadLogger {
  public:
-    using RQueue = AtomicQueue<T>;
-    using RPayload = T;
-    IPayloadReceiver(const char* socketName, tcp::socket* socket, RQueue* receiverQueue);
+    using tp = int64_t; 
+    PayloadLogger();
 
-    virtual void _onPayloadReceiveError(const std::error_code &ec, const char* partStr);
-    virtual void _onPayloadBytesDownloaded(PayloadType type, size_t downloaded, size_t total);
+    AtomicQueue<PayloadTrace>           tracesQueue;
+    AtomicQueue<NetworkLoadSpeedTrace>  speedQueue;
 
-    void _startReceiving();
+    void logNewPayload();
+    void logPayloadType(PayloadType payloadType);
+    void logPayloadSize(size_t expectedSize);
+   
+    void commitPayloadSpeed(size_t loaded);
+    void commitLog();
 
  private:
-    void _receivePayloadType();
-    void _receivePayloadBytesSize();
-    void _receivePayloadBytes();
+    PayloadTrace _traceBuf;
+
+    static PayloadTrace::tp _epochNow();
 };
 
 }   // namespace Network

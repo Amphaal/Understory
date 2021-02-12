@@ -19,30 +19,17 @@
 
 #pragma once
 
-#include <chrono>
-
 #include <asio.hpp>
 using asio::ip::tcp;
 
-#include "AtomicQueue.h"
+#include "PayloadLogger.h"
 
 namespace UnderStory {
 
 namespace Network {
 
-class PayloadLog {
- public:
-    void increment();
-    int id() const;
-    std::chrono::system_clock::time_point started() const;
-
- private:
-    int _payloadIdCount = 0;
-    std::chrono::system_clock::time_point _latestPayloadTP;
-};
-
 template<class T>
-class IPayloadHandler {
+class IPayloadHandler : public PayloadLogger {
  public:
     IPayloadHandler(const char* socketName, tcp::socket* socket, AtomicQueue<T>* payloadQueue);
 
@@ -54,8 +41,6 @@ class IPayloadHandler {
     T _buf;
     size_t _bufContentOffset = 0;
     std::atomic<bool> _isProcessing = false;
-
-    PayloadLog _log;
 };
 
 }   // namespace Network

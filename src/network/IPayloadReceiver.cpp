@@ -34,6 +34,9 @@ void UnderStory::Network::IPayloadReceiver<T>::_onPayloadReceiveError(const std:
         this->_socketName, 
         partStr
     );
+
+    // commit even on error
+    this->commitLog();
 }
 
 template<class T>
@@ -44,6 +47,9 @@ void UnderStory::Network::IPayloadReceiver<T>::_onPayloadBytesDownloaded(Payload
         downloaded,
         total
     );
+
+    //
+    this->commitPayloadSpeed(downloaded);
 }
 
 template<class T>
@@ -63,7 +69,8 @@ void UnderStory::Network::IPayloadReceiver<T>::_receivePayloadType() {
         asio::buffer(&this->_buf.type, sizeof(this->_buf.type)),
         [this](std::error_code ec, std::size_t length) {
             // log
-            this->_log.increment();
+            this->logNewPayload();
+            this->logPayloadType(this->_buf.type);
 
             // if error...
             if(ec) 
@@ -121,6 +128,7 @@ void UnderStory::Network::IPayloadReceiver<T>::_receivePayloadBytes() {
 
             // push to queue
             this->_payloadQueue->push(this->_buf);
+            this->commitLog();
 
             // clear offset
             this->_bufContentOffset = 0;

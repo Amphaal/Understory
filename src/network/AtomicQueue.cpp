@@ -19,9 +19,7 @@
 
 #include <assert.h>
 
-#include "AtomicQueue.h"
-
-#include "Payloads.h"
+#include "PayloadLogger.h"
 
 template<class T>
 void UnderStory::Network::AtomicQueue<T>::push(const T& val) {
@@ -87,3 +85,5 @@ void UnderStory::Network::AtomicQueue<T>::waitToBeFilled(std::unique_lock<std::m
 
 template class UnderStory::Network::AtomicQueue<UnderStory::Network::RawPayload>;
 template class UnderStory::Network::AtomicQueue<UnderStory::Network::SpawnedRawPayload>;
+template class UnderStory::Network::AtomicQueue<UnderStory::Network::NetworkLoadSpeedTrace>;
+template class UnderStory::Network::AtomicQueue<UnderStory::Network::PayloadTrace>;

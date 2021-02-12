@@ -21,19 +21,6 @@
 
 #include "Payloads.h"
 
-void UnderStory::Network::PayloadLog::increment() {
-    _payloadIdCount++;
-    _latestPayloadTP = std::chrono::system_clock::now();
-}
-
-int UnderStory::Network::PayloadLog::id() const {
-    return _payloadIdCount;
-}
-
-std::chrono::system_clock::time_point UnderStory::Network::PayloadLog::started() const {
-    return _latestPayloadTP;
-}
-
 template<class T>
 UnderStory::Network::IPayloadHandler<T>::IPayloadHandler(const char* socketName, tcp::socket* socket, AtomicQueue<T>* payloadQueue) : 
     _socketName(socketName), 

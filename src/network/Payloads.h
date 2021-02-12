@@ -31,16 +31,14 @@ enum class PayloadType {
     HANDSHAKE = 2
 };
 
-class RawPayload {
- public:
+struct RawPayload {
     PayloadType type = PayloadType::UNKNOWN;
     size_t bytesSize = 0;
     std::string bytes;
 };
 
 // duplicate fields on a different class to prevent implicit conversion from RawPayload
-class SpawnedRawPayload {
- public:
+struct SpawnedRawPayload {
     PayloadType type = PayloadType::UNKNOWN;
     size_t bytesSize = 0;
     std::string bytes;
