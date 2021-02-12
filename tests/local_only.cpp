@@ -80,7 +80,7 @@ TEST_CASE("client / server - Handshake", "[network]") {
     client1.initiateHandshake(username);
 
     // test callback on main thread
-    auto onPayloadReceived = [username, &serverContext, &clientContext](const SpawnedRawPayload & payload) -> bool {
+    auto onPayloadReceived = [username, &serverContext, &clientContext](const SpawnedRawPayload & payload) -> bool {        
         // check type
         REQUIRE(payload.type == PayloadType::HANDSHAKE);
 

@@ -19,6 +19,8 @@
 
 #include "ClientSocket.h"
 
+#include "src/base/Defaults.hpp"
+
 #include <spdlog/spdlog.h>
 
 UnderStory::Network::ClientSocket::ClientSocket(asio::io_context &context, const char * name, const std::string &host, unsigned short port) :
@@ -26,7 +28,8 @@ UnderStory::Network::ClientSocket::ClientSocket(asio::io_context &context, const
     IPayloadReceiver(name, this, &this->_incomingQueue),
     IPayloadSender(name, this, &this->_outgoingQueue),
     IPayloadProcessor(&this->_incomingQueue),
-    _io_context(context), 
+    _io_context(context),
+    _hbTimer(context),
     _name(name) {
     // resolve host
     tcp::resolver resolver(context);
@@ -51,6 +54,9 @@ UnderStory::Network::ClientSocket::ClientSocket(asio::io_context &context, const
             // start receiving
             this->_startReceiving();
 
+            //
+            this->_sendHeartbeats();
+
             // log
             spdlog::info("[{}] Successfully connected to {}:{} !", 
                 this->_name, 
@@ -60,6 +66,20 @@ UnderStory::Network::ClientSocket::ClientSocket(asio::io_context &context, const
         }
     );
 }
+
+void UnderStory::Network::ClientSocket::_sendHeartbeats() {
+    _hbTimer.expires_after(Defaults::HEARTBEAT_FREQUENCY);
+    _hbTimer.async_wait([this](const std::error_code&){
+          //
+          this->_asyncSendPayload({
+              PayloadType::HEARTBEAT
+          });
+
+          // resend
+          this->_sendHeartbeats();
+    });
+}
+
 
 void UnderStory::Network::ClientSocket::_onError(const std::error_code &ec) {
     spdlog::error("[{}] error >> {}", this->_name, ec.message());

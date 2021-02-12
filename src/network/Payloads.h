@@ -27,7 +27,8 @@ namespace Network {
 
 enum class PayloadType {
     UNKNOWN = 0,
-    HANDSHAKE = 1
+    HEARTBEAT = 1,
+    HANDSHAKE = 2
 };
 
 class RawPayload {
@@ -40,10 +41,10 @@ class RawPayload {
 // duplicate fields on a different class to prevent implicit conversion from RawPayload
 class SpawnedRawPayload {
  public:
-    int spawnId = 0;
     PayloadType type = PayloadType::UNKNOWN;
     size_t bytesSize = 0;
     std::string bytes;
+    int spawnId = 0;
 };
 
 }   // namespace Network

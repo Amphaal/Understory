@@ -21,7 +21,7 @@
 
 #include <google/protobuf/message.h>
 
-#include "Payloads.hpp"
+#include "Payloads.h"
 
 namespace UnderStory {
 

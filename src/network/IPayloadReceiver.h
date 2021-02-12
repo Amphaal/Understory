@@ -20,7 +20,7 @@
 #pragma once
 
 #include "IPayloadHandler.h"
-#include "Payloads.hpp"
+#include "Payloads.h"
 
 namespace UnderStory {
 

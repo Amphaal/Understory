@@ -24,6 +24,8 @@
 #include "IClientImpl.h"
 #include "IPayloadProcessor.h"
 
+#include "asio/time_t_timer.hpp"
+
 namespace UnderStory {
 
 namespace Network {
@@ -42,6 +44,9 @@ class ClientSocket : public tcp::socket, public IPayloadReceiver<>, public IPayl
     void _onError(const std::error_code &ec);
 
     void _asyncSendPayload(const RawPayload &payload) final;
+
+    time_t_timer _hbTimer;
+    void _sendHeartbeats();
 };
 
 }   // namespace Network

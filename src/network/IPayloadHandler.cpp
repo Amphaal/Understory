@@ -19,7 +19,7 @@
 
 #include "IPayloadHandler.h"
 
-#include "Payloads.hpp"
+#include "Payloads.h"
 
 void UnderStory::Network::PayloadLog::increment() {
     _payloadIdCount++;
