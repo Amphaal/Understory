@@ -25,3 +25,6 @@
 [submodule "src/base/magic_enum"]
 	path = src/base/magic_enum
 	url = https://github.com/Neargye/magic_enum
+[submodule "src/network/candy"]
+	path = src/network/candy
+	url = https://github.com/Amphaal/NetworkCandy
