@@ -75,6 +75,7 @@ namespace UnderStory {
 class USApplication : public Magnum::Platform::Application, public Widget::AppContainer {
  public:
     explicit USApplication(const Arguments& arguments);
+    ~USApplication();
 
  private:
     void drawEvent() final;

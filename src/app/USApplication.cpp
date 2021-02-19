@@ -159,6 +159,10 @@ UnderStory::USApplication::USApplication(const Arguments& arguments): Magnum::Pl
     spdlog::info("APP OK !");
 }
 
+UnderStory::USApplication::~USApplication() {
+    sentry_shutdown();
+}
+
 void UnderStory::USApplication::viewportEvent(ViewportEvent& event) {
     // set viewport
     Magnum::GL::defaultFramebuffer.setViewport({{}, event.framebufferSize()});
