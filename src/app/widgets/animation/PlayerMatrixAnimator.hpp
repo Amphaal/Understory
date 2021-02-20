@@ -34,7 +34,8 @@ template<class T = Magnum::Vector2>
 class PlayerMatrixAnimator : public MatrixAnimator {
  public:
     //
-    using AnimationCallback = void(*)(Magnum::Float, const float &, State<T>&);
+    using AnimType = T;
+    using AnimationCallback = void(*)(Magnum::Float, const float &, State<AnimType>&);
 
     //
     PlayerMatrixAnimator(Magnum::Matrix3* animatedMatrix, float animDurationInSecs, AnimationCallback animCb = &_defaultAnimationCallback)
@@ -65,8 +66,8 @@ class PlayerMatrixAnimator : public MatrixAnimator {
     void virtual _onAnimationProgress() = 0;
 
     const Magnum::Matrix3* animatedMatrix() const { return _animatedMatrix; }
-    const T& currentAnim() const { return _animState.current; }
-    const State<T>& animState() const { return _animState; }
+    const AnimType& currentAnim() const { return _animState.current; }
+    const State<AnimType>& animState() const { return _animState; }
 
     void _multiplyAnimatedMatrix(const Magnum::Matrix3& factorMatrix) {
         (*_animatedMatrix) = factorMatrix * (*_animatedMatrix);
@@ -76,14 +77,14 @@ class PlayerMatrixAnimator : public MatrixAnimator {
         (*_animatedMatrix) = replacingMatrix;
     }
 
-    void _updateAnimationAndPlay(const T &from, const T &to) {
+    void _updateAnimationAndPlay(const AnimType &from, const AnimType &to) {
         _animState.from = from;
         _animState.to = to;
-        _animState.current = T();
+        _animState.current = AnimType();
         _startAnim();
     }
 
-    void _setAnimationKeyframe(const T &to) {
+    void _setAnimationKeyframe(const AnimType &to) {
         stopAnim();
         _animState.from = to;
         _animState.to = to;
@@ -91,14 +92,14 @@ class PlayerMatrixAnimator : public MatrixAnimator {
     }
 
  private:
-    State<T> _animState;
+    State<AnimType> _animState;
 
     void _startAnim() final {
         MatrixAnimator::_startAnim();
         _player.play(timeline()->previousFrameTime());
     }
 
-    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, State<T>& state) {
+    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<AnimType>& state) {
         state.current = Magnum::Math::lerp(
             state.from,
             state.to,

@@ -47,7 +47,7 @@ class AtomSelectorButton :
     public Hoverable,
     public Button {
  public:
-    AtomSelectorButton() : PlayerMatrixAnimator(&_moveAnim, .1f, &_defaultAnimationCallback) {
+    AtomSelectorButton() : PlayerMatrixAnimator(&_moveAnim, .1f) {
         _updateCurrentColor();
     }
 
@@ -86,15 +86,6 @@ class AtomSelectorButton :
     Magnum::Color4 _currentColor;
     void _updateCurrentColor() {
         _currentColor = isHovered() || isToggled() ? 0xFFFFFF_rgbf : 0x000000_rgbf;
-    }
-
-    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<Magnum::Vector2>& state) {
-        //
-        state.current = Magnum::Math::lerp(
-            state.from,
-            state.to,
-            Magnum::Animation::Easing::cubicOut(prc)
-        );
     }
 
     void _onHoverChanged(bool isHovered) final {

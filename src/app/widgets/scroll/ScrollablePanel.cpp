@@ -24,7 +24,7 @@
 using namespace Magnum::Math::Literals;
 
 UnderStory::Widget::ScrollablePanel::ScrollablePanel(StickTo stickness, float thickness) :
-    PlayerMatrixAnimator(&_matrix, .1f, &_defaultAnimationCallback),
+    PlayerMatrixAnimator(&_matrix, .1f),
     _stickness(stickness),
     _thickness(thickness),
     _scroller(this) {
@@ -77,15 +77,6 @@ void UnderStory::Widget::ScrollablePanel::scrollFromHandle(Magnum::Float prcHand
 
 const UnderStory::Widget::StickTo UnderStory::Widget::ScrollablePanel::stickyness() const {
     return _stickness;
-}
-
-void UnderStory::Widget::ScrollablePanel::_defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<Magnum::Vector2>& state) {
-    //
-    state.current = Magnum::Math::lerp(
-        state.from,
-        state.to,
-        Magnum::Animation::Easing::cubicOut(prc)
-    );
 }
 
 void UnderStory::Widget::ScrollablePanel::_onAnimationProgress() {

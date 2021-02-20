@@ -103,7 +103,7 @@ class MapScaleHelper : public Animation::PlayerMatrixAnimator<ScrollAnimStateCom
     static constexpr float MIN_SCALE = .03125f;
     static constexpr float SMOOTHING_AS_SECONDS = .2f;
 
-    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<ScrollAnimStateComponent>& state) {
+    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<AnimType>& state) {
         //
         if(!state.to.translation.isZero()) {
             state.previous.translation = state.current.translation;

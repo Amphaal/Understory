@@ -69,7 +69,7 @@ void UnderStory::Widget::ScrollerHandle::updateSize(const Magnum::Float& handleS
     _updateShape(scrollerShape);
 
     // update its geometry
-    animateByPercentage(0.f);
+    _updateGeometry();
 
     // ... then finally update buffer
     _bufferScroller.setSubData(0, _verticesScroller);

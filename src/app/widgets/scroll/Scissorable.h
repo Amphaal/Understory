@@ -59,7 +59,7 @@ class Scissorable : public Scrollable {
  private:
     ScrollablePanel* _associatedPanel;
     
-    Magnum::Float _translationFactor;
+    Magnum::Float _translationFactor = 0.f;
     Magnum::Float _canvasSize;
     Magnum::Float _contentSize;
 

@@ -71,8 +71,6 @@ class ScrollablePanel : public Animation::PlayerMatrixAnimator<Magnum::Vector2>,
 
     Magnum::GL::Mesh _mesh{Magnum::GL::MeshPrimitive::Triangles};
 
-    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<Magnum::Vector2>& state);
-
     void _onAnimationProgress() final;
 
     void _onToggled(bool isToggled) final;

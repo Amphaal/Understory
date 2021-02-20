@@ -88,7 +88,7 @@ class ShortcutsText : public Animation::PlayerMatrixAnimator<STHStateComponent>,
 
     StaticText _text;
 
-    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<STHStateComponent>& state) {
+    static void _defaultAnimationCallback(Magnum::Float /*t*/, const float &prc, Animation::State<AnimType>& state) {
         //
         state.current.scaling = Magnum::Math::lerp(
             state.from.scaling,
